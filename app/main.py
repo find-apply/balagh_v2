@@ -41,6 +41,12 @@ async def model_api_handler(request: Request, exc: genai_errors.APIError):
     return JSONResponse(status_code=502, content={"detail": f"Model API error ({exc.code}): {exc.message}"})
 
 
+if os.getenv("KIDS_ENABLED") == "1":
+    from .kids.router import router as kids_router
+
+    app.include_router(kids_router)
+
+
 def _get_project(project_id: str) -> Project:
     project = store.load(project_id)
     if project is None:
