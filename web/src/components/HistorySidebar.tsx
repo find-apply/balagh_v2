@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { BASE } from '../api'
 import type { HistoryEntry } from '../history'
 import { LANGUAGES } from '../labels'
-import { Logo } from './Landing'
+import { adminToken } from '../admin/adminApi'
+import { Icon } from './Icon'
+import { Rail, RailBrand, RailFoot } from './shell/Rail'
 
 interface Props {
   entries: HistoryEntry[]
@@ -34,13 +36,11 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
   shown.forEach((e) => groups.set(group(e.at), [...(groups.get(group(e.at)) ?? []), e]))
 
   return (
-    <div className="rail">
-      <button className="logo-button" onClick={onHome} aria-label="الصفحة الرئيسية">
-        <Logo />
-      </button>
+    <Rail>
+      <RailBrand onClick={onHome} />
 
       <button className={composing ? 'primary block-button new-btn on' : 'primary block-button new-btn'} onClick={onNew}>
-        + توليد جديد
+        <Icon name="sparkles" size={16} /> توليد جديد
         {busyId === 'new' && <span className="spinner" />}
       </button>
 
@@ -81,7 +81,7 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
                   </small>
                 </button>
                 <button className="rail-hide" title="إخفاء من السجل" aria-label="إخفاء من السجل" onClick={() => onHide(e.id)}>
-                  ×
+                  <Icon name="trash" size={14} />
                 </button>
               </div>
             ))}
@@ -89,14 +89,13 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
         ))}
       </nav>
 
-      <div className="rail-foot">
-        <button className="link" onClick={onHome}>
-          عن بلاغ
-        </button>
-        <a href={`${BASE}/docs`} target="_blank" rel="noreferrer">
-          API
-        </a>
-      </div>
-    </div>
+      <RailFoot
+        items={[
+          { icon: 'book', label: 'عن بلاغ', onClick: onHome },
+          { icon: 'cpu', label: 'API', href: `${BASE}/docs`, external: true },
+          ...(adminToken.get() ? [{ icon: 'dashboard' as const, label: 'الإدارة', href: '#/admin' }] : []),
+        ]}
+      />
+    </Rail>
   )
 }

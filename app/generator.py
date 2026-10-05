@@ -1,6 +1,7 @@
 import asyncio
 import os
 import re
+import time
 from pathlib import Path
 from typing import Optional, TypeVar
 from uuid import uuid4
@@ -10,7 +11,7 @@ from google import genai
 from google.genai import types
 from pydantic import BaseModel
 
-from . import sources
+from . import flow_settings, sources, store
 from .schemas import (
     AudienceKnowledge, AudienceSpec, BriefIn, ClaimsDraft, ClaimStatus, ContentLevel, Evidence, EvidenceKind,
     Finding, FindingsDraft, Idea, IdeasDraft, Language, LocalizedDraft, Platform, Reference, ReferenceUsage,
@@ -19,8 +20,6 @@ from .schemas import (
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
-MODEL = os.getenv("REELS_MODEL", "gemini-pro-latest")
-REVIEW_MODEL = os.getenv("REELS_REVIEW_MODEL", "gemini-flash-latest")
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
@@ -266,7 +265,24 @@ def _evidence_block(evidence: list[Evidence], lang: Language) -> str:
     return f"<evidence>\n{items}\n</evidence>"
 
 
-async def _generate(system: str, prompt: str, output: type[T], model: str = MODEL) -> T:
+async def _generate(system: str, prompt: str, output: type[T], role: str = "generation") -> T:
+    """Runs one model call with the admin's current settings, and records it for the admin's run log."""
+    flow = flow_settings.current()
+    model = flow.review_model if role == "review" else flow.generation_model
+    if flow.extra_rules.strip():
+        system += f"\n\nAdditional editorial rules from the platform's administrators (binding):\n{flow.extra_rules.strip()}"
+    started = time.monotonic()
+    error = None
+    try:
+        return await _call_model(system, prompt, output, model)
+    except Exception as e:
+        error = f"{type(e).__name__}: {e}"
+        raise
+    finally:
+        store.log_run(output.__name__, model, time.monotonic() - started, error)
+
+
+async def _call_model(system: str, prompt: str, output: type[T], model: str) -> T:
     response = await client.aio.models.generate_content(
         model=model,
         contents=prompt,
@@ -477,14 +493,14 @@ async def review_script(script: Script, idea: Idea, source: Optional[Script]) ->
         f"<script>\n{_script_view(script)}\n</script>"
     )
     tasks = [
-        _generate(SCHOLARLY_SYSTEM, context, FindingsDraft, REVIEW_MODEL),
-        _generate(AUDIENCE_SYSTEM, context, FindingsDraft, REVIEW_MODEL),
+        _generate(SCHOLARLY_SYSTEM, context, FindingsDraft, "review"),
+        _generate(AUDIENCE_SYSTEM, context, FindingsDraft, "review"),
     ]
     if source is not None:
         tasks.append(_generate(
             MEANING_SYSTEM,
             f"<source_script>\n{_script_view(source)}\n</source_script>\n\n<localized_script>\n{_script_view(script)}\n</localized_script>",
-            ClaimsDraft, REVIEW_MODEL,
+            ClaimsDraft, "review",
         ))
     results = await asyncio.gather(*tasks)
     findings = [

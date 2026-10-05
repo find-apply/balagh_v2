@@ -1,5 +1,6 @@
 import { IdeaList } from './IdeaList'
 import { Progress, ScriptSkeleton } from './Progress'
+import { Icon } from './Icon'
 import { ScriptView } from './ScriptView'
 import { projectTitle } from '../history'
 import { KNOWLEDGE, LANGUAGES, PLATFORMS, scriptLabel } from '../labels'
@@ -22,10 +23,8 @@ function Stepper({ current }: { current: number }) {
   )
 }
 
-interface Props {
-  project: Project
-  scriptId: string | null
-  busy: Busy | null
+/** Everything that changes a project. Leaving `actions` out shows the project read-only, as the admin does. */
+export interface WorkspaceActions {
   autoReview: boolean
   onAutoReview: (on: boolean) => void
   onReuse: () => void
@@ -36,7 +35,16 @@ interface Props {
   onApprove: (scriptId: string, role: ReviewRole, name: string) => void
 }
 
-export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, onReuse, onPick, onReview, onRevise, onLocalize, onApprove }: Props) {
+interface Props {
+  project: Project
+  scriptId: string | null
+  busy?: Busy | null
+  actions?: WorkspaceActions
+  /** Where a project or one of its scripts lives, so the same view can be mounted under another route. */
+  hashFor?: (projectId: string, scriptId?: string | null) => string
+}
+
+export function Workspace({ project, scriptId, busy = null, actions, hashFor = projectHash }: Props) {
   const here = busy?.projectId === project.id ? busy : null
   const writing = here?.kind === 'script'
   const pending = scriptId === 'new'
@@ -67,27 +75,29 @@ export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, o
             <span className="badge">{brief.platforms.map((p) => PLATFORMS[p]).join('، ')}</span>
           </div>
         </div>
+        {actions && (
         <div className="ws-tools">
           <label className="switch" title="بعد كل سيناريو أو نسخة جديدة، يشغّل بلاغ المراجعين الثلاثة مباشرة">
-            <input type="checkbox" checked={autoReview} onChange={(e) => onAutoReview(e.target.checked)} />
+            <input type="checkbox" checked={actions.autoReview} onChange={(e) => actions.onAutoReview(e.target.checked)} />
             <span className="track" />
             مراجعة آلية تلقائية
           </label>
-          <button type="button" onClick={onReuse} disabled={busy?.kind === 'ideas'} title="يفتح توليدا جديدا بنفس الجمهور والمنصات">
-            ⧉ توليد بنفس الموجز
+          <button type="button" onClick={actions.onReuse} disabled={busy?.kind === 'ideas'} title="يفتح توليدا جديدا بنفس الجمهور والمنصات">
+            <Icon name="copy" size={16} /> توليد بنفس الموجز
           </button>
         </div>
+        )}
       </header>
 
       <Stepper current={step} />
 
       <nav className="tabs" aria-label="نسخ المشروع">
-        <button className={!scriptId ? 'tab on' : 'tab'} onClick={() => go(projectHash(project.id))}>
+        <button className={!scriptId ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id))}>
           <span>الأفكار</span>
           <small>{project.ideas.length} أفكار</small>
         </button>
         {scripts.map((s) => (
-          <button key={s.id} className={s.id === scriptId ? 'tab on' : 'tab'} onClick={() => go(projectHash(project.id, s.id))}>
+          <button key={s.id} className={s.id === scriptId ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id, s.id))}>
             <span dir="auto">{s.title}</span>
             <small>
               <i className={s.approved ? 'state ok' : s.review ? 'state warn' : 'state'} />
@@ -96,7 +106,7 @@ export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, o
           </button>
         ))}
         {writing && (
-          <button className={pending ? 'tab on' : 'tab'} onClick={() => go(projectHash(project.id, 'new'))}>
+          <button className={pending ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id, 'new'))}>
             <span>
               <span className="spinner brand mini" /> نسخة جديدة
             </span>
@@ -113,7 +123,7 @@ export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, o
       )}
 
       {(!scriptId || (pending && !writing) || (scriptId && !pending && !active)) && (
-        <IdeaList ideas={project.ideas} disabled={busy !== null} onPick={onPick} />
+        <IdeaList ideas={project.ideas} disabled={busy !== null} onPick={actions?.onPick} />
       )}
 
       {active && (
@@ -124,10 +134,14 @@ export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, o
             script={active}
             source={source}
             disabled={busy !== null}
-            onReview={() => onReview(active.id)}
-            onRevise={(notes) => onRevise(active.id, notes)}
-            onLocalize={(body) => onLocalize(active.id, body)}
-            onApprove={(role, name) => onApprove(active.id, role, name)}
+            actions={
+              actions && {
+                onReview: () => actions.onReview(active.id),
+                onRevise: (notes) => actions.onRevise(active.id, notes),
+                onLocalize: (body) => actions.onLocalize(active.id, body),
+                onApprove: (role, name) => actions.onApprove(active.id, role, name),
+              }
+            }
             shareUrl={`${location.origin}${location.pathname}${projectHash(project.id, active.id)}`}
           />
         </>

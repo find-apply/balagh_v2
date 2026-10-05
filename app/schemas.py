@@ -355,3 +355,15 @@ class Project(BaseModel):
     brief: BriefIn
     ideas: list[Idea]
     scripts: dict[str, Script] = Field(default_factory=dict, description="Keyed by script id.")
+
+
+class HistoryEntry(BaseModel):
+    """One row of a client's generation history."""
+    id: str
+    title: str
+    audience: str
+    language: Language
+    at: datetime
+    scripts: int
+    approved: int
+    shared: bool = Field(description="Opened from someone else's review link rather than created by this client.")

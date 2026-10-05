@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api, ApiError } from './api'
+import { AdminApp } from './admin/AdminApp'
 import { BriefForm } from './components/BriefForm'
 import { HistorySidebar } from './components/HistorySidebar'
-import { Landing, Logo } from './components/Landing'
+import { Landing } from './components/Landing'
+import { Icon } from './components/Icon'
+import { AppShell } from './components/shell/AppShell'
 import { IdeaSkeletons, Progress, Toast } from './components/Progress'
 import { Workspace } from './components/Workspace'
 import { loadHistory, saveHistory, upsertEntry } from './history'
@@ -30,7 +33,6 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [referral, setReferral] = useState<string | null>(null)
   const [autoReview, setAutoReview] = useState(readAutoReview)
-  const [drawer, setDrawer] = useState(false)
   // A brief copied from an existing project; changing formKey gives the composer a fresh start.
   const [draft, setDraft] = useState<Brief | null>(null)
   const [formKey, setFormKey] = useState(0)
@@ -38,7 +40,6 @@ export default function App() {
   useEffect(() => {
     const sync = () => {
       setRoute(parseRoute())
-      setDrawer(false)
       scrollTo({ top: 0 })
     }
     addEventListener('popstate', sync)
@@ -55,6 +56,21 @@ export default function App() {
     [history, projects],
   )
   useEffect(() => saveHistory(entries), [entries])
+
+  // The server keeps the authoritative history for this browser; the local copy is the offline fallback.
+  // Entries only known locally (from before server history existed) are registered by opening them once.
+  useEffect(() => {
+    api.listProjects().then(
+      (remote) => {
+        setHistory((local) => {
+          const known = new Set(remote.map((r) => r.id))
+          for (const e of local) if (!known.has(e.id)) api.getProject(e.id).catch(() => {})
+          return [...remote, ...local.filter((e) => !known.has(e.id))]
+        })
+      },
+      () => {},
+    )
+  }, [])
 
   const openId = route.view === 'project' ? route.id : null
   const loaded = openId ? projects[openId] : undefined
@@ -154,17 +170,25 @@ export default function App() {
 
   const hide = (id: string) => {
     setHistory((h) => h.filter((e) => e.id !== id))
+    api.hideProject(id).catch(() => {})
     if (id === openId) go('#/new')
   }
 
+  if (route.view === 'admin') return <AdminApp path={route.path} />
   if (route.view === 'landing') return <Landing onStart={() => go('#/new')} resume={history.length > 0} />
 
   const project = loaded ?? null
   const creating = busy?.kind === 'ideas'
 
   return (
-    <div className={drawer ? 'shell drawer-open' : 'shell'}>
-      <aside className="shell-rail">
+    <AppShell
+      menuLabel="السجل"
+      action={
+        <button onClick={() => go('#/new')}>
+          <Icon name="sparkles" size={15} /> جديد
+        </button>
+      }
+      rail={
         <HistorySidebar
           entries={entries}
           activeId={openId}
@@ -175,18 +199,8 @@ export default function App() {
           onHide={hide}
           onHome={() => go('')}
         />
-      </aside>
-      <div className="scrim" onClick={() => setDrawer(false)} />
-
-      <div className="shell-main">
-        <header className="mobile-bar">
-          <button className="menu" aria-label="السجل" onClick={() => setDrawer(true)}>
-            ☰
-          </button>
-          <Logo />
-          <button onClick={() => go('#/new')}>+ جديد</button>
-        </header>
-
+      }
+    >
         <main className="main-inner">
           {error && (
             <div className="notice bad" role="alert">
@@ -227,24 +241,24 @@ export default function App() {
               project={project}
               scriptId={route.view === 'project' ? route.script : null}
               busy={busy}
-              autoReview={autoReview}
-              onAutoReview={toggleAutoReview}
-              onReuse={() => {
-                setDraft(project.brief)
-                setFormKey((k) => k + 1)
-                go('#/new')
+              actions={{
+                autoReview,
+                onAutoReview: toggleAutoReview,
+                onReuse: () => {
+                  setDraft(project.brief)
+                  setFormKey((k) => k + 1)
+                  go('#/new')
+                },
+                onPick: (idea) => produce(project.id, 'script', () => api.createScript(project.id, idea.id, null)),
+                onReview: (sid) =>
+                  job({ task: TASKS.review, projectId: project.id, kind: 'review', scriptId: sid }, () => reviewNow(project.id, sid)),
+                onRevise: (sid, notes) => produce(project.id, 'revise', () => api.revise(project.id, sid, notes)),
+                onLocalize: (sid, body) => produce(project.id, 'localize', () => api.localize(project.id, sid, body)),
+                onApprove: (sid, role, name) =>
+                  job({ task: TASKS.approve, projectId: project.id, kind: 'approve' }, async () =>
+                    putScript(project.id, await api.approve(project.id, sid, role, name)),
+                  ),
               }}
-              onPick={(idea) => produce(project.id, 'script', () => api.createScript(project.id, idea.id, null))}
-              onReview={(sid) =>
-                job({ task: TASKS.review, projectId: project.id, kind: 'review', scriptId: sid }, () => reviewNow(project.id, sid))
-              }
-              onRevise={(sid, notes) => produce(project.id, 'revise', () => api.revise(project.id, sid, notes))}
-              onLocalize={(sid, body) => produce(project.id, 'localize', () => api.localize(project.id, sid, body))}
-              onApprove={(sid, role, name) =>
-                job({ task: TASKS.approve, projectId: project.id, kind: 'approve' }, async () =>
-                  putScript(project.id, await api.approve(project.id, sid, role, name)),
-                )
-              }
             />
           )}
 
@@ -255,7 +269,6 @@ export default function App() {
             يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
           </p>
         </main>
-      </div>
-    </div>
+    </AppShell>
   )
 }

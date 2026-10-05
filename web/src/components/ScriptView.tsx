@@ -5,16 +5,23 @@ import type { AudienceSpec, LocalizeRequest, ReviewRole, Script } from '../types
 import { GROUPS } from '../audiences'
 import { AudienceFields } from './AudienceFields'
 
-interface Props {
-  script: Script
-  source: Script | null
-  disabled: boolean
+/** What a reader can do to a script. Leaving `actions` out shows the script read-only, as the admin does. */
+export interface ScriptActions {
   onReview: () => void
   onRevise: (notes: string | null) => void
   onLocalize: (body: LocalizeRequest) => void
   onApprove: (role: ReviewRole, name: string) => void
+}
+
+interface Props {
+  script: Script
+  source: Script | null
+  disabled: boolean
+  actions?: ScriptActions
   shareUrl: string
 }
+
+type Handlers = Pick<ScriptActions, 'onReview' | 'onLocalize' | 'onApprove'>
 
 function download(script: Script) {
   const url = URL.createObjectURL(new Blob([toMarkdown(script)], { type: 'text/markdown;charset=utf-8' }))
@@ -69,7 +76,7 @@ function Scenes({ script }: { script: Script }) {
   )
 }
 
-function LocalizeForm({ script, disabled, onLocalize }: Pick<Props, 'script' | 'disabled' | 'onLocalize'>) {
+function LocalizeForm({ script, disabled, onLocalize }: { script: Script; disabled: boolean; onLocalize: Handlers['onLocalize'] }) {
   const [target, setTarget] = useState<AudienceSpec>({
     audience: GROUPS[4].label,
     language: script.target.language === 'ar' ? 'en' : 'ar',
@@ -98,13 +105,14 @@ function LocalizeForm({ script, disabled, onLocalize }: Pick<Props, 'script' | '
   )
 }
 
-function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'script' | 'disabled' | 'onApprove' | 'shareUrl'>) {
+function Approvals({ script, disabled, onApprove, shareUrl }: { script: Script; disabled: boolean; onApprove?: Handlers['onApprove']; shareUrl: string }) {
   const pending = script.required_approvals.filter((r) => !script.approvals.some((a) => a.role === r.role))
   const [name, setName] = useState('')
   const [role, setRole] = useState<ReviewRole | null>(null)
   const [copied, setCopied] = useState(false)
   const chosen = pending.some((r) => r.role === role) ? role : (pending[0]?.role ?? null)
   const others = pending.some((r) => r.role !== 'creator')
+  const editable = Boolean(onApprove)
 
   return (
     <section className="card" id="s-approve">
@@ -131,12 +139,12 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
           )
         })}
       </ul>
-      {chosen && (
+      {editable && chosen && (
         <form
           className="row approve"
           onSubmit={(e) => {
             e.preventDefault()
-            onApprove(chosen, name.trim())
+            onApprove?.(chosen, name.trim())
           }}
         >
           <label className="field">
@@ -158,6 +166,7 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
           </button>
         </form>
       )}
+      {editable && (
       <div className="actions">
         {others && (
           <button
@@ -173,12 +182,13 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
           صدّر Markdown
         </button>
       </div>
+      )}
     </section>
   )
 }
 
 /** The one action that moves this version forward, so the flow never stalls on a long page. */
-function NextStep({ script, disabled, onReview }: Pick<Props, 'script' | 'disabled' | 'onReview'>) {
+function NextStep({ script, disabled, onReview }: { script: Script; disabled: boolean; onReview: Handlers['onReview'] }) {
   const blocking = script.review?.blocking ?? 0
   if (!script.review)
     return (
@@ -229,7 +239,7 @@ function NextStep({ script, disabled, onReview }: Pick<Props, 'script' | 'disabl
   )
 }
 
-export function ScriptView({ script, source, disabled, onReview, onRevise, onLocalize, onApprove, shareUrl }: Props) {
+export function ScriptView({ script, source, disabled, actions, shareUrl }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
   const [compare, setCompare] = useState(false)
@@ -263,7 +273,7 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
         </nav>
       </div>
 
-      <NextStep script={script} disabled={disabled} onReview={onReview} />
+      {actions && <NextStep script={script} disabled={disabled} onReview={actions.onReview} />}
 
       <section className="card" id="s-script">
         <h3>السيناريو</h3>
@@ -421,18 +431,20 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
             )}
           </>
         )}
+        {actions && (
+          <>
         <label className="field">
           <span>ملاحظات المراجع البشري (اختياري)</span>
           <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </label>
         <div className="actions">
-          <button disabled={disabled} onClick={onReview}>
+          <button disabled={disabled} onClick={actions!.onReview}>
             {review ? 'أعد المراجعة الآلية' : 'راجع آليا'}
           </button>
           <button
             disabled={disabled || !canRevise}
             onClick={() => {
-              onRevise(notes.trim() || null)
+              actions!.onRevise(notes.trim() || null)
               setNotes('')
             }}
           >
@@ -442,10 +454,12 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
             وطّن لجمهور آخر
           </button>
         </div>
-        {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={onLocalize} />}
+        {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={actions!.onLocalize} />}
+          </>
+        )}
       </section>
 
-      <Approvals script={script} disabled={disabled} onApprove={onApprove} shareUrl={shareUrl} />
+      <Approvals script={script} disabled={disabled} onApprove={actions?.onApprove} shareUrl={shareUrl} />
 
       <section className="card" id="s-posts">
         <h3>المنشورات</h3>

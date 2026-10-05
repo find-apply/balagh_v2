@@ -17,15 +17,18 @@ export function EvidenceItem({ e }: { e: Evidence }) {
 interface Props {
   ideas: Idea[]
   disabled: boolean
-  onPick: (idea: Idea) => void
+  /** Leave out to show the ideas without a way to pick one. */
+  onPick?: (idea: Idea) => void
 }
 
 export function IdeaList({ ideas, disabled, onPick }: Props) {
   return (
     <>
       <div className="page-head">
-        <h2>اختر فكرة</h2>
-        <p className="muted">ثلاث زوايا للموضوع، لكل منها نصوصها الموثّقة. اختر واحدة ليكتب بلاغ سيناريوها.</p>
+        <h2>{onPick ? 'اختر فكرة' : 'الأفكار المقترحة'}</h2>
+        <p className="muted">
+          ثلاث زوايا للموضوع، لكل منها نصوصها الموثّقة.{onPick && ' اختر واحدة ليكتب بلاغ سيناريوها.'}
+        </p>
       </div>
       <div className="ideas">
         {ideas.map((idea, i) => (
@@ -74,9 +77,11 @@ export function IdeaList({ ideas, disabled, onPick }: Props) {
                 </ul>
               </div>
             )}
-            <button className="primary block-button idea-cta" disabled={disabled} onClick={() => onPick(idea)}>
-              اكتب السيناريو ←
-            </button>
+            {onPick && (
+              <button className="primary block-button idea-cta" disabled={disabled} onClick={() => onPick(idea)}>
+                اكتب السيناريو ←
+              </button>
+            )}
           </article>
         ))}
       </div>
