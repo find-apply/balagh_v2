@@ -61,6 +61,7 @@ export function toMarkdown(s: Script): string {
   s.references.forEach((r) => {
     lines.push(`- ${r.source} (${r.usage === 'quoted' ? 'اقتباس حرفي' : 'بالمعنى'}): ${r.arabic}`)
     if (r.translation_source) lines.push(`  - ${r.translation_source}: ${r.text}`)
+    r.tafsir.forEach((t) => lines.push(`  - ${t.source}: ${t.text}`))
   })
   lines.push('', '## المنشورات', '')
   s.posts.forEach((p) => lines.push(`### ${PLATFORMS[p.platform]}`, '', p.caption, '', p.hashtags.join(' '), ''))

@@ -261,6 +261,17 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
                 <small>{r.translation_source}</small>
               </p>
             )}
+            {r.tafsir.map((t) => (
+              <details className="tafsir" key={t.source}>
+                <summary>
+                  <span className="badge">تفسير</span> {t.source}
+                </summary>
+                <p dir="rtl">{t.text}</p>
+                <small className="muted">
+                  شرح السيناريو لهذه الآية يجب أن يتبع هذا التفسير. التفسير كلام المفسّر، لا نص القرآن.
+                </small>
+              </details>
+            ))}
           </div>
         ))}
       </section>

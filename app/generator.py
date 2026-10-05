@@ -113,7 +113,13 @@ evidence id on that scene.
 - Do not attribute anything to Allah, the Quran, or the Prophet that is not backed by an evidence item. If the \
 evidence list is empty or lacks what the idea hoped for, build the script without it rather than filling the gap \
 from memory.
-- Keep the generated explanation clearly separate from the quoted text: introduce a quote as a quote."""
+- Keep the generated explanation clearly separate from the quoted text: introduce a quote as a quote.
+- A Quran item may carry `<tafsir>`: an approved commentary on those verses. When you explain what a verse \
+means, say what the commentary says, in your own simple words for this audience. Do not go beyond it, and do \
+not contradict it. The commentary is Arabic prose written about the verses, not the verses themselves: never \
+quote it, never put its words inside the quote, and never attribute them to Allah. One commentary entry may \
+cover several verses at once, as its source line says; do not read it as being about one verse alone. Where \
+there is no commentary, keep the explanation to what the verse plainly says."""
 
 SCRIPT_SYSTEM = f"""You are a short-form video scriptwriter for Islamic content. Turn the chosen idea into a complete, ready-to-shoot script.
 
@@ -186,6 +192,9 @@ You are the scholarly reviewer. Look for:
 - Rewards, punishments or promises exaggerated beyond what the evidence says.
 - A scholar quoted or named.
 - The Quran's words or meaning given outside a «» quote: the Quran may only be quoted verbatim, never paraphrased.
+- An explanation of a verse that goes beyond, or contradicts, the `<tafsir>` commentary given with it. Where a \
+verse has commentary, the script's explanation of it must be traceable to that commentary.
+- Words of the commentary presented as the verse itself, or attributed to Allah.
 - A content level that looks wrong for what the script actually says.
 
 Religious errors and misattributions are blocking.
@@ -259,8 +268,12 @@ def _evidence_block(evidence: list[Evidence], lang: Language) -> str:
         return "<evidence>none: do not quote or attribute any religious text</evidence>"
     def body(e: Evidence) -> str:
         if e.quran_key:
-            return " ".join(f"({ayah}) {text}" for ayah, text in sources.verse_parts(e.quran_key, lang).items())
-        return _evidence_text(e, lang)
+            text = " ".join(f"({ayah}) {t}" for ayah, t in sources.verse_parts(e.quran_key, lang).items())
+        else:
+            text = _evidence_text(e, lang)
+        # The commentary is in Arabic whatever the script's language: it grounds the meaning, it is not quoted.
+        tafsir = "".join(f'\n<tafsir source="{t.source}">{t.text}</tafsir>' for t in e.tafsir)
+        return f"{text}{tafsir}"
 
     items = "\n".join(f'<item id="{e.id}" kind="{e.kind.value}" source="{e.source}">{body(e)}</item>' for e in evidence)
     return f"<evidence>\n{items}\n</evidence>"
@@ -384,6 +397,7 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
             usage=ReferenceUsage.quoted if i in quoted else ReferenceUsage.paraphrased,
             text=inserts.get(i, _evidence_text(e, lang)),
             translation_source=e.translation_source if translated else None,
+            tafsir=e.tafsir,
         )
         for i, e in evidence.items() if i in quoted or i in relied
     ]

@@ -564,3 +564,20 @@ td {
 .approve button {
   margin-bottom: 14px;
 }
+
+.tafsir {
+  margin-top: 8px;
+  font-size: 0.9375rem;
+}
+
+.tafsir summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.tafsir p {
+  margin: 6px 0 2px;
+  padding: 10px 14px;
+  background: #f6f4ee;
+  border-radius: 10px;
+}
