@@ -1,0 +1,42 @@
+# Dependencies and build caches (reinstall with npm install)
+node_modules/
+.cache/
+.remotion/
+.turbo/
+dist/
+build/
+
+# Rendered outputs and previews (regenerate with the render scripts)
+out/
+renders/
+tmp/
+*.log
+
+# Downloaded source videos and their raw transcripts
+youtube-*/
+FDownloader*
+
+# Large media: videos and generated audio
+*.mp4
+*.mov
+*.webm
+*.mkv
+*.avi
+*.wav
+*.mp3
+*.ogg
+*.m4a
+*.aac
+*.flac
+
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.local
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
