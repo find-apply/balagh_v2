@@ -1,0 +1,14 @@
+[Unit]
+Description=Balagh API (FastAPI)
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/balagh
+ExecStart=/var/www/balagh/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8610
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
