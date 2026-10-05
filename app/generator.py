@@ -529,6 +529,6 @@ async def revise_script(script: Script, idea: Idea, notes: Optional[str]) -> Scr
     )
     fields = await _write(SCRIPT_SYSTEM, prompt, LocalizedDraft if localized else ScriptDraft, idea, script.target.language)
     return script.model_copy(update=dict(
-        id=_new_id(), version=script.version + 1, revised_from=script.id, review=None, approved=False,
+        id=_new_id(), version=script.version + 1, revised_from=script.id, review=None, approvals=[],
         adaptation_notes=fields["draft"].adaptation_notes if localized else [], **fields,
     ))

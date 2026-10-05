@@ -1,4 +1,4 @@
-import type { Brief, LocalizeRequest, Project, ReviewReport, Script } from './types'
+import type { Brief, LocalizeRequest, Project, ReviewReport, ReviewRole, Script } from './types'
 
 const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8010').replace(/\/$/, '')
 
@@ -44,6 +44,6 @@ export const api = {
     request<ReviewReport>('POST', `/projects/${projectId}/scripts/${scriptId}/review`),
   revise: (projectId: string, scriptId: string, notes: string | null) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/revise`, { notes }),
-  approve: (projectId: string, scriptId: string) =>
-    request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/approve`),
+  approve: (projectId: string, scriptId: string, role: ReviewRole, name: string) =>
+    request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/approve`, { role, name }),
 }

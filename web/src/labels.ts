@@ -28,6 +28,8 @@ export const LEVELS: Record<ContentLevel, string> = {
 
 export const REVIEWERS = { scholarly: 'المراجع العلمي', audience: 'مراجع الجمهور', meaning: 'مراجع المعنى' }
 
+export const ROLES = { creator: 'صانع المحتوى', scholar: 'مراجع شرعي', language: 'مراجع لغوي وثقافي' }
+
 export const CLAIMS = { preserved: 'محفوظ', altered: 'تغيّر', dropped: 'محذوف', added: 'مضاف' }
 
 export function scriptLabel(s: Script): string {
@@ -62,6 +64,8 @@ export function toMarkdown(s: Script): string {
   })
   lines.push('', '## المنشورات', '')
   s.posts.forEach((p) => lines.push(`### ${PLATFORMS[p.platform]}`, '', p.caption, '', p.hashtags.join(' '), ''))
-  lines.push('---', '', s.ai_disclosure)
+  lines.push('## الاعتماد', '')
+  s.approvals.forEach((a) => lines.push(`- ${ROLES[a.role]}: ${a.name} (${new Date(a.at).toLocaleString('ar')})`))
+  lines.push('', '---', '', s.ai_disclosure)
   return lines.join('\n')
 }

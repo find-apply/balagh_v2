@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Request
@@ -7,7 +8,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from google.genai import errors as genai_errors
 
 from . import generator, store
-from .schemas import BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn
+from .schemas import Approval, ApproveIn, BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn
 
 app = FastAPI(title="بلاغ", description="Brief -> 3 video ideas -> verified script -> localization -> review.")
 
@@ -132,10 +133,12 @@ async def revise_script(project_id: str, script_id: str, body: ReviseIn) -> Scri
 
 
 @app.post("/projects/{project_id}/scripts/{script_id}/approve", response_model=Script)
-async def approve_script(project_id: str, script_id: str) -> Script:
-    """Step 6: the human reviewer approves this exact version for export."""
+async def approve_script(project_id: str, script_id: str, body: ApproveIn) -> Script:
+    """Step 6: a named human signs off on this exact version in one role. Export opens once every
+    role the version requires has signed off."""
     project = _get_project(project_id)
     script = _get_script(project, script_id)
-    script.approved = True
+    script.approvals = [a for a in script.approvals if a.role != body.role]
+    script.approvals.append(Approval(role=body.role, name=body.name.strip(), at=datetime.now(timezone.utc)))
     store.save(project)
     return script

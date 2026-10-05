@@ -110,6 +110,14 @@ export interface ReviewReport {
   note: string
 }
 
+export type ReviewRole = 'creator' | 'scholar' | 'language'
+
+export interface Approval {
+  role: ReviewRole
+  name: string
+  at: string
+}
+
 export interface Script {
   id: string
   idea_id: string
@@ -133,6 +141,8 @@ export interface Script {
   adaptation_notes: { change: string; reason: string }[]
   terminology: TermCheck[]
   review: ReviewReport | null
+  approvals: Approval[]
+  required_approvals: { role: ReviewRole; reason: string }[]
   approved: boolean
   ai_disclosure: string
 }

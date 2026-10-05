@@ -536,3 +536,31 @@ td {
     flex: none;
   }
 }
+
+.approvals {
+  list-style: none;
+  padding: 0;
+}
+
+.approvals li {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+}
+
+.approvals li.done {
+  border-color: var(--ok);
+}
+
+.approvals p {
+  margin: 0;
+}
+
+.approve {
+  align-items: flex-end;
+}
+
+.approve button {
+  margin-bottom: 14px;
+}

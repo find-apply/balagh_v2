@@ -29,8 +29,19 @@ export default function App() {
   const [referral, setReferral] = useState<string | null>(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) api.getProject(saved).then(setProject, () => localStorage.removeItem(STORAGE_KEY))
+    // A review link (?project=…&script=…) opens that script directly for the reviewer.
+    const params = new URLSearchParams(location.search)
+    const shared = params.get('project')
+    const saved = shared ?? localStorage.getItem(STORAGE_KEY)
+    if (!saved) return
+    api.getProject(saved).then(
+      (loaded) => {
+        setProject(loaded)
+        const script = params.get('script')
+        if (script && loaded.scripts[script]) setActiveId(script)
+      },
+      () => (shared ? setError('تعذر فتح رابط المراجعة: المشروع غير موجود.') : localStorage.removeItem(STORAGE_KEY)),
+    )
   }, [])
 
   async function run(label: string, task: () => Promise<void>) {
@@ -54,6 +65,7 @@ export default function App() {
 
   const reset = () => {
     localStorage.removeItem(STORAGE_KEY)
+    history.replaceState(null, '', location.pathname)
     setProject(null)
     setActiveId(null)
     setError(null)
@@ -140,8 +152,9 @@ export default function App() {
               disabled={busy !== null}
               onReview={() =>
                 run('ثلاثة مراجعين آليين يفحصون السيناريو', async () => {
-                  const review = await api.review(pid, active.id)
-                  putScript({ ...active, review }, false)
+                  await api.review(pid, active.id)
+                  // The review can change who must sign off, so reload the script as the server sees it.
+                  setProject(await api.getProject(pid))
                 })
               }
               onRevise={(notes) =>
@@ -150,7 +163,10 @@ export default function App() {
               onLocalize={(body) =>
                 run('يوطّن بلاغ السيناريو للجمهور الجديد', async () => putScript(await api.localize(pid, active.id, body)))
               }
-              onApprove={() => run('اعتماد', async () => putScript(await api.approve(pid, active.id), false))}
+              onApprove={(role, name) =>
+                run('اعتماد', async () => putScript(await api.approve(pid, active.id, role, name), false))
+              }
+              shareUrl={`${location.origin}/?project=${pid}&script=${active.id}`}
             />
           )}
         </>

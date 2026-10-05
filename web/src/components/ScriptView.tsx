@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, toMarkdown } from '../labels'
-import type { AudienceSpec, LocalizeRequest, Script } from '../types'
+import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
+import type { AudienceSpec, LocalizeRequest, ReviewRole, Script } from '../types'
 import { GROUPS } from '../audiences'
 import { AudienceFields } from './AudienceFields'
 
@@ -12,7 +12,8 @@ interface Props {
   onReview: () => void
   onRevise: (notes: string | null) => void
   onLocalize: (body: LocalizeRequest) => void
-  onApprove: () => void
+  onApprove: (role: ReviewRole, name: string) => void
+  shareUrl: string
 }
 
 function download(script: Script) {
@@ -91,7 +92,86 @@ function LocalizeForm({ script, disabled, onLocalize }: Pick<Props, 'script' | '
   )
 }
 
-export function ScriptView({ script, source, disabled, onReview, onRevise, onLocalize, onApprove }: Props) {
+function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'script' | 'disabled' | 'onApprove' | 'shareUrl'>) {
+  const pending = script.required_approvals.filter((r) => !script.approvals.some((a) => a.role === r.role))
+  const [name, setName] = useState('')
+  const [role, setRole] = useState<ReviewRole | null>(null)
+  const [copied, setCopied] = useState(false)
+  const chosen = pending.some((r) => r.role === role) ? role : (pending[0]?.role ?? null)
+  const others = pending.some((r) => r.role !== 'creator')
+
+  return (
+    <section className="card">
+      <h3>الاعتماد البشري</h3>
+      <p className="muted">
+        المراجعة على قدر الخطر: يحدد بلاغ من يلزم اعتماده لهذه النسخة، ولا يُفتح التصدير قبل اكتماله.
+      </p>
+      <ul className="approvals">
+        {script.required_approvals.map((r) => {
+          const done = script.approvals.find((a) => a.role === r.role)
+          return (
+            <li key={r.role} className={done ? 'done' : ''}>
+              <div className="badges">
+                <span className={done ? 'badge ok' : 'badge warn'}>{done ? 'معتمد' : 'بانتظار الاعتماد'}</span>
+                <strong>{ROLES[r.role]}</strong>
+              </div>
+              <p className="muted small">{r.reason}</p>
+              {done && (
+                <p className="small">
+                  {done.name} · {new Date(done.at).toLocaleString('ar')}
+                </p>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {chosen && (
+        <form
+          className="row approve"
+          onSubmit={(e) => {
+            e.preventDefault()
+            onApprove(chosen, name.trim())
+          }}
+        >
+          <label className="field">
+            <span>بصفة</span>
+            <select value={chosen} onChange={(e) => setRole(e.target.value as ReviewRole)}>
+              {pending.map((r) => (
+                <option key={r.role} value={r.role}>
+                  {ROLES[r.role]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>اسم المعتمِد</span>
+            <input required minLength={2} value={name} onChange={(e) => setName(e.target.value)} placeholder="الاسم الكامل" />
+          </label>
+          <button className="primary" disabled={disabled}>
+            أعتمد هذه النسخة
+          </button>
+        </form>
+      )}
+      <div className="actions">
+        {others && (
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText(shareUrl).then(() => setCopied(true))
+            }}
+          >
+            {copied ? 'نُسخ الرابط' : 'انسخ رابط المراجعة للمراجع'}
+          </button>
+        )}
+        <button disabled={!script.approved} onClick={() => download(script)} title="يتاح بعد اكتمال الاعتماد">
+          صدّر Markdown
+        </button>
+      </div>
+    </section>
+  )
+}
+
+export function ScriptView({ script, source, disabled, onReview, onRevise, onLocalize, onApprove, shareUrl }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
   const [compare, setCompare] = useState(false)
@@ -291,15 +371,11 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
           <button disabled={disabled} onClick={() => setShowLocalize((v) => !v)}>
             وطّن لجمهور آخر
           </button>
-          <button className="primary" disabled={disabled || script.approved} onClick={onApprove}>
-            {script.approved ? 'معتمد' : 'اعتمد هذه النسخة'}
-          </button>
-          <button disabled={!script.approved} onClick={() => download(script)} title="يتاح بعد الاعتماد">
-            صدّر Markdown
-          </button>
         </div>
         {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={onLocalize} />}
       </section>
+
+      <Approvals script={script} disabled={disabled} onApprove={onApprove} shareUrl={shareUrl} />
 
       <section className="card">
         <h3>المنشورات</h3>

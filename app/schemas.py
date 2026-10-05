@@ -1,7 +1,8 @@
+from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, computed_field, field_validator
 
 
 class Platform(str, Enum):
@@ -80,6 +81,17 @@ class LocalizeIn(AudienceSpec):
     platforms: Optional[list[Platform]] = Field(default=None, description="Leave null to keep the source script's platforms.")
     duration_seconds: Optional[int] = Field(default=None, ge=5, le=600, description="Leave null to keep the source duration.")
     notes: Optional[str] = Field(default=None, max_length=1000)
+
+
+class ReviewRole(str, Enum):
+    creator = "creator"    # the content creator
+    scholar = "scholar"    # a qualified religious reviewer
+    language = "language"  # a native speaker of the target language and culture
+
+
+class ApproveIn(BaseModel):
+    role: ReviewRole
+    name: str = Field(min_length=2, max_length=80, description="Who is approving, in their own name.")
 
 
 class ReviseIn(BaseModel):
@@ -271,6 +283,17 @@ class ReviewReport(BaseModel):
     note: str = "مراجعة أولية آلية بالذكاء الاصطناعي، لا تغني عن مراجعة مختص قبل النشر."
 
 
+class Approval(BaseModel):
+    role: ReviewRole
+    name: str
+    at: datetime
+
+
+class RequiredApproval(BaseModel):
+    role: ReviewRole
+    reason: str
+
+
 AI_DISCLOSURE = "هذا المحتوى مولَّد بالذكاء الاصطناعي. النصوص الشرعية المقتبسة مأخوذة حرفيا من المصادر المذكورة، والباقي شرح مولَّد يحتاج مراجعة بشرية قبل النشر."
 
 
@@ -297,10 +320,34 @@ class Script(BaseModel):
     adaptation_notes: list[AdaptationNote] = Field(default_factory=list, description="Localized scripts only.")
     terminology: list[TermCheck] = Field(default_factory=list, description="Localized scripts only.")
     review: Optional[ReviewReport] = None
-    approved: bool = Field(default=False, description="Set by the human reviewer. Required before export.")
+    approvals: list[Approval] = Field(default_factory=list, description="Human sign-offs on this exact version.")
     ai_disclosure: str = AI_DISCLOSURE
     # The model's draft with quote placeholders, kept for localization and revision.
     draft: Optional[ScriptDraft] = Field(default=None, exclude=True)
+
+
+    @computed_field(description="Who must sign off before export. Review is proportionate to risk.")
+    @property
+    def required_approvals(self) -> list[RequiredApproval]:
+        required = [RequiredApproval(role=ReviewRole.creator, reason="صاحب المحتوى يعتمد كل نسخة قبل تصديرها.")]
+        if self.content_level == ContentLevel.C:
+            required.append(RequiredApproval(role=ReviewRole.scholar, reason="مستوى المحتوى (ج): مسألة خلافية أو عالية الحساسية."))
+        elif self.review and self.review.blocking:
+            required.append(RequiredApproval(role=ReviewRole.scholar, reason="في المراجعة الآلية ملاحظات مانعة لم تُصحَّح."))
+        elif self.warnings:
+            required.append(RequiredApproval(role=ReviewRole.scholar, reason="تنبيه آلي: مشهد يذكر نصا شرعيا دون دليل موثق مرتبط به."))
+        if self.localized_from:
+            required.append(RequiredApproval(
+                role=ReviewRole.language,
+                reason="نسخة موطّنة: الملاءمة اللغوية والثقافية لا تُفحص آليا.",
+            ))
+        return required
+
+    @computed_field(description="True once every required role has signed off. Required before export.")
+    @property
+    def approved(self) -> bool:
+        signed = {a.role for a in self.approvals}
+        return all(r.role in signed for r in self.required_approvals)
 
 
 class Project(BaseModel):
