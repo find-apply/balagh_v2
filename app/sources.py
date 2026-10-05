@@ -59,8 +59,25 @@ def _stem(token: str) -> str:
     return token
 
 
+def _token_list(text: str) -> list[str]:
+    # Names like عبدالله are written joined or apart; split them so both spellings match.
+    plain = re.sub(r"\bعبد(?=ال\w)", "عبد ", normalize(text))
+    return [_stem(t) for t in plain.split() if len(t) >= 3]
+
+
 def _tokens(text: str) -> set[str]:
-    return {_stem(t) for t in normalize(text).split() if len(t) >= 3}
+    return set(_token_list(text))
+
+
+def _pairs(tokens: list[str]) -> set[tuple[str, str]]:
+    return set(zip(tokens, tokens[1:]))
+
+
+def _hadith_number(h: dict) -> str:
+    """The number scholars cite: Fath al-Bari numbering for al-Bukhari, Abd al-Baqi numbering for Muslim."""
+    if h.get("a") is None:
+        return f"رقم تسلسلي {h['n']}"
+    return str(int(float(h["a"])))
 
 
 _hadith_tokens = [_tokens(h["t"]) for h in _hadith]
@@ -106,19 +123,25 @@ def search_hadith(query: str, limit: int = 2) -> list[Evidence]:
     for t in q:
         for i in _index.get(t, ()):
             counts[i] += 1
-    hits = [
-        (n / len(q), i) for i, n in counts.items()
-        if n / len(q) >= 0.75 and len(_hadith[i]["t"]) <= MAX_HADITH_CHARS
-    ]
-    hits.sort(key=lambda x: (-x[0], len(_hadith[x[1]]["t"])))
+    # Shared words are not enough: chains of narrators repeat the same names. The wording must also
+    # run in the same order, so at least half of the query's adjacent word pairs must appear.
+    wanted = _pairs(_token_list(query))
+    hits = []
+    for i, n in counts.items():
+        if n / len(q) < 0.75 or len(_hadith[i]["t"]) > MAX_HADITH_CHARS:
+            continue
+        order = len(wanted & _pairs(_token_list(_hadith[i]["t"]))) / len(wanted)
+        if order >= 0.5:
+            hits.append((order, n / len(q), i))
+    hits.sort(key=lambda x: (-x[0], -x[1], len(_hadith[x[2]]["t"])))
     found = []
-    for _, i in hits[:limit]:
+    for _, _, i in hits[:limit]:
         h = _hadith[i]
         found.append(Evidence(
             id="", kind=EvidenceKind.hadith, text=h["t"],
-            source=f"{COLLECTIONS[h['c']]}، حديث رقم {h['n']}",
+            source=f"{COLLECTIONS[h['c']]}، حديث رقم {_hadith_number(h)}",
             translation_en=h.get("e"),
-            translation_source=f"{HADITH_EN_SOURCE[h['c']]}, no. {h['n']}" if h.get("e") else None,
+            translation_source=f"{HADITH_EN_SOURCE[h['c']]}, no. {_hadith_number(h)}" if h.get("e") else None,
         ))
     return found
 
