@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+data/balagh.db
+node_modules/
+dist/
+*.local
+.DS_Store
