@@ -28,6 +28,7 @@ interface Props {
   busy: Busy | null
   autoReview: boolean
   onAutoReview: (on: boolean) => void
+  onReuse: () => void
   onPick: (idea: Idea) => void
   onReview: (scriptId: string) => void
   onRevise: (scriptId: string, notes: string | null) => void
@@ -35,7 +36,7 @@ interface Props {
   onApprove: (scriptId: string, role: ReviewRole, name: string) => void
 }
 
-export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, onPick, onReview, onRevise, onLocalize, onApprove }: Props) {
+export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, onReuse, onPick, onReview, onRevise, onLocalize, onApprove }: Props) {
   const here = busy?.projectId === project.id ? busy : null
   const writing = here?.kind === 'script'
   const pending = scriptId === 'new'
@@ -66,11 +67,16 @@ export function Workspace({ project, scriptId, busy, autoReview, onAutoReview, o
             <span className="badge">{brief.platforms.map((p) => PLATFORMS[p]).join('، ')}</span>
           </div>
         </div>
-        <label className="switch" title="بعد كل سيناريو أو نسخة جديدة، يشغّل بلاغ المراجعين الثلاثة مباشرة">
-          <input type="checkbox" checked={autoReview} onChange={(e) => onAutoReview(e.target.checked)} />
-          <span className="track" />
-          مراجعة آلية تلقائية
-        </label>
+        <div className="ws-tools">
+          <label className="switch" title="بعد كل سيناريو أو نسخة جديدة، يشغّل بلاغ المراجعين الثلاثة مباشرة">
+            <input type="checkbox" checked={autoReview} onChange={(e) => onAutoReview(e.target.checked)} />
+            <span className="track" />
+            مراجعة آلية تلقائية
+          </label>
+          <button type="button" onClick={onReuse} disabled={busy?.kind === 'ideas'} title="يفتح توليدا جديدا بنفس الجمهور والمنصات">
+            ⧉ توليد بنفس الموجز
+          </button>
+        </div>
       </header>
 
       <Stepper current={step} />

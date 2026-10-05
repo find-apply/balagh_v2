@@ -31,6 +31,9 @@ export default function App() {
   const [referral, setReferral] = useState<string | null>(null)
   const [autoReview, setAutoReview] = useState(readAutoReview)
   const [drawer, setDrawer] = useState(false)
+  // A brief copied from an existing project; changing formKey gives the composer a fresh start.
+  const [draft, setDraft] = useState<Brief | null>(null)
+  const [formKey, setFormKey] = useState(0)
 
   useEffect(() => {
     const sync = () => {
@@ -111,6 +114,8 @@ export default function App() {
     job({ task: TASKS.ideas, projectId: 'new', kind: 'ideas' }, async () => {
       const p = await api.createProject(brief)
       cache(p)
+      setDraft(null)
+      setFormKey((k) => k + 1)
       if (parseRoute().view === 'new') go(projectHash(p.id), true)
     })
   }
@@ -206,7 +211,7 @@ export default function App() {
               )}
               {/* Stays mounted while generating so a failed request keeps the brief as the user left it. */}
               <div hidden={creating}>
-                <BriefForm disabled={busy !== null} onSubmit={createProject} />
+                <BriefForm key={formKey} disabled={busy !== null} initial={draft} onSubmit={createProject} />
               </div>
             </>
           )}
@@ -224,6 +229,11 @@ export default function App() {
               busy={busy}
               autoReview={autoReview}
               onAutoReview={toggleAutoReview}
+              onReuse={() => {
+                setDraft(project.brief)
+                setFormKey((k) => k + 1)
+                go('#/new')
+              }}
               onPick={(idea) => produce(project.id, 'script', () => api.createScript(project.id, idea.id, null))}
               onReview={(sid) =>
                 job({ task: TASKS.review, projectId: project.id, kind: 'review', scriptId: sid }, () => reviewNow(project.id, sid))
