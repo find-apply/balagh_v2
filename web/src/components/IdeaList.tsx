@@ -24,7 +24,7 @@ export function IdeaList({ ideas, disabled, onPick }: Props) {
   return (
     <>
       <div className="page-head">
-        <h1>اختر فكرة</h1>
+        <h2>اختر فكرة</h2>
         <p className="muted">ثلاث زوايا للموضوع، لكل منها نصوصها الموثّقة. اختر واحدة ليكتب بلاغ سيناريوها.</p>
       </div>
       <div className="ideas">

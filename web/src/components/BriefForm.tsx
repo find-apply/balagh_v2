@@ -66,7 +66,7 @@ export function BriefForm({ disabled, onSubmit }: Props) {
     <form className="brief" onSubmit={submit}>
       <div className="brief-main">
         <div className="page-head">
-          <h1>مشروع جديد</h1>
+          <h1>توليد جديد</h1>
           <p className="muted">كل خانة فيها خيار تلقائي: اختر ما يهمك واترك الباقي لبلاغ.</p>
         </div>
 

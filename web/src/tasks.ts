@@ -54,3 +54,13 @@ export const TASKS = {
   },
   approve: { title: 'تسجيل الاعتماد', expected: 2, stages: [] },
 } satisfies Record<string, Task>
+
+/** The job running now: which project it belongs to ("new" while ideas are generated) and what it is producing. */
+export interface Busy {
+  task: Task
+  projectId: string
+  kind: 'ideas' | 'script' | 'review' | 'approve'
+  scriptId?: string
+  /** Position in a chained flow, such as "الخطوة 1 من 2". */
+  step?: string
+}

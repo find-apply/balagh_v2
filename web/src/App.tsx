@@ -1,45 +1,43 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { api, ApiError } from './api'
 import { BriefForm } from './components/BriefForm'
-import { IdeaList } from './components/IdeaList'
+import { HistorySidebar } from './components/HistorySidebar'
 import { Landing, Logo } from './components/Landing'
-import { Progress } from './components/Progress'
-import { ScriptView } from './components/ScriptView'
-import { LANGUAGES, PLATFORMS, scriptLabel } from './labels'
+import { IdeaSkeletons, Progress, Toast } from './components/Progress'
+import { Workspace } from './components/Workspace'
+import { loadHistory, saveHistory, upsertEntry } from './history'
+import type { HistoryEntry } from './history'
+import { go, parseRoute, projectHash } from './route'
 import { TASKS } from './tasks'
-import type { Task } from './tasks'
-import type { Project, Script } from './types'
+import type { Busy } from './tasks'
+import type { Brief, Project, Script } from './types'
 
-const STORAGE_KEY = 'balagh.project'
+const AUTO_REVIEW_KEY = 'balagh.autoReview'
 
-const STEPS = ['الموجز', 'الأفكار', 'السيناريو', 'المراجعة', 'الاعتماد']
-
-// The studio opens on #studio, or directly on a review link (?project=…&script=…).
-const isStudio = () => location.hash === '#studio' || new URLSearchParams(location.search).has('project')
-
-function Stepper({ current }: { current: number }) {
-  return (
-    <ol className="stepper">
-      {STEPS.map((s, i) => (
-        <li key={s} className={i < current ? 'done' : i === current ? 'now' : ''}>
-          <span className="step-num">{i < current ? '✓' : i + 1}</span>
-          <span className="step-label">{s}</span>
-        </li>
-      ))}
-    </ol>
-  )
+function readAutoReview(): boolean {
+  try {
+    return localStorage.getItem(AUTO_REVIEW_KEY) !== 'off'
+  } catch {
+    return true
+  }
 }
 
 export default function App() {
-  const [studio, setStudio] = useState(isStudio)
-  const [project, setProject] = useState<Project | null>(null)
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const [busy, setBusy] = useState<Task | null>(null)
+  const [route, setRoute] = useState(parseRoute)
+  const [history, setHistory] = useState<HistoryEntry[]>(loadHistory)
+  const [projects, setProjects] = useState<Record<string, Project>>({})
+  const [busy, setBusy] = useState<Busy | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [referral, setReferral] = useState<string | null>(null)
+  const [autoReview, setAutoReview] = useState(readAutoReview)
+  const [drawer, setDrawer] = useState(false)
 
   useEffect(() => {
-    const sync = () => setStudio(isStudio())
+    const sync = () => {
+      setRoute(parseRoute())
+      setDrawer(false)
+      scrollTo({ top: 0 })
+    }
     addEventListener('popstate', sync)
     addEventListener('hashchange', sync)
     return () => {
@@ -48,27 +46,49 @@ export default function App() {
     }
   }, [])
 
+  // Entries show the live title and counts of projects loaded in this session.
+  const entries = useMemo(
+    () => history.map((e) => (projects[e.id] ? upsertEntry([e], projects[e.id])[0] : e)),
+    [history, projects],
+  )
+  useEffect(() => saveHistory(entries), [entries])
+
+  const openId = route.view === 'project' ? route.id : null
+  const loaded = openId ? projects[openId] : undefined
+
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const shared = params.get('project')
-    const saved = shared ?? localStorage.getItem(STORAGE_KEY)
-    if (!saved) return
-    api.getProject(saved).then(
-      (loaded) => {
-        setProject(loaded)
-        const script = params.get('script')
-        if (script && loaded.scripts[script]) setActiveId(script)
+    if (!openId || loaded) return
+    api.getProject(openId).then(
+      (p) => {
+        setProjects((all) => ({ ...all, [p.id]: p }))
+        // A project this browser has not seen came from someone's review link.
+        setHistory((h) => upsertEntry(h, p, !h.some((e) => e.id === p.id)))
       },
-      () => (shared ? setError('تعذر فتح رابط المراجعة: المشروع غير موجود.') : localStorage.removeItem(STORAGE_KEY)),
+      (e) => {
+        // Only a 404 means the project is gone; a network error keeps it in history for a retry.
+        if (e instanceof ApiError && e.status === 404) {
+          setHistory((h) => h.filter((x) => x.id !== openId))
+          setError('تعذر فتح المشروع: لم يعد موجودا على الخادم.')
+          go('#/new', true)
+        } else setError(e instanceof Error ? e.message : String(e))
+      },
     )
-  }, [])
+  }, [openId, loaded])
 
-  useEffect(() => {
-    scrollTo({ top: 0 })
-  }, [studio, activeId, project?.id])
+  function cache(p: Project, shared = false) {
+    setProjects((all) => ({ ...all, [p.id]: p }))
+    setHistory((h) => upsertEntry(h, p, shared))
+  }
 
-  async function run(task: Task, work: () => Promise<void>) {
-    setBusy(task)
+  function putScript(pid: string, script: Script) {
+    setProjects((all) => {
+      const p = all[pid]
+      return p ? { ...all, [pid]: { ...p, scripts: { ...p.scripts, [script.id]: script } } } : all
+    })
+  }
+
+  async function job(b: Busy, work: () => Promise<void>) {
+    setBusy(b)
     setError(null)
     setReferral(null)
     try {
@@ -81,157 +101,151 @@ export default function App() {
     }
   }
 
-  const putScript = (script: Script, activate = true) => {
-    setProject((p) => p && { ...p, scripts: { ...p.scripts, [script.id]: script } })
-    if (activate) setActiveId(script.id)
+  async function reviewNow(pid: string, scriptId: string) {
+    await api.review(pid, scriptId)
+    // The review can change who must sign off, so reload the project as the server sees it.
+    cache(await api.getProject(pid))
   }
 
-  const openStudio = () => {
-    location.hash = 'studio'
-    setStudio(true)
+  function createProject(brief: Brief) {
+    job({ task: TASKS.ideas, projectId: 'new', kind: 'ideas' }, async () => {
+      const p = await api.createProject(brief)
+      cache(p)
+      if (parseRoute().view === 'new') go(projectHash(p.id), true)
+    })
   }
 
-  const openLanding = () => {
-    history.pushState(null, '', location.pathname)
-    setStudio(false)
+  /** Writes a new version, opens it, and (when enabled) reviews it straight away so the flow never stops between steps. */
+  function produce(pid: string, kind: 'script' | 'revise' | 'localize', make: () => Promise<Script>) {
+    const back = location.hash
+    const pending = projectHash(pid, 'new')
+    go(pending)
+    const step = autoReview ? 'الخطوة 1 من 2' : undefined
+    job({ task: TASKS[kind], projectId: pid, kind: 'script', step }, async () => {
+      let script: Script
+      try {
+        script = await make()
+      } catch (e) {
+        if (location.hash === pending) go(back, true)
+        throw e
+      }
+      putScript(pid, script)
+      if (location.hash === pending) go(projectHash(pid, script.id), true)
+      if (autoReview) {
+        setBusy({ task: TASKS.review, projectId: pid, kind: 'review', scriptId: script.id, step: 'الخطوة 2 من 2' })
+        await reviewNow(pid, script.id)
+      }
+    })
   }
 
-  const reset = () => {
-    localStorage.removeItem(STORAGE_KEY)
-    history.replaceState(null, '', `${location.pathname}#studio`)
-    setProject(null)
-    setActiveId(null)
-    setError(null)
-    setReferral(null)
+  const toggleAutoReview = (on: boolean) => {
+    setAutoReview(on)
+    try {
+      localStorage.setItem(AUTO_REVIEW_KEY, on ? 'on' : 'off')
+    } catch {
+      // The preference then lasts for this session only.
+    }
   }
 
-  if (!studio) return <Landing onStart={openStudio} resume={project !== null} />
+  const hide = (id: string) => {
+    setHistory((h) => h.filter((e) => e.id !== id))
+    if (id === openId) go('#/new')
+  }
 
-  // Originals first, then localized versions; revisions follow the version they correct.
-  const scripts = project
-    ? Object.values(project.scripts).sort(
-        (a, b) => Number(Boolean(a.localized_from)) - Number(Boolean(b.localized_from)) || a.version - b.version,
-      )
-    : []
-  const active = project && activeId ? project.scripts[activeId] : null
-  const source = active?.localized_from && project ? (project.scripts[active.localized_from] ?? null) : null
-  const pid = project?.id ?? ''
-  const step = !project ? 0 : !active ? 1 : !active.review ? 3 : !active.approved ? 4 : 5
+  if (route.view === 'landing') return <Landing onStart={() => go('#/new')} resume={history.length > 0} />
+
+  const project = loaded ?? null
+  const creating = busy?.kind === 'ideas'
 
   return (
-    <div className="studio">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <button className="logo-button" onClick={openLanding} aria-label="الصفحة الرئيسية">
-            <Logo />
+    <div className={drawer ? 'shell drawer-open' : 'shell'}>
+      <aside className="shell-rail">
+        <HistorySidebar
+          entries={entries}
+          activeId={openId}
+          busyId={busy ? busy.projectId : null}
+          composing={route.view === 'new'}
+          onNew={() => go('#/new')}
+          onOpen={(id) => go(projectHash(id))}
+          onHide={hide}
+          onHome={() => go('')}
+        />
+      </aside>
+      <div className="scrim" onClick={() => setDrawer(false)} />
+
+      <div className="shell-main">
+        <header className="mobile-bar">
+          <button className="menu" aria-label="السجل" onClick={() => setDrawer(true)}>
+            ☰
           </button>
-          <Stepper current={step} />
-          {project ? (
-            <button onClick={reset}>+ مشروع جديد</button>
-          ) : (
-            <span className="topbar-spacer" />
+          <Logo />
+          <button onClick={() => go('#/new')}>+ جديد</button>
+        </header>
+
+        <main className="main-inner">
+          {error && (
+            <div className="notice bad" role="alert">
+              <strong>تعذر إكمال الطلب</strong>
+              <p>{error}</p>
+            </div>
           )}
-        </div>
-      </header>
+          {referral && route.view === 'new' && (
+            <div className="notice referral" dir="auto">
+              <strong>هذه مسألة تحتاج إلى مختص</strong>
+              <p>{referral}</p>
+            </div>
+          )}
 
-      {busy && <Progress key={busy.title} task={busy} />}
-
-      <main className="studio-main">
-        {error && (
-          <div className="notice bad" role="alert">
-            <strong>تعذر إكمال الطلب</strong>
-            <p>{error}</p>
-          </div>
-        )}
-        {referral && (
-          <div className="notice referral" dir="auto">
-            <strong>هذه مسألة تحتاج إلى مختص</strong>
-            <p>{referral}</p>
-          </div>
-        )}
-
-        {!project && (
-          <BriefForm
-            disabled={busy !== null}
-            onSubmit={(brief) =>
-              run(TASKS.ideas, async () => {
-                const created = await api.createProject(brief)
-                localStorage.setItem(STORAGE_KEY, created.id)
-                setProject(created)
-              })
-            }
-          />
-        )}
-
-        {project && (
-          <div className="workspace">
-            <aside className="sidebar">
-              <div className="side-card">
-                <span className="side-title">الموجز</span>
-                <p dir="auto">{project.brief.idea ?? 'مواضيع يقترحها بلاغ'}</p>
-                <p className="muted small" dir="auto">
-                  {project.brief.audience} · {LANGUAGES[project.brief.language]}
-                </p>
-                <p className="muted small">{project.brief.platforms.map((p) => PLATFORMS[p]).join('، ')}</p>
+          {route.view === 'new' && (
+            <>
+              {creating && busy && (
+                <div className="gen-flow">
+                  <Progress key={busy.task.title} task={busy.task} />
+                  <IdeaSkeletons />
+                </div>
+              )}
+              {/* Stays mounted while generating so a failed request keeps the brief as the user left it. */}
+              <div hidden={creating}>
+                <BriefForm disabled={busy !== null} onSubmit={createProject} />
               </div>
-              <nav className="side-card side-nav">
-                <span className="side-title">المشروع</span>
-                <button className={active ? 'nav-item' : 'nav-item on'} onClick={() => setActiveId(null)}>
-                  <span>الأفكار</span>
-                  <small>{project.ideas.length} أفكار</small>
-                </button>
-                {scripts.length > 0 && <span className="side-title">السيناريوهات</span>}
-                {scripts.map((s) => (
-                  <button key={s.id} className={s.id === activeId ? 'nav-item on' : 'nav-item'} onClick={() => setActiveId(s.id)}>
-                    <span dir="auto">{s.title}</span>
-                    <small>
-                      {scriptLabel(s)}
-                      <i className={s.approved ? 'state ok' : s.review ? 'state warn' : 'state'} />
-                    </small>
-                  </button>
-                ))}
-              </nav>
-            </aside>
+            </>
+          )}
 
-            <section className="content">
-              {!active && (
-                <IdeaList
-                  ideas={project.ideas}
-                  disabled={busy !== null}
-                  onPick={(idea) => run(TASKS.script, async () => putScript(await api.createScript(pid, idea.id, null)))}
-                />
-              )}
+          {route.view === 'project' && !project && !error && (
+            <div className="loading-view">
+              <span className="spinner brand" /> يفتح المشروع…
+            </div>
+          )}
 
-              {active && (
-                <ScriptView
-                  key={active.id}
-                  script={active}
-                  source={source}
-                  disabled={busy !== null}
-                  onReview={() =>
-                    run(TASKS.review, async () => {
-                      await api.review(pid, active.id)
-                      // The review can change who must sign off, so reload the script as the server sees it.
-                      setProject(await api.getProject(pid))
-                    })
-                  }
-                  onRevise={(notes) => run(TASKS.revise, async () => putScript(await api.revise(pid, active.id, notes)))}
-                  onLocalize={(body) => run(TASKS.localize, async () => putScript(await api.localize(pid, active.id, body)))}
-                  onApprove={(role, name) =>
-                    run(TASKS.approve, async () => putScript(await api.approve(pid, active.id, role, name), false))
-                  }
-                  shareUrl={`${location.origin}/?project=${pid}&script=${active.id}`}
-                />
-              )}
-            </section>
-          </div>
-        )}
+          {project && (
+            <Workspace
+              project={project}
+              scriptId={route.view === 'project' ? route.script : null}
+              busy={busy}
+              autoReview={autoReview}
+              onAutoReview={toggleAutoReview}
+              onPick={(idea) => produce(project.id, 'script', () => api.createScript(project.id, idea.id, null))}
+              onReview={(sid) =>
+                job({ task: TASKS.review, projectId: project.id, kind: 'review', scriptId: sid }, () => reviewNow(project.id, sid))
+              }
+              onRevise={(sid, notes) => produce(project.id, 'revise', () => api.revise(project.id, sid, notes))}
+              onLocalize={(sid, body) => produce(project.id, 'localize', () => api.localize(project.id, sid, body))}
+              onApprove={(sid, role, name) =>
+                job({ task: TASKS.approve, projectId: project.id, kind: 'approve' }, async () =>
+                  putScript(project.id, await api.approve(project.id, sid, role, name)),
+                )
+              }
+            />
+          )}
 
-        <p className="disclosure">
-          أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة
-          يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
-        </p>
-      </main>
+          {busy?.kind === 'approve' && <Toast label={busy.task.title} />}
+
+          <p className="disclosure">
+            أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة
+            يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
+          </p>
+        </main>
+      </div>
     </div>
   )
 }

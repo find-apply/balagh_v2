@@ -71,7 +71,7 @@ function HeroMock() {
 }
 
 export function Landing({ onStart, resume }: { onStart: () => void; resume: boolean }) {
-  const cta = resume ? 'تابع مشروعك' : 'ابدأ مشروعا'
+  const cta = resume ? 'افتح لوحة العمل' : 'ابدأ مشروعا'
   return (
     <div className="landing">
       <header className="topbar">

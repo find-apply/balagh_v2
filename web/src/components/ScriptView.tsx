@@ -250,7 +250,7 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
           {script.localized_from && <span className="badge info">موطَّن</span>}
           {script.approved ? <span className="badge ok">معتمد</span> : <span className="badge warn">غير معتمد</span>}
         </div>
-        <h1 dir="auto">{script.title}</h1>
+        <h2 dir="auto">{script.title}</h2>
         <p className="muted" dir="auto">
           الجمهور: {script.target.audience}
         </p>
