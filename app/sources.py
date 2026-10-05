@@ -17,6 +17,9 @@ DATA = Path(__file__).resolve().parent.parent / "data"
 _quran = json.loads((DATA / "quran.json").read_text(encoding="utf-8"))
 _hadith = json.loads((DATA / "hadith.json").read_text(encoding="utf-8"))
 
+# The mushaf's hizb and sajdah marks sit in the verse text; they are page furniture, not words of the verse.
+_quran["verses"] = {k: re.sub(r"\s*[۞۩]\s*", " ", v).strip() for k, v in _quran["verses"].items()}
+
 COLLECTIONS = {"bukhari": "صحيح البخاري", "muslim": "صحيح مسلم"}
 MAX_VERSES = 5
 MAX_HADITH_CHARS = 2500
