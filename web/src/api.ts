@@ -1,6 +1,6 @@
 import type { Brief, LocalizeRequest, Project, ReviewReport, ReviewRole, Script } from './types'
 
-const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8010').replace(/\/$/, '')
+export const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8010').replace(/\/$/, '')
 
 export class ApiError extends Error {
   status: number

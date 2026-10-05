@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, MouseEvent } from 'react'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
 import type { AudienceSpec, LocalizeRequest, ReviewRole, Script } from '../types'
 import { GROUPS } from '../audiences'
@@ -23,6 +23,12 @@ function download(script: Script) {
   a.download = `${script.title}.md`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+// In-page links scroll without touching the URL hash, which keeps the app on #studio.
+function jump(e: MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault()
+  document.querySelector(e.currentTarget.getAttribute('href')!)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function Scenes({ script }: { script: Script }) {
@@ -101,7 +107,7 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
   const others = pending.some((r) => r.role !== 'creator')
 
   return (
-    <section className="card">
+    <section className="card" id="s-approve">
       <h3>الاعتماد البشري</h3>
       <p className="muted">
         المراجعة على قدر الخطر: يحدد بلاغ من يلزم اعتماده لهذه النسخة، ولا يُفتح التصدير قبل اكتماله.
@@ -171,6 +177,58 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
   )
 }
 
+/** The one action that moves this version forward, so the flow never stalls on a long page. */
+function NextStep({ script, disabled, onReview }: Pick<Props, 'script' | 'disabled' | 'onReview'>) {
+  const blocking = script.review?.blocking ?? 0
+  if (!script.review)
+    return (
+      <div className="next">
+        <div>
+          <strong>الخطوة التالية: المراجعة الآلية</strong>
+          <p className="muted small">ثلاثة مراجعين يفحصون السيناريو: علمي، وجمهور، ومعنى.</p>
+        </div>
+        <button className="primary" disabled={disabled} onClick={onReview}>
+          راجع آليا
+        </button>
+      </div>
+    )
+  if (blocking > 0)
+    return (
+      <div className="next bad">
+        <div>
+          <strong>{blocking} ملاحظة مانعة</strong>
+          <p className="small">صحّحها في نسخة جديدة قبل الاعتماد.</p>
+        </div>
+        <a className="button" href="#s-review" onClick={jump}>
+          اعرض الملاحظات
+        </a>
+      </div>
+    )
+  if (!script.approved)
+    return (
+      <div className="next">
+        <div>
+          <strong>الخطوة التالية: الاعتماد البشري</strong>
+          <p className="muted small">لا يُفتح التصدير قبل أن يوقّع كل من تتطلبه هذه النسخة.</p>
+        </div>
+        <a className="button primary" href="#s-approve" onClick={jump}>
+          اذهب إلى الاعتماد
+        </a>
+      </div>
+    )
+  return (
+    <div className="next ok">
+      <div>
+        <strong>النسخة معتمدة وجاهزة للتصدير</strong>
+        <p className="small">صدّرها، أو وطّنها لجمهور آخر.</p>
+      </div>
+      <button className="primary" onClick={() => download(script)}>
+        صدّر Markdown
+      </button>
+    </div>
+  )
+}
+
 export function ScriptView({ script, source, disabled, onReview, onRevise, onLocalize, onApprove, shareUrl }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
@@ -180,7 +238,7 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
 
   return (
     <div className="script">
-      <section className="card">
+      <div className="script-head">
         <div className="badges">
           <span className="badge">{LANGUAGES[script.target.language]}</span>
           {script.target.dialect && <span className="badge">{script.target.dialect}</span>}
@@ -192,11 +250,23 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
           {script.localized_from && <span className="badge info">موطَّن</span>}
           {script.approved ? <span className="badge ok">معتمد</span> : <span className="badge warn">غير معتمد</span>}
         </div>
-        <h2 dir="auto">{script.title}</h2>
+        <h1 dir="auto">{script.title}</h1>
         <p className="muted" dir="auto">
           الجمهور: {script.target.audience}
         </p>
+        <nav className="jump">
+          <a href="#s-script" onClick={jump}>السيناريو</a>
+          <a href="#s-sources" onClick={jump}>المصادر ({script.references.length})</a>
+          <a href="#s-review" onClick={jump}>المراجعة</a>
+          <a href="#s-approve" onClick={jump}>الاعتماد</a>
+          <a href="#s-posts" onClick={jump}>المنشورات</a>
+        </nav>
+      </div>
 
+      <NextStep script={script} disabled={disabled} onReview={onReview} />
+
+      <section className="card" id="s-script">
+        <h3>السيناريو</h3>
         {script.warnings.length > 0 && (
           <div className="notice warn">
             <strong>تنبيهات آلية</strong>
@@ -242,7 +312,7 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
         </p>
       </section>
 
-      <section className="card">
+      <section className="card" id="s-sources">
         <h3>المصادر</h3>
         {script.references.length === 0 && <p className="muted">هذا السيناريو لا يقتبس نصا شرعيا.</p>}
         {script.references.map((r) => (
@@ -300,7 +370,7 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
         </section>
       )}
 
-      <section className="card">
+      <section className="card" id="s-review">
         <h3>المراجعة</h3>
         {!review && <p className="muted">لم تُراجَع هذه النسخة بعد.</p>}
         {review && (
@@ -377,7 +447,7 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
 
       <Approvals script={script} disabled={disabled} onApprove={onApprove} shareUrl={shareUrl} />
 
-      <section className="card">
+      <section className="card" id="s-posts">
         <h3>المنشورات</h3>
         {script.posts.map((p) => (
           <div className="post" key={p.platform}>
