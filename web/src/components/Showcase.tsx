@@ -39,7 +39,9 @@ interface Example {
   project: string
   script: string
   brief: { idea: string | null; audience: string; language: string; knowledge: string; tone: string | null; platforms: string[]; duration: number | null }
-  ideas: { title: string; hook: string; evidence: string[] }[]
+  ideas: { title: string; hook: string; evidence: string[]; locus?: string; mentions?: string[] }[]
+  /** When the ideas were drawn from a video or a file. */
+  source?: { kind: string; label: string; url: string | null; summary: string }
   chosen: number
   first: ShowScript
   final: ShowScript
@@ -329,6 +331,14 @@ export function Showcase({ onStart }: { onStart: () => void }) {
               <div className="card">
                 <h3>1. الطلب كما كتبه المستخدم</h3>
                 <Brief b={ex.brief} />
+                {ex.source && (
+                  <p className="notice" dir="auto">
+                    <strong>{ex.source.kind === 'youtube' ? 'مصدر الإلهام: فيديو يوتيوب' : 'مصدر الإلهام: ملف'}</strong>{' '}
+                    {ex.source.url ? <a href={ex.source.url} target="_blank" rel="noreferrer">{ex.source.label}</a> : ex.source.label}
+                    <br />
+                    <span className="small">{ex.source.summary}</span>
+                  </p>
+                )}
               </div>
               <div className="card">
                 <h3>2. ما جرى</h3>
@@ -354,9 +364,15 @@ export function Showcase({ onStart }: { onStart: () => void }) {
                       {i.hook}
                     </span>
                     <div className="badges">
+                      {i.locus && <span className="badge info">من المصدر: {i.locus}</span>}
                       {i.evidence.map((e) => (
                         <span className="badge ok" key={e}>
                           {e}
+                        </span>
+                      ))}
+                      {(i.mentions ?? []).map((m) => (
+                        <span className="badge" key={m} title="ذكرها المصدر وهي خارج نطاق مصادرنا الحالية، فلم تُستعمل">
+                          خارج النطاق: {m.slice(0, 40)}…
                         </span>
                       ))}
                     </div>
