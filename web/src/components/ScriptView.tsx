@@ -388,15 +388,15 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
         <p className="muted" dir="auto">
           الجمهور: {script.target.audience}
         </p>
-        <nav className="jump" aria-label="أجزاء السيناريو">
-          {TABS.map((t) => (
-            <TabLink key={t.id} to={t.id} go={setTab} className={tab === t.id ? 'on' : undefined}>
-              {t.label}
-              {t.id === 'script' && ` (${script.references.length})`}
-            </TabLink>
-          ))}
-        </nav>
       </div>
+      <nav className="jump" aria-label="أجزاء السيناريو">
+        {TABS.map((t) => (
+          <TabLink key={t.id} to={t.id} go={setTab} className={tab === t.id ? 'on' : undefined}>
+            {t.label}
+            {t.id === 'script' && ` (${script.references.length})`}
+          </TabLink>
+        ))}
+      </nav>
 
       {actions && <NextStep script={script} disabled={disabled} onReview={actions.onReview} go={setTab} />}
 

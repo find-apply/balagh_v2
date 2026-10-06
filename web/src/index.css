@@ -1509,6 +1509,10 @@ button.link {
 /* Script */
 
 .script-head {
+  margin-bottom: 4px;
+}
+
+.jump {
   margin-bottom: 16px;
 }
 
@@ -3321,7 +3325,8 @@ details.card[open] > summary {
     position: sticky;
     top: 50px;
     z-index: 10;
-    background: var(--bg, #f7f6f2);
+    background: var(--bg);
     padding-top: 4px;
+    margin-bottom: 16px;
   }
 }
