@@ -28,6 +28,7 @@ LABELS = {
         "teaser_cta": "شَاهِدُوا الْحَلْقَةَ كَامِلَةً مَعَ أَطْفَالِكُمْ",
         "silent": "اقْرَأْ مَعَنَا: يُضَافُ صَوْتُ الْقَارِئِ عِنْدَ تَوَفُّرِ التَّسْجِيلِ",
         "silent_short": "يُعرض النص للقراءة · صوت القارئ يُضاف عند توفر التسجيل",
+        "preview": "معاينة · غير معتمد",
     },
     Language.en: {
         "story": "Listen and learn", "board": "Lesson board", "words": "Let's understand", "quiz": "Question",
@@ -37,6 +38,7 @@ LABELS = {
         "teaser_cta": "Watch the full episode with your children",
         "silent": "Read along: a reciter's voice is added once a recording is available",
         "silent_short": "Shown for reading · a reciter's voice is added once recorded",
+        "preview": "PREVIEW · NOT APPROVED",
     },
 }
 

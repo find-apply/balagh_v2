@@ -100,6 +100,7 @@ export interface Video {
   project_id: string
   script_id: string
   template: string
+  preview: boolean
   status: VideoStatus
   url: string | null
   error: string | null

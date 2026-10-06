@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Img, Sequence, interpolate, spring, staticFile} from 'remotion';
 import {WHO, currentLine, spokenParts, useDir, useT} from '../core/story';
 import {LangCtx, amiri, cairo, inter, useEn} from '../core/theme';
-import {FPS, SceneAudio, StoryScene, StorySpec} from '../spec';
+import {FPS, SceneAudio, StoryScene, StorySpec, Watermark} from '../spec';
 
 const C = {teal: '#1f9d8a', tealDark: '#14705f', peach: '#ffc9a8', cream: '#fff7ea', yellow: '#ffd84d', ink: '#26343b'};
 const PASTEL = 'linear-gradient(135deg, #fde7d3 0%, #f3f7e6 45%, #d6efe8 100%)';
@@ -172,6 +172,7 @@ export const Kids: React.FC<{spec: StorySpec}> = ({spec}) => {
           from += dur;
           return el;
         })}
+        <Watermark text={spec.watermark} wide />
       </AbsoluteFill>
     </LangCtx.Provider>
   );

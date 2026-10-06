@@ -16,10 +16,10 @@ _render_lock = asyncio.Semaphore(int(os.getenv("VIDEO_PARALLEL_RENDERS", "2")))
 _tasks: set[asyncio.Task] = set()
 
 
-def start(project_id: str, script: Script, template_id: str) -> Video:
+def start(project_id: str, script: Script, template_id: str, preview: bool = False) -> Video:
     """Creates the job and runs it in the background; the caller polls GET /videos/{id}."""
     video = Video(id=uuid4().hex[:12], project_id=project_id, script_id=script.id, template=template_id,
-                  created_at=datetime.now(timezone.utc))
+                  preview=preview, created_at=datetime.now(timezone.utc))
     store.save_video(video)
     task = asyncio.create_task(_run(video, script))
     _tasks.add(task)
@@ -41,6 +41,9 @@ async def _run(video: Video, script: Script) -> None:
                 shutil.copyfile(asset, job / asset.name)
         b = spec.Build(public=job)
         props = await spec.build(script, template, b)
+        if video.preview:
+            # Reviewers watch this one; the mark says it is not the version that gets published.
+            props["watermark"] = spec.LABELS[script.target.language]["preview"]
         video.new_images, video.new_clips, video.notes = b.new_images, b.new_clips, b.notes
         (job / "props.json").write_text(json.dumps({"spec": props}, ensure_ascii=False), encoding="utf-8")
 

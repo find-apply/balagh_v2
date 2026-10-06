@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent, MouseEvent, ReactNode } from 'react'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
-import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, VideoTemplate } from '../types'
+import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, Video, VideoTemplate } from '../types'
+import { api, BASE } from '../api'
 import { GROUPS } from '../audiences'
 import { AudienceFields } from './AudienceFields'
 import { StoryView } from './StoryView'
@@ -132,7 +133,42 @@ function LocalizeForm({ script, disabled, onLocalize }: { script: Script; disabl
   )
 }
 
-function Approvals({ script, disabled, onApprove, shareUrl }: { script: Script; disabled: boolean; onApprove?: Handlers['onApprove']; shareUrl: string }) {
+/** The newest finished preview of this version, for the reviewer to watch before signing. */
+function PreviewForReview({ projectId, script, onGo }: { projectId: string; script: Script; onGo?: (part: 'video') => void }) {
+  const [video, setVideo] = useState<Video | null | undefined>(undefined)
+  useEffect(() => {
+    api.videos(projectId, script.id).then(
+      (vs) => setVideo(vs.find((v) => v.status === 'done') ?? null),
+      () => setVideo(null),
+    )
+  }, [projectId, script.id])
+  if (video === undefined) return null
+  if (video === null)
+    return (
+      <div className="notice">
+        <strong>لا معاينة لهذه النسخة بعد.</strong>
+        <p className="small">
+          أنشئ فيديو معاينة بعلامة مائية ليشاهده المراجع قبل أن يوقّع.{' '}
+          {onGo && (
+            <a href="#s-video" onClick={(e) => { e.preventDefault(); onGo('video') }}>
+              إلى تبويب الفيديو ←
+            </a>
+          )}
+        </p>
+      </div>
+    )
+  return (
+    <div className="review-preview">
+      <div className="badges">
+        <span className={video.preview ? 'badge warn' : 'badge ok'}>{video.preview ? 'معاينة بعلامة مائية' : 'فيديو نهائي'}</span>
+        <span className="badge">{Math.round(video.duration_seconds ?? 0)} ث</span>
+      </div>
+      <video controls preload="metadata" src={BASE + video.url} className="player" />
+    </div>
+  )
+}
+
+function Approvals({ projectId, script, disabled, onApprove, shareUrl, onGo }: { projectId: string; script: Script; disabled: boolean; onApprove?: Handlers['onApprove']; shareUrl: string; onGo?: (part: 'video') => void }) {
   const pending = script.required_approvals.filter((r) => !script.approvals.some((a) => a.role === r.role))
   const [name, setName] = useState('')
   const [role, setRole] = useState<ReviewRole | null>(null)
@@ -145,8 +181,10 @@ function Approvals({ script, disabled, onApprove, shareUrl }: { script: Script; 
     <section className="card" id="s-approve">
       <h3>الاعتماد البشري</h3>
       <p className="muted">
-        المراجعة على قدر الخطر: يحدد بلاغ من يلزم اعتماده لهذه النسخة، ولا يُفتح التصدير قبل اكتماله.
+        المراجعة على قدر الخطر: يحدد بلاغ من يلزم اعتماده لهذه النسخة، ولا يُفتح الفيديو النهائي والتصدير قبل اكتماله.
+        المراجع يشاهد المعاينة ثم يوقّع.
       </p>
+      <PreviewForReview projectId={projectId} script={script} onGo={onGo} />
       <ul className="approvals">
         {script.required_approvals.map((r) => {
           const done = script.approvals.find((a) => a.role === r.role)
@@ -242,15 +280,30 @@ function NextStep({ script, disabled, onReview, go }: { script: Script; disabled
         </TabLink>
       </div>
     )
+  if (!script.approved && !script.template)
+    return (
+      <div className="next">
+        <div>
+          <strong>الخطوة التالية: قالب الفيديو ومعاينته</strong>
+          <p className="muted small">اختر قالبا وأنشئ معاينة بعلامة مائية يشاهدها المراجع قبل أن يوقّع.</p>
+        </div>
+        <TabLink to="template" go={go} className="button primary">
+          اختر قالبا
+        </TabLink>
+      </div>
+    )
   if (!script.approved)
     return (
       <div className="next">
         <div>
-          <strong>الخطوة التالية: الاعتماد البشري</strong>
-          <p className="muted small">لا يُفتح التصدير قبل أن يوقّع كل من تتطلبه هذه النسخة.</p>
+          <strong>الخطوة التالية: المعاينة ثم الاعتماد البشري</strong>
+          <p className="muted small">أنشئ معاينة بعلامة مائية، ثم يوقّع كل من تتطلبه هذه النسخة بعد مشاهدتها.</p>
         </div>
+        <TabLink to="video" go={go} className="button">
+          المعاينة
+        </TabLink>
         <TabLink to="approve" go={go} className="button primary">
-          اذهب إلى الاعتماد
+          الاعتماد
         </TabLink>
       </div>
     )
@@ -269,11 +322,11 @@ function NextStep({ script, disabled, onReview, go }: { script: Script; disabled
   return (
     <div className="next ok">
       <div>
-        <strong>النسخة معتمدة وجاهزة للفيديو</strong>
-        <p className="small">أنشئ الفيديو بالقالب المختار، أو صدّر النص، أو وطّنه لجمهور آخر.</p>
+        <strong>النسخة معتمدة: الفيديو النهائي بلا علامة مائية</strong>
+        <p className="small">أنشئ الفيديو النهائي بالقالب المختار، أو صدّر النص، أو وطّنه لجمهور آخر.</p>
       </div>
       <TabLink to="video" go={go} className="button primary">
-        أنشئ الفيديو
+        الفيديو النهائي
       </TabLink>
     </div>
   )
@@ -555,7 +608,17 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
       </div>
 
       <div hidden={tab !== 'approve'}>
-        <Approvals script={script} disabled={disabled} onApprove={actions?.onApprove} shareUrl={shareUrl} />
+        <Approvals
+          projectId={projectId}
+          script={script}
+          disabled={disabled}
+          onApprove={actions?.onApprove}
+          shareUrl={shareUrl}
+          onGo={(part) => {
+            setTab(part)
+            document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
+        />
       </div>
 
       <div id="s-video" hidden={tab !== 'video'}>

@@ -4,7 +4,7 @@ import {loadFont as loadAref} from '@remotion/google-fonts/ArefRuqaa';
 import {loadFont as loadPatrick} from '@remotion/google-fonts/PatrickHand';
 import {currentLine, spokenParts, useDir, useT} from '../core/story';
 import {LangCtx, amiri, cairo, inter, useEn} from '../core/theme';
-import {FPS, SceneAudio, StoryScene, StorySpec} from '../spec';
+import {FPS, SceneAudio, StoryScene, StorySpec, Watermark} from '../spec';
 
 const aref = loadAref('normal', {weights: ['400', '700'], subsets: ['arabic']}).fontFamily;
 const patrick = loadPatrick('normal', {weights: ['400'], subsets: ['latin']}).fontFamily;
@@ -251,6 +251,7 @@ export const Chalk: React.FC<{spec: StorySpec}> = ({spec}) => {
           from += dur;
           return el;
         })}
+        <Watermark text={spec.watermark} wide />
       </AbsoluteFill>
     </LangCtx.Provider>
   );

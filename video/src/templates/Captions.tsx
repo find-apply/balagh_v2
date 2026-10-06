@@ -3,7 +3,7 @@ import {AbsoluteFill, Sequence} from 'remotion';
 import {BG, LangCtx} from '../core/theme';
 import {BigText, CaptionStage, Fill} from '../core/ui';
 import {Visual} from '../core/visuals';
-import {Art, Clips, FPS, OUTRO_SECONDS, VideoSpec} from '../spec';
+import {Art, Clips, FPS, OUTRO_SECONDS, VideoSpec, Watermark} from '../spec';
 
 /** Maps a scene's art onto the animated visuals drawn in core/visuals.tsx. */
 const toVisual = (a: Art): Visual => {
@@ -41,6 +41,7 @@ export const Captions: React.FC<{spec: VideoSpec}> = ({spec}) => {
           </Fill>
         </Sequence>
         <Clips clips={spec.audio} />
+        <Watermark text={spec.watermark} />
       </AbsoluteFill>
     </LangCtx.Provider>
   );

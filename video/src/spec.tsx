@@ -20,6 +20,8 @@ export type Clip = {t0: number; src: string};
 
 export type VideoSpec = {
   lang: 'ar' | 'en';
+  /** Set on a preview rendered before approval: the text of the mark drawn over every frame. */
+  watermark?: string;
   duration: number;
   hook?: string;
   cues: Cue[];
@@ -57,12 +59,13 @@ export type StoryScene = {
   revealAt?: number;
 };
 
-export type StorySpec = {lang: 'ar' | 'en'; title: string; scenes: StoryScene[]};
+export type StorySpec = {lang: 'ar' | 'en'; title: string; scenes: StoryScene[]; watermark?: string};
 
 /** Input of the parents' teaser: shots cut from the story, built by app/video/spec.py. */
 export type TeaserShot = {image: string; duration: number; lines: Line[]};
 export type TeaserSpec = {
   lang: 'ar' | 'en';
+  watermark?: string;
   title: string;
   intro: string;
   lesson: string;
@@ -71,6 +74,30 @@ export type TeaserSpec = {
   cta: string;
   introSeconds: number;
   ctaSeconds: number;
+};
+
+/** Balagh mark plus the preview text, over every frame of a preview render. Sized for 720- and 1280-wide frames. */
+export const Watermark: React.FC<{text?: string; wide?: boolean}> = ({text, wide}) => {
+  if (!text) return null;
+  const s = wide ? 1.1 : 0.95;
+  const logo = (size: number) => (
+    <span style={{display: 'inline-flex', alignItems: 'center', gap: 8 * s}}>
+      <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="16" fill="#0c5a4a" />
+        <text x="32" y="45" fontSize="34" fontWeight="700" textAnchor="middle" fill="#ffffff" fontFamily="Cairo, sans-serif">ب</text>
+      </svg>
+      <span style={{fontFamily: 'Cairo, sans-serif', fontWeight: 800, fontSize: size * 0.62, color: '#ffffff'}}>بلاغ</span>
+    </span>
+  );
+  return (
+    <div style={{position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden'}}>
+      <div style={{position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%) rotate(-24deg)', whiteSpace: 'nowrap', fontFamily: 'Cairo, sans-serif', fontWeight: 800, fontSize: 60 * s, color: 'rgba(255,255,255,0.34)', letterSpacing: 2, textShadow: '0 2px 12px rgba(0,0,0,0.35)', border: `${4 * s}px solid rgba(255,255,255,0.28)`, borderRadius: 18, padding: `${10 * s}px ${34 * s}px`}}>{text}</div>
+      <div style={{position: 'absolute', top: 18 * s, left: 18 * s, display: 'flex', alignItems: 'center', gap: 12 * s, background: 'rgba(0,0,0,0.45)', borderRadius: 999, padding: `${8 * s}px ${16 * s}px ${8 * s}px ${10 * s}px`}}>
+        {logo(36 * s)}
+        <span style={{fontFamily: 'Cairo, sans-serif', fontWeight: 700, fontSize: 20 * s, color: '#ffe27a'}}>{text}</span>
+      </div>
+    </div>
+  );
 };
 
 export const FPS = 30;

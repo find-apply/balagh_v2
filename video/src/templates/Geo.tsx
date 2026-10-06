@@ -1,7 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Sequence, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
 import {amiri, cairo, inter} from '../core/theme';
-import {Clips, OUTRO_SECONDS, VideoSpec} from '../spec';
+import {Clips, OUTRO_SECONDS, VideoSpec, Watermark} from '../spec';
 
 const FPS = 30;
 const GOLD = '#e2bf62', GOLD2 = '#f6e3a6';
@@ -202,6 +202,7 @@ export const Geo: React.FC<{spec: VideoSpec}> = ({spec}) => {
       <Sequence durationInFrames={Math.round(spec.duration * FPS)}><GeoMain s={main} en={en} /></Sequence>
       <Sequence from={Math.round(spec.duration * FPS)} durationInFrames={Math.round(OUTRO_SECONDS * FPS)}><GeoOutro s={{lines: spec.outro}} en={en} /></Sequence>
       <Clips clips={spec.audio} />
+      <Watermark text={spec.watermark} />
     </AbsoluteFill>
   );
 };

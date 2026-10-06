@@ -3148,3 +3148,11 @@ details.small summary {
 .tab {
   flex: 0 0 auto;
 }
+
+.review-preview {
+  margin: 12px 0 18px;
+}
+
+.review-preview .player {
+  max-height: 360px;
+}

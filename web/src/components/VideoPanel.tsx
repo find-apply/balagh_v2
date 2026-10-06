@@ -49,7 +49,9 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
     }
   }
 
-  const blocked = !template ? 'اختر قالبا أولا.' : !script.approved ? 'يُفتح إنشاء الفيديو بعد اعتماد النسخة.' : null
+  const blocked = !template ? 'اختر قالبا أولا.' : null
+  const hasFinal = videos.some((v) => v.status === 'done' && !v.preview)
+  const hasPreview = videos.some((v) => v.status === 'done' && v.preview)
 
   return (
     <section className="card">
@@ -59,24 +61,40 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
         المختار. النصوص الشرعية لا تُقرأ بصوت اصطناعي: القرآن بتلاوة قارئ، والحديث من تسجيل يضعه صانع المحتوى في
         data/recitations، وإلا عُرض بصمت.
       </p>
+      <p className="muted small">
+        {script.approved
+          ? 'النسخة معتمدة: الفيديو النهائي بلا علامة مائية.'
+          : 'قبل الاعتماد يُنشأ فيديو معاينة بعلامة مائية «معاينة · غير معتمد» يشاهده المراجعون؛ بعد الاعتماد يُنشأ الفيديو النهائي بلا علامة، والصوت والصور محفوظة فلا يُدفع ثمنها مرة أخرى.'}
+      </p>
       {error && <div className="notice bad">{error}</div>}
       {blocked ? (
         // Instead of a grey button, the one action that unblocks it.
         <div className="next">
           <div>
             <strong>{blocked}</strong>
-            <p className="muted small">{!template ? 'القالب يحدد شكل الفيديو وما يُولَّد له.' : 'يوقّع كل من تتطلبه هذه النسخة بالاسم، ثم يُفتح الإنشاء.'}</p>
+            <p className="muted small">القالب يحدد شكل الفيديو وما يُولَّد له.</p>
           </div>
           {onGo && (
-            <button className="primary" disabled={disabled} onClick={() => onGo(!template ? 'template' : 'approve')}>
-              {!template ? 'اختر قالبا' : 'اذهب إلى الاعتماد'}
+            <button className="primary" disabled={disabled} onClick={() => onGo('template')}>
+              اختر قالبا
             </button>
           )}
         </div>
       ) : (
-        <button className="primary" disabled={disabled || starting || running} onClick={start}>
-          {running ? 'يُنشأ الفيديو…' : `أنشئ الفيديو بقالب «${template!.name}»`}
-        </button>
+        <div className="actions">
+          <button className="primary" disabled={disabled || starting || running} onClick={start}>
+            {running
+              ? 'يُنشأ الفيديو…'
+              : script.approved
+                ? `${hasFinal ? 'أعد إنشاء' : 'أنشئ'} الفيديو النهائي بقالب «${template!.name}»`
+                : `${hasPreview ? 'أعد إنشاء' : 'أنشئ'} معاينة بقالب «${template!.name}»`}
+          </button>
+          {!script.approved && hasPreview && onGo && (
+            <button disabled={disabled} onClick={() => onGo('approve')}>
+              المعاينة جاهزة: اذهب إلى الاعتماد
+            </button>
+          )}
+        </div>
       )}
       {videos.length > 0 && (
         <ul className="plain videos">
@@ -86,6 +104,7 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
                 <span className={`badge ${v.status === 'done' ? 'ok' : v.status === 'failed' ? 'bad' : 'info'}`}>
                   {VIDEO_STATUS[v.status]}
                 </span>
+                <span className={v.preview ? 'badge warn' : 'badge ok'}>{v.preview ? 'معاينة بعلامة مائية' : 'نهائي'}</span>
                 <span className="badge">{templates?.find((t) => t.id === v.template)?.name ?? v.template}</span>
                 {v.duration_seconds != null && <span className="badge">{Math.round(v.duration_seconds)} ث</span>}
                 {v.status === 'done' && (

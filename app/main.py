@@ -271,16 +271,15 @@ async def rewrite_story(project_id: str, script_id: str, body: StoryIn) -> Scrip
 
 @app.post("/projects/{project_id}/scripts/{script_id}/videos", response_model=Video, status_code=202)
 async def create_video(project_id: str, script_id: str, body: VideoIn) -> Video:
-    """Step 7: render the approved script as a video with the given template. Runs in the background:
-    poll GET /videos/{id} until status is done or failed."""
+    """Step 7: render the script as a video with the given template. Before the version is approved the
+    video is a watermarked preview for the reviewers to watch; once approved, the final video has no
+    watermark. Runs in the background: poll GET /videos/{id} until status is done or failed."""
     project = _get_project(project_id)
     script = _get_script(project, script_id)
     _check_template(body.template)
-    if not script.approved:
-        raise HTTPException(status_code=409, detail="التصدير مقفل: يلزم اعتماد هذه النسخة أولا.")
     if catalog.is_story(body.template) and script.story is None:
-        raise HTTPException(status_code=409, detail="اختر هذا القالب أولا حتى تُكتب القصة، ثم اعتمدها.")
-    return render.start(project_id, script, body.template)
+        raise HTTPException(status_code=409, detail="اختر هذا القالب أولا حتى تُكتب القصة.")
+    return render.start(project_id, script, body.template, preview=not script.approved)
 
 
 @app.get("/projects/{project_id}/scripts/{script_id}/videos", response_model=list[Video])

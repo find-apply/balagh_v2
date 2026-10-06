@@ -506,6 +506,7 @@ class Video(BaseModel):
     project_id: str
     script_id: str
     template: str
+    preview: bool = Field(default=False, description="Rendered before approval, with a watermark; the final video has none.")
     status: VideoStatus = VideoStatus.queued
     url: Optional[str] = Field(default=None, description="Path of the MP4 under the API, once done.")
     error: Optional[str] = None

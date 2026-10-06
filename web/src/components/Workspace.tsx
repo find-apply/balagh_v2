@@ -10,7 +10,7 @@ import { go, projectHash } from '../route'
 import type { Busy } from '../tasks'
 import type { Idea, LocalizeRequest, Project, ReviewRole, VideoTemplate } from '../types'
 
-const STEPS = ['الموجز', 'الأفكار', 'السيناريو', 'القالب', 'المراجعة', 'الاعتماد', 'الفيديو']
+const STEPS = ['الموجز', 'الأفكار', 'السيناريو', 'القالب', 'المعاينة', 'المراجعة', 'الاعتماد', 'النهائي']
 
 function Stepper({ current }: { current: number }) {
   return (
@@ -81,14 +81,18 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
     tabsRef.current?.querySelector('.tab.on')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
   }, [scriptId])
   // Whether the open version already has a finished video: the last step is done then.
-  const [videoOf, setVideoOf] = useState<string | null>(null)
+  // Which finished videos the open version has: a watermarked preview (before approval) and the final one.
+  const [videosOf, setVideosOf] = useState<{ id: string; preview: boolean; final: boolean } | null>(null)
   useEffect(() => {
-    if (!active?.approved) return
+    if (!active?.template) return
     const id = active.id
-    api.videos(project.id, id).then((vs) => vs.some((v) => v.status === 'done') && setVideoOf(id), () => {})
-  }, [project.id, active?.id, active?.approved])
-  const hasVideo = active !== null && videoOf === active.id
-  const step = pending && writing ? 2 : !active ? 1 : !active.template ? 3 : !active.review ? 4 : !active.approved ? 5 : hasVideo ? 7 : 6
+    api.videos(project.id, id).then(
+      (vs) => setVideosOf({ id, preview: vs.some((v) => v.status === 'done' && v.preview), final: vs.some((v) => v.status === 'done' && !v.preview) }),
+      () => {},
+    )
+  }, [project.id, active?.id, active?.template, active?.approved])
+  const vids = active && videosOf?.id === active.id ? videosOf : null
+  const step = pending && writing ? 2 : !active ? 1 : !active.template ? 3 : !vids?.preview && !vids?.final ? 4 : !active.review ? 5 : !active.approved ? 6 : vids?.final ? 8 : 7
   const brief = project.brief
 
   return (

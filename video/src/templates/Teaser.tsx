@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame} from 'remotion';
 import {WHO, spokenParts, useDir, useT} from '../core/story';
 import {LangCtx, amiri, cairo, inter, useEn} from '../core/theme';
-import {FPS, SceneAudio, TeaserShot, TeaserSpec} from '../spec';
+import {FPS, SceneAudio, TeaserShot, TeaserSpec, Watermark} from '../spec';
 
 // The parents' teaser: vertical, 20-30 s, cut from the children's story. Same palette as the Kids template.
 const C = {teal: '#1f9d8a', tealDark: '#14705f', yellow: '#ffd84d', ink: '#26343b', cream: '#fff7ea'};
@@ -99,6 +99,7 @@ export const Teaser: React.FC<{spec: TeaserSpec}> = ({spec}) => {
         {seq(spec.introSeconds, <Intro spec={spec} />, 'intro')}
         {spec.shots.map((s, i) => seq(s.duration, <><Shot shot={s} label={i === spec.shots.length - 1 ? spec.lesson : undefined} /><SceneAudio s={{id: `t${i}`, type: 'story', duration: s.duration, lines: s.lines}} /></>, `shot${i}`))}
         {seq(spec.ctaSeconds, <Cta spec={spec} />, 'cta')}
+        <Watermark text={spec.watermark}  />
       </AbsoluteFill>
     </LangCtx.Provider>
   );
