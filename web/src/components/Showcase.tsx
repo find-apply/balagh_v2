@@ -48,7 +48,14 @@ interface Example {
   timeline: string[]
 }
 
-const data = raw as { examples: Example[] }
+interface Guard {
+  title: string
+  input: string
+  outcome: 'referred' | 'unverified'
+  text: string
+}
+
+const data = raw as { examples: Example[]; guards: Guard[] }
 
 function Brief({ b }: { b: Example['brief'] }) {
   return (
@@ -343,7 +350,7 @@ export function Showcase({ onStart }: { onStart: () => void }) {
 
             <div className="card">
               <h3>4. السيناريو</h3>
-              <Script s={ex.first} label={ex.story ? 'النسخة الأولى' : 'النسخة العربية الأصلية'} />
+              <Script s={ex.first} label={ex.final.id === ex.first.id ? 'السيناريو' : ex.story ? 'النسخة الأولى' : 'النسخة العربية الأصلية'} />
               <h4>ما وجده المراجعون في هذه النسخة</h4>
               <Review s={ex.first} />
               {ex.story && (
@@ -353,11 +360,11 @@ export function Showcase({ onStart }: { onStart: () => void }) {
                   <Review s={ex.final} />
                 </>
               )}
-              {!ex.story && (
+              {!ex.story && ex.final.id !== ex.first.id && (
                 <>
-                  <h4>النسخة الموطّنة للإنجليزية</h4>
-                  <Script s={ex.final} label="Localized" />
-                  <h4>ما وجده المراجعون في النسخة الموطّنة</h4>
+                  <h4>{ex.id === 'adults' ? 'النسخة الموطّنة للإنجليزية' : 'النسخة المصحّحة المعتمدة'}</h4>
+                  <Script s={ex.final} label={ex.id === 'adults' ? 'Localized' : 'بعد التصحيح'} />
+                  <h4>ما وجده المراجعون فيها</h4>
                   <Review s={ex.final} />
                 </>
               )}
@@ -373,6 +380,29 @@ export function Showcase({ onStart }: { onStart: () => void }) {
           </div>
         </section>
       ))}
+
+      <section className="section alt" id="guards">
+        <div className="section-inner">
+          <span className="eyebrow">ما يرفضه بلاغ</span>
+          <h2>طلبان لم يُولَّد لهما ما طُلب</h2>
+          <div className="show-grid">
+            {data.guards.map((g) => (
+              <div className="card" key={g.title}>
+                <h3>{g.title}</h3>
+                <p className="muted small">ما طُلب</p>
+                <p dir="auto">
+                  <strong>{g.input}</strong>
+                </p>
+                <p className="muted small">ما حدث</p>
+                <div className={g.outcome === 'referred' ? 'notice referral' : 'notice warn'} dir="auto">
+                  <strong>{g.outcome === 'referred' ? 'أُحيل إلى مختص، ولم يُولَّد محتوى' : 'عُلِّم غير موثّق ولم يُستعمل'}</strong>
+                  <p>{g.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="cta-band">
         <div className="section-inner">

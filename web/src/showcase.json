@@ -759,6 +759,318 @@
     "تصحيح في نسخة جديدة، مراجعة ثانية بلا ملاحظات، اعتماد",
     "فيديوهان عموديان: الترجمة المتحركة والزخرفة الهندسية، بتلاوة حقيقية للآية"
    ]
+  },
+  {
+   "id": "english",
+   "title": "بالإنجليزية لشباب يتعرفون على الإسلام: Why does God allow hardship?",
+   "project": "6daf2c87dc3d425d9c137890445c924d",
+   "script": "3c5adc9e",
+   "brief": {
+    "idea": "Why does God allow hardship? Hope for anyone going through a hard time",
+    "audience": "Young people in the UK exploring Islam",
+    "language": "en",
+    "knowledge": "new",
+    "tone": null,
+    "platforms": [
+     "instagram_reels",
+     "tiktok"
+    ],
+    "duration": 30
+   },
+   "ideas": [
+    {
+     "title": "The Spiritual Workout",
+     "hook": "Why would a loving God let you struggle? Think of it like going to the gym.",
+     "evidence": [
+      "صحيح البخاري، حديث رقم 7466",
+      "صحيح البخاري، حديث رقم 5644"
+     ]
+    },
+    {
+     "title": "The Missing Pixel",
+     "hook": "Have you ever missed a train, felt completely ruined, and then realized it saved you from a disaster?",
+     "evidence": [
+      "سورة البقرة، الآية 216"
+     ]
+    },
+    {
+     "title": "The Greatest Were Tested",
+     "hook": "If being a good person meant life would be easy, then the Prophets would have had zero problems.",
+     "evidence": []
+    }
+   ],
+   "chosen": 2,
+   "first": {
+    "id": "3c5adc9e",
+    "title": "The Missing Pixel",
+    "hook": "Ever felt completely ruined after missing an opportunity?",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-4",
+      "voiceover": "Ever felt completely ruined after missing an opportunity?",
+      "screen": "Ever felt ruined?"
+     },
+     {
+      "t": "4-9",
+      "voiceover": "We only see one pixel. The Creator sees the entire picture.",
+      "screen": "The Creator sees the entire picture."
+     },
+     {
+      "t": "9-26",
+      "voiceover": "The Quran reminds us: «Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.»",
+      "screen": "But perhaps you hate a thing and it is good for you..."
+     },
+     {
+      "t": "26-30",
+      "voiceover": "That painful loss could actually be your ultimate protection.",
+      "screen": "Your ultimate protection."
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة البقرة، الآية 216",
+      "usage": "quoted",
+      "text": "Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.",
+      "sharh": null,
+      "tafsir": [
+       "فرض الله عليكم -أيها المؤمنون- قتال الكفار، والقتال مكروه لكم من جهة الطبع; لمشقته وكثرة مخاطره، وقد تكرهون شيئًا وهو في حقيقته خير لكم، وقد تحبون شيئًا لما فيه من الراحة أو اللذة العاجلة، وهو شر لكم. والله تعالى يعلم ما هو خير لكم، وأنتم لا تعلمون ذلك. فبادروا إلى الجهاد في سبيله."
+      ]
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "Reflect on a past hardship that turned out to be a hidden blessing, and trust the bigger picture."
+   },
+   "final": {
+    "id": "3c5adc9e",
+    "title": "The Missing Pixel",
+    "hook": "Ever felt completely ruined after missing an opportunity?",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-4",
+      "voiceover": "Ever felt completely ruined after missing an opportunity?",
+      "screen": "Ever felt ruined?"
+     },
+     {
+      "t": "4-9",
+      "voiceover": "We only see one pixel. The Creator sees the entire picture.",
+      "screen": "The Creator sees the entire picture."
+     },
+     {
+      "t": "9-26",
+      "voiceover": "The Quran reminds us: «Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.»",
+      "screen": "But perhaps you hate a thing and it is good for you..."
+     },
+     {
+      "t": "26-30",
+      "voiceover": "That painful loss could actually be your ultimate protection.",
+      "screen": "Your ultimate protection."
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة البقرة، الآية 216",
+      "usage": "quoted",
+      "text": "Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.",
+      "sharh": null,
+      "tafsir": [
+       "فرض الله عليكم -أيها المؤمنون- قتال الكفار، والقتال مكروه لكم من جهة الطبع; لمشقته وكثرة مخاطره، وقد تكرهون شيئًا وهو في حقيقته خير لكم، وقد تحبون شيئًا لما فيه من الراحة أو اللذة العاجلة، وهو شر لكم. والله تعالى يعلم ما هو خير لكم، وأنتم لا تعلمون ذلك. فبادروا إلى الجهاد في سبيله."
+      ]
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "Reflect on a past hardship that turned out to be a hidden blessing, and trust the bigger picture."
+   },
+   "story": null,
+   "videos": [
+    {
+     "template": "الترجمة المتحركة",
+     "id": "captions",
+     "url": "/media/videos/e5f5bde9e559.mp4",
+     "seconds": 49.28,
+     "images": 0,
+     "clips": 4,
+     "notes": [],
+     "aspect": "9:16",
+     "example": "بالإنجليزية لمن يتعرف على الإسلام"
+    }
+   ],
+   "timeline": [
+    "طلب بالإنجليزية: شباب في بريطانيا يتعرفون على الإسلام، معرفة = جديد، Reels وTikTok، 30 ث",
+    "ثلاث أفكار؛ الثالثة طلبت حديث «أشد الناس بلاء الأنبياء» فلم يوجد في الصحيحين فعُلِّم غير موثّق ولم يُستعمل",
+    "الفكرة الثانية: آية البقرة 216 بترجمة Saheeh International المعتمدة، لا ترجمة النموذج",
+    "السيناريو يبدأ من سؤال يطرحه هذا الجمهور («Ever felt ruined after missing an opportunity?») ويقدّم المصطلح بعد المعنى",
+    "المراجعة بلا ملاحظات، اعتماد، ريلز بالترجمة المتحركة بالرسوم الجديدة (عاصفة، آية، قفل)"
+   ]
+  },
+  {
+   "id": "darija",
+   "title": "بالدارجة الجزائرية لعامة الناس: الصدق في البيع والشراء",
+   "project": "57c5349aec674d3183ac9bcff76eee26",
+   "script": "2eb2c429",
+   "brief": {
+    "idea": "الصدق في البيع والشراء",
+    "audience": "عامة الناس، الجزائر",
+    "language": "ar",
+    "knowledge": "familiar",
+    "tone": "خفيف وقريب",
+    "platforms": [
+     "tiktok",
+     "facebook_reels"
+    ],
+    "duration": 30
+   },
+   "ideas": [
+    {
+     "title": "القفازة ولا البركة؟",
+     "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+     "evidence": [
+      "صحيح البخاري، حديث رقم 2110",
+      "صحيح البخاري، حديث رقم 2082"
+     ]
+    },
+    {
+     "title": "قصة صبرة الطعام",
+     "hook": "تخيل لوكان رسول الله ﷺ يجي يفيريفي السلعة ديالك في المارشي.. واش راح يلقى؟",
+     "evidence": [
+      "صحيح مسلم، حديث رقم 102",
+      "صحيح مسلم، حديث رقم 101"
+     ]
+    },
+    {
+     "title": "بيع حلال في واد كنيس",
+     "hook": "رايح تبيع تليفونك ولا الميكرو ديالك في واد كنيس؟ أرواح نعطيلك 3 خطوات باش دراهمك يكونو حلال.",
+     "evidence": [
+      "سورة النساء، الآية 29"
+     ]
+    }
+   ],
+   "chosen": 1,
+   "first": {
+    "id": "2eb2c429",
+    "title": "القفازة ولا البركة؟",
+    "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+      "screen": "حاسب روحك قافز؟"
+     },
+     {
+      "t": "6-13",
+      "voiceover": "ضربت ضربتك ودخلت دراهم؟ بصح علابالك بلي هاد التخمام هو لي يطير البركة؟ الغشة عمرها ما كانت شطارة.",
+      "screen": "الغشة ماشي شطارة"
+     },
+     {
+      "t": "13-23",
+      "voiceover": "النبي ﷺ قالنا على البيع والشراء: «فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا».",
+      "screen": "فإن صدقا وبينا بورك لهما"
+     },
+     {
+      "t": "23-30",
+      "voiceover": "الصدق يجيب البركة، بيع بالنية وقول الصراحة وربي يخلف. ابعت الفيديو لصاحبك لي راه باغي يبيع.",
+      "screen": "بيع بالنية وربي يخلف"
+     }
+    ],
+    "references": [
+     {
+      "source": "صحيح البخاري، حديث رقم 2110",
+      "usage": "quoted",
+      "text": "فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا",
+      "sharh": null,
+      "tafsir": []
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "ابعت الفيديو لصاحبك لي راه باغي يبيع."
+   },
+   "final": {
+    "id": "2eb2c429",
+    "title": "القفازة ولا البركة؟",
+    "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+      "screen": "حاسب روحك قافز؟"
+     },
+     {
+      "t": "6-13",
+      "voiceover": "ضربت ضربتك ودخلت دراهم؟ بصح علابالك بلي هاد التخمام هو لي يطير البركة؟ الغشة عمرها ما كانت شطارة.",
+      "screen": "الغشة ماشي شطارة"
+     },
+     {
+      "t": "13-23",
+      "voiceover": "النبي ﷺ قالنا على البيع والشراء: «فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا».",
+      "screen": "فإن صدقا وبينا بورك لهما"
+     },
+     {
+      "t": "23-30",
+      "voiceover": "الصدق يجيب البركة، بيع بالنية وقول الصراحة وربي يخلف. ابعت الفيديو لصاحبك لي راه باغي يبيع.",
+      "screen": "بيع بالنية وربي يخلف"
+     }
+    ],
+    "references": [
+     {
+      "source": "صحيح البخاري، حديث رقم 2110",
+      "usage": "quoted",
+      "text": "فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا",
+      "sharh": null,
+      "tafsir": []
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "ابعت الفيديو لصاحبك لي راه باغي يبيع."
+   },
+   "story": null,
+   "videos": [
+    {
+     "template": "الزخرفة الهندسية",
+     "id": "geo",
+     "url": "/media/videos/a4102bd55a12.mp4",
+     "seconds": 41.49,
+     "images": 0,
+     "clips": 3,
+     "notes": [],
+     "aspect": "9:16",
+     "example": "بالدارجة الجزائرية: الصدق في البيع"
+    }
+   ],
+   "timeline": [
+    "طلب: الصدق في البيع والشراء، عامة الناس في الجزائر، الدارجة الجزائرية، أسلوب خفيف وقريب، TikTok وFacebook، 30 ث",
+    "الأفكار بالدارجة فعلا: «الطوموبيل»، «واد كنيس»، «الديفو»؛ لكل فكرة حديثان من الصحيحين",
+    "السيناريو بالدارجة، والحديث نفسه بالفصحى حرفيا من صحيح البخاري (2110) لا يُترجم ولا يُدرّج",
+    "المراجعة بلا ملاحظات، اعتماد، ريلز بالزخرفة الهندسية. الحديث معروض بصمت حتى يوضع تسجيل قارئ"
+   ]
+  }
+ ],
+ "guards": [
+  {
+   "title": "سؤال فتوى شخصية",
+   "input": "طلقت زوجتي ثلاثا وأنا غاضب في مجلس واحد، هل وقع الطلاق؟",
+   "outcome": "referred",
+   "text": "هذا السؤال يتعلق بحالة شخصية محددة تتطلب فتوى خاصة ومراعاة لظروف لا يمكن الإحاطة بها هنا، ولذلك ننصحك بالرجوع إلى عالم مؤهل أو دار إفتاء معتمدة للاستماع إلى التفاصيل كاملة وإعطاء الحكم الشرعي المناسب. يمكننا مساعدتك بدلا من ذلك في التخطيط لفيديو تعليمي عام حول مكانة الأسرة وأهمية حفظ اللسان في الإسلام."
+  },
+  {
+   "title": "حديث خارج المصادر الموثّقة",
+   "input": "فكرة طلبت حديث «أشد الناس بلاء الأنبياء ثم الأمثل فالأمثل» (مشروع الإنجليزية)",
+   "outcome": "unverified",
+   "text": "لم يوجد في صحيحي البخاري ومسلم، فعُلِّم «غير موثّق» ولم يدخل قائمة الأدلة، وكُتبت الفكرة بما وُجد. الحديث صحيح عند غيرهما (الترمذي)، لكن بلاغ لا يستعمل ما لا يستطيع التحقق منه."
   }
  ]
 }
