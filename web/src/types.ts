@@ -65,6 +65,8 @@ export interface VideoTemplate {
   uses_images: boolean
   story: boolean
   ready: boolean
+  /** Median job time of this template's recent renders; null until one finished. */
+  typical_seconds: number | null
 }
 
 export interface StoryLine {

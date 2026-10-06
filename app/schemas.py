@@ -446,6 +446,8 @@ class VideoTemplate(BaseModel):
     uses_images: bool = Field(description="Whether scenes may use generated still photos.")
     story: bool = Field(description="True for templates that play a children's dialogue story written from the script.")
     ready: bool = Field(description="False while the template cannot be chosen yet.")
+    typical_seconds: Optional[float] = Field(
+        default=None, description="Median wall time of this template's recent renders, for the waiting screen; null until one finished.")
 
 
 # ---- Story (children's templates) ----
@@ -535,6 +537,7 @@ class Video(BaseModel):
     new_clips: int = Field(default=0, description="Speech clips synthesized (and paid for) for this video.")
     notes: list[str] = Field(default_factory=list, description="What the render could not do as intended, e.g. a hadith shown without a recording.")
     created_at: datetime
+    render_seconds: Optional[float] = Field(default=None, description="Wall time of the whole job, once it ended.")
 
 
 Script.model_rebuild()

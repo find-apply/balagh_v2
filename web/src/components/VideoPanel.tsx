@@ -15,6 +15,42 @@ interface Props {
 
 const ACTIVE = new Set(['queued', 'voicing', 'imaging', 'rendering'])
 
+/** "نحو 4 دقائق" from seconds, rounded up to a half minute so the promise is rarely broken. */
+function minutes(seconds: number): string {
+  const m = Math.ceil(seconds / 30) / 2
+  return m < 1 ? 'أقل من دقيقة' : m === 1 ? 'نحو دقيقة' : `نحو ${m} ${m <= 10 ? 'دقائق' : 'دقيقة'}`
+}
+
+/** The waiting line of a running job: time elapsed against what this template usually takes. */
+function Waiting({ video, template }: { video: Video; template: VideoTemplate | undefined }) {
+  const since = () => Math.max(0, (Date.now() - new Date(video.created_at).getTime()) / 1000)
+  const [elapsed, setElapsed] = useState(since)
+  useEffect(() => {
+    const timer = setInterval(() => setElapsed(since()), 1000)
+    return () => clearInterval(timer)
+    // `since` closes over nothing but the prop; the ticker only needs to restart for a new job.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video.created_at])
+  const typical = template?.typical_seconds ?? null
+  const share = typical ? Math.min(0.95, elapsed / typical) : null
+  const mm = String(Math.floor(elapsed / 60))
+  const ss = String(Math.floor(elapsed % 60)).padStart(2, '0')
+  return (
+    <div className="waiting">
+      <div className="waiting-bar" aria-hidden="true">
+        <span style={{ width: `${Math.round((share ?? 0.1) * 100)}%` }} className={share == null ? 'pulse' : ''} />
+      </div>
+      <p className="muted small">
+        مضى <span dir="ltr">{mm}:{ss}</span>
+        {typical
+          ? ` · هذا القالب يستغرق عادة ${minutes(typical)}${elapsed > typical * 1.3 ? '، وهذا يطول أكثر من المعتاد: الخادم يصيّر فيديو آخر على الأرجح' : ''}`
+          : ' · يستغرق الفيديو عادة بين 3 و8 دقائق'}
+        . يمكنك متابعة العمل في الصفحة، أو تركها: الفيديو يُحفظ هنا.
+      </p>
+    </div>
+  )
+}
+
 /** Renders the approved script with its template and follows the job until the MP4 is ready. */
 export function VideoPanel({ projectId, script, template, templates, disabled, onGo }: Props) {
   const [videos, setVideos] = useState<Video[]>([])
@@ -113,9 +149,7 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
                   </span>
                 )}
               </div>
-              {ACTIVE.has(v.status) && (
-                <p className="muted small">يستغرق إنشاء الفيديو عادة بين 3 و8 دقائق. يمكنك متابعة العمل في الصفحة.</p>
-              )}
+              {ACTIVE.has(v.status) && <Waiting video={v} template={templates?.find((t) => t.id === v.template)} />}
               {v.error && <p className="muted small">{v.error}</p>}
               {v.notes.map((n) => (
                 <p className="muted small" key={n}>

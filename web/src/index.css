@@ -3239,3 +3239,34 @@ button.big {
 .rv-decision:focus-within ~ .rv-jump {
   display: none;
 }
+
+.waiting {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.waiting-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.waiting-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--brand);
+  transition: width 1s linear;
+}
+
+.waiting-bar .pulse {
+  animation: waiting-pulse 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes waiting-pulse {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}

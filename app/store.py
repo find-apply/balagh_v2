@@ -1,5 +1,6 @@
 """Project storage. SQLite file by default; set DATABASE_URL to a Postgres URL for hosts with an ephemeral disk."""
 import json
+import statistics
 import os
 from pathlib import Path
 from datetime import datetime, timezone
@@ -147,6 +148,18 @@ def videos_for(script_id: str) -> list[Video]:
     with engine.connect() as conn:
         rows = conn.execute(select(videos.c.data).where(videos.c.script_id == script_id)).all()
     return sorted((Video.model_validate_json(r[0]) for r in rows), key=lambda v: v.created_at, reverse=True)
+
+
+def typical_render_seconds() -> dict[str, float]:
+    """Median job time per template over the last finished renders, for the waiting screen."""
+    with engine.connect() as conn:
+        rows = conn.execute(select(videos.c.data)).all()
+    times: dict[str, list[float]] = {}
+    for (data,) in rows:
+        video = Video.model_validate_json(data)
+        if video.status == VideoStatus.done and video.render_seconds:
+            times.setdefault(video.template, []).append(video.render_seconds)
+    return {t: statistics.median(sorted(s)[-10:]) for t, s in times.items()}
 
 
 def fail_unfinished_videos(reason: str) -> None:

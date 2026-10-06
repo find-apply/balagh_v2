@@ -58,6 +58,7 @@ async def _run(video: Video, script: Script) -> None:
     except Exception as e:  # the job must always end in a stored status
         video.status, video.error = VideoStatus.failed, str(e)[:500]
     finally:
+        video.render_seconds = round((datetime.now(timezone.utc) - video.created_at).total_seconds(), 1)
         store.save_video(video)
         shutil.rmtree(job, ignore_errors=True)
 

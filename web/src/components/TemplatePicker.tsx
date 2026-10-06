@@ -32,6 +32,9 @@ export function TemplatePicker({ templates, chosen, disabled, onPick }: Props) {
                 </span>
                 <span className="badge">{t.uses_images ? 'رسوم وصور' : 'رسوم فقط'}</span>
                 {t.story && <span className="badge info">للأطفال</span>}
+                {t.typical_seconds != null && (
+                  <span className="badge">{`التصيير ${Math.ceil(t.typical_seconds / 60)} د تقريبا`}</span>
+                )}
                 {!t.ready && <span className="badge warn">قريبا</span>}
                 {t.id === chosen && <span className="badge ok">القالب المختار</span>}
               </div>

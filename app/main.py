@@ -68,6 +68,12 @@ async def generation_failed_handler(request: Request, exc: RuntimeError):
 
 @app.exception_handler(genai_errors.APIError)
 async def model_api_handler(request: Request, exc: genai_errors.APIError):
+    if "spending cap" in (exc.message or ""):
+        # The platform's own budget, not the user's request: say so instead of asking them to retry.
+        logger.error("model spending cap reached: %s", exc.message)
+        return JSONResponse(status_code=503, content={
+            "detail": "توقف التوليد مؤقتا: بلغ حساب المنصة سقف إنفاقه الشهري لدى مزوّد النموذج. المشرف يرى هذا في سجل التشغيل ويرفعه؛ لا علاقة لطلبك بذلك، وسيعمل عند رفعه.",
+        })
     logger.warning("model API error %s: %s", exc.code, exc.message)
     if exc.code in (429, 503):
         return JSONResponse(status_code=429, content={
@@ -122,7 +128,8 @@ async def root() -> RedirectResponse:
 @app.get("/video/templates", response_model=list[VideoTemplate])
 async def list_templates() -> list[dict]:
     """The video template library. A template is chosen for a script once it is written."""
-    return catalog.TEMPLATES
+    typical = store.typical_render_seconds()
+    return [{**t, "typical_seconds": typical.get(t["id"])} for t in catalog.TEMPLATES]
 
 
 @app.post("/projects", response_model=Project, status_code=201, dependencies=[Depends(generation_open)])
