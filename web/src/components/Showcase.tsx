@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { BASE } from '../api'
 import raw from '../showcase.json'
 import { CHARACTERS, CLAIMS, KNOWLEDGE, LANGUAGES, PLATFORMS, REVIEWERS, STORY_SCENES } from '../labels'
@@ -43,7 +44,7 @@ interface Example {
   first: ShowScript
   final: ShowScript
   story: ShowStory | null
-  videos: { template: string; id: string; url: string; seconds: number; images: number; clips: number; notes: string[] }[]
+  videos: { template: string; id: string; url: string; seconds: number; images: number; clips: number; notes: string[]; aspect: string; example: string }[]
   timeline: string[]
 }
 
@@ -220,7 +221,37 @@ function Story({ story }: { story: ShowStory }) {
   )
 }
 
+/** All the videos in one swipeable strip, like a reels feed: scroll-snap on touch, arrows on desktop. */
+function ReelStrip({ videos }: { videos: Example['videos'] }) {
+  const strip = useRef<HTMLDivElement>(null)
+  const step = (dir: number) => strip.current?.scrollBy({ left: dir * (strip.current.clientWidth * 0.8), behavior: 'smooth' })
+  return (
+    <div className="reels">
+      <button className="reels-arrow prev" aria-label="السابق" onClick={() => step(1)}>
+        ‹
+      </button>
+      <div className="reels-strip" ref={strip}>
+        {videos.map((v) => (
+          <figure key={v.url} className={v.aspect === '9:16' ? 'reel tall' : 'reel wide'}>
+            <video controls preload="metadata" src={BASE + v.url} playsInline />
+            <figcaption>
+              <strong>{v.template}</strong> · {Math.round(v.seconds)} ث
+              <span className="muted small" dir="auto">
+                {v.example}
+              </span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <button className="reels-arrow next" aria-label="التالي" onClick={() => step(-1)}>
+        ›
+      </button>
+    </div>
+  )
+}
+
 export function Showcase({ onStart }: { onStart: () => void }) {
+  const videos = data.examples.flatMap((e) => e.videos)
   return (
     <div className="landing showcase">
       <header className="topbar">
@@ -249,8 +280,19 @@ export function Showcase({ onStart }: { onStart: () => void }) {
         </div>
       </section>
 
+      <section className="section alt" id="reels">
+        <div className="section-inner">
+          <span className="eyebrow">الفيديوهات</span>
+          <h2>كما خرجت من بلاغ، بلا مونتاج</h2>
+          <p className="muted small">
+            اسحب أو استعمل الأسهم. الصوت مولَّد للحوار والشرح؛ الآية بتلاوة قارئ، والحديث يُعرض بصمت حتى يوضع تسجيل قارئ.
+          </p>
+          <ReelStrip videos={videos} />
+        </div>
+      </section>
+
       {data.examples.map((ex) => (
-        <section className="section alt show-example" key={ex.id} id={ex.id}>
+        <section className="section show-example" key={ex.id} id={ex.id}>
           <div className="section-inner">
             <h2 dir="auto">{ex.title}</h2>
             <div className="show-grid">
@@ -322,28 +364,6 @@ export function Showcase({ onStart }: { onStart: () => void }) {
               </div>
             )}
 
-            {ex.videos.length > 0 && (
-              <div className="card">
-                <h3>6. الفيديو كما خرج</h3>
-                <p className="muted small">
-                  الصوت مولَّد للحوار والشرح، والصور مولَّدة برسوم مرجعية ثابتة للشخصيات، والحديث يُعرض بصمت حتى يوضع تسجيل قارئ.
-                </p>
-                <div className="show-videos">
-                  {ex.videos.map((v) => (
-                    <figure key={v.id} className={v.id === 'teaser' ? 'tall' : ''}>
-                      <video controls preload="metadata" src={BASE + v.url} />
-                      <figcaption>
-                        <strong>{v.template}</strong> · {Math.round(v.seconds)} ث
-                        <span className="muted small">
-                          {' '}
-                          · {v.clips} مقطع صوتي و{v.images} صورة جديدة لهذا التصيير
-                        </span>
-                      </figcaption>
-                    </figure>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </section>
       ))}

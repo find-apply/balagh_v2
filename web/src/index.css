@@ -2988,3 +2988,98 @@ details.small summary {
 .show-videos figcaption {
   margin-top: 8px;
 }
+
+/* Reels strip */
+.reels {
+  position: relative;
+  margin-top: 20px;
+}
+
+.reels-strip {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 4px 4px 12px;
+  scrollbar-width: thin;
+}
+
+.reel {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  margin: 0;
+}
+
+.reel video {
+  display: block;
+  border-radius: 14px;
+  background: #000;
+  height: 520px;
+}
+
+.reel.tall video {
+  width: 292px;
+}
+
+.reel.wide video {
+  width: 460px;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  align-self: center;
+}
+
+.reel.wide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 520px;
+}
+
+.reel figcaption {
+  margin-top: 8px;
+  max-width: 460px;
+}
+
+.reel figcaption .small {
+  display: block;
+}
+
+.reels-arrow {
+  position: absolute;
+  top: 240px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.reels-arrow.prev {
+  inset-inline-start: -8px;
+}
+
+.reels-arrow.next {
+  inset-inline-end: -8px;
+}
+
+@media (max-width: 720px) {
+  .reel video {
+    height: 70vh;
+  }
+
+  .reel.tall video {
+    width: calc(70vh * 9 / 16);
+  }
+
+  .reel.wide video {
+    width: 86vw;
+  }
+
+  .reels-arrow {
+    display: none;
+  }
+}
