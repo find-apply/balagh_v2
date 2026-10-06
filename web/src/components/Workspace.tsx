@@ -218,29 +218,6 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
         </label>
       )}
 
-      {active && actions && (() => {
-        const next = nextStep(active)
-        const prev = Number(selected) - 1
-        const run = () => {
-          if (next.action.kind === 'review') return actions.onReview(active.id)
-          openTab(next.action.kind === 'findings' ? 'review' : next.action.kind)
-        }
-        return (
-          <div className={`flowbar ${next.tone}`}>
-            <button type="button" className="ghost" disabled={prev < 1} onClick={() => selectStep(prev)}>
-              → السابق
-            </button>
-            <div className="flowbar-text">
-              <strong>{next.title}</strong>
-              <span className="muted small">{next.hint}</span>
-            </div>
-            <button type="button" className="primary" disabled={busy !== null} onClick={run}>
-              {next.action.label} ←
-            </button>
-          </div>
-        )
-      })()}
-
       {active && (
         <>
           {reviewing && here && <Progress key={here.task.title} task={here.task} step={here.step} />}
@@ -266,6 +243,29 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
           />
         </>
       )}
+
+      {active && actions && (() => {
+        const next = nextStep(active)
+        const prev = Number(selected) - 1
+        const run = () => {
+          if (next.action.kind === 'review') return actions.onReview(active.id)
+          openTab(next.action.kind === 'findings' ? 'review' : next.action.kind)
+        }
+        return (
+          <div className={`flowbar ${next.tone}`}>
+            <button type="button" className="ghost" disabled={prev < 1} onClick={() => selectStep(prev)}>
+              → السابق
+            </button>
+            <div className="flowbar-text">
+              <strong>{next.title}</strong>
+              <span className="muted small">{next.hint}</span>
+            </div>
+            <button type="button" className="primary" disabled={busy !== null} onClick={run}>
+              {next.action.label} ←
+            </button>
+          </div>
+        )
+      })()}
     </div>
   )
 }
