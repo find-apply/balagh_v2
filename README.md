@@ -98,6 +98,7 @@ npm run dev                 # http://localhost:5173
 | `REELS_MODEL` | نموذج التوليد | `gemini-pro-latest` |
 | `REELS_REVIEW_MODEL` | نموذج المراجعين | `gemini-flash-latest` |
 | `DATABASE_URL` | قاعدة Postgres بدل SQLite | `data/balagh.db` |
+| `ROOT_PATH` | البادئة التي يُخدم تحتها الـAPI خلف nginx (مثل `/api`)، حتى تعمل صفحة `/docs` | فارغ |
 | `CORS_ORIGINS` | عناوين الواجهة المسموحة، مفصولة بفواصل | `http://localhost:5173` |
 | `REELS_FALLBACK_MODEL` | النموذج البديل حين يبلغ الأساسي حدّه | قيمة `REELS_REVIEW_MODEL` |
 | `VITE_API_URL` (في `web/`) | عنوان الـ API | `http://127.0.0.1:8010` |

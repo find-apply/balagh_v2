@@ -26,8 +26,10 @@ async def lifespan(_: FastAPI):
     yield
 
 
+# Behind nginx the API lives under /api (the prefix is stripped before proxying); the docs page and the
+# OpenAPI document must know that prefix or Swagger fetches /openapi.json from the web app instead.
 app = FastAPI(title="بلاغ", description="Brief -> 3 video ideas -> verified script -> localization -> review -> video.",
-              lifespan=lifespan)
+              lifespan=lifespan, root_path=os.getenv("ROOT_PATH", ""))
 render.VIDEOS.mkdir(parents=True, exist_ok=True)
 app.mount("/media/videos", StaticFiles(directory=render.VIDEOS), name="videos")
 
@@ -121,8 +123,8 @@ def _drop_story_template(script: Script) -> None:
 
 
 @app.get("/", include_in_schema=False)
-async def root() -> RedirectResponse:
-    return RedirectResponse("/docs")
+async def root(request: Request) -> RedirectResponse:
+    return RedirectResponse(f"{request.scope.get('root_path', '')}/docs")
 
 
 @app.get("/video/templates", response_model=list[VideoTemplate])
