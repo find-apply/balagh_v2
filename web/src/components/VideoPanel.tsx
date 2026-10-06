@@ -148,6 +148,18 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
           )}
         </div>
       )}
+      {videos.some((v) => v.status === 'done') && (
+        <details className="checklist">
+          <summary>قائمة الفحص البشري قبل النشر (دقيقتان)</summary>
+          <ul>
+            <li>النص على الشاشة يطابق ما يُسمع، ولا تُقطع آية أو حديث في منتصف كلمة.</li>
+            <li>اسم المصدر ورقمه ظاهران تحت كل نص شرعي، و«جزء من الحديث» حين يكون المقتبس أقصر.</li>
+            <li>لا نص يخرج عن حواف الشاشة، ولا صورة لا تناسب الجمهور.</li>
+            <li>الملاحظات الآلية أعلاه كلها ✓، أو فُهم سبب كل ملاحظة.</li>
+            <li>الصوت واضح من أول ثانية، والصمت المقصود لقراءة نص بلا تسجيل مكتوب تحته.</li>
+          </ul>
+        </details>
+      )}
       {videos.length > 0 && (
         <ul className="plain videos">
           {videos.map((v, i) => (
