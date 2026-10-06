@@ -3031,8 +3031,6 @@ details.small summary {
 .reel.wide {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 520px;
 }
 
 .reel figcaption {
