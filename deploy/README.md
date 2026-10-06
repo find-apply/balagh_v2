@@ -67,8 +67,10 @@ ssh FindApply 'cd /var/www/balagh \
   && .venv/bin/pip install -q -r requirements.txt \
   && cd web && npm ci --silent \
   && VITE_API_URL=https://balagh.findapply.com/api npm run build \
-  && systemctl restart balagh-api'
+  && deploy/restart.sh'
 ```
+
+`deploy/restart.sh` ينتظر انتهاء أي تصيير جارٍ قبل إعادة التشغيل؛ `systemctl restart` مباشرة يقطع الفيديو الذي يُصيَّر الآن ويفشله.
 
 إذا تغيرت الاعتمادات في `pyproject.toml`، أعد توليد `requirements.txt` قبل الرفع:
 
