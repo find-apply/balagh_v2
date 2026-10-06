@@ -3109,3 +3109,26 @@ details.small summary {
 .show-stats {
   margin: 8px 0 20px;
 }
+
+.idea-more > summary {
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-top: 12px;
+}
+
+.tab.approved {
+  border-color: var(--brand);
+}
+
+.tab.approved small {
+  color: var(--brand);
+}
+
+.clamp2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

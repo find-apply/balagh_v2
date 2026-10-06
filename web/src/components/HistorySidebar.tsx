@@ -51,9 +51,7 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
       <nav className="rail-list" aria-label="سجل التوليدات">
         {entries.length === 0 && (
           <p className="rail-empty">
-            لا توليدات بعد.
-            <br />
-            ستظهر مشاريعك هنا، محفوظة في هذا المتصفح.
+            لا مشاريع بعد. ابدأ بموضوعك، أو <a href="#/examples">شاهد أمثلة حقيقية ←</a>
           </p>
         )}
         {q && shown.length === 0 && <p className="rail-empty">لا نتائج.</p>}
@@ -75,7 +73,6 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
                       <>
                         <i className={e.approved ? 'state ok' : e.scripts ? 'state warn' : 'state'} />
                         {LANGUAGES[e.language]} · {e.scripts ? `${e.scripts} سيناريو` : '3 أفكار'}
-                        {e.shared && ' · رابط مراجعة'}
                       </>
                     )}
                   </small>

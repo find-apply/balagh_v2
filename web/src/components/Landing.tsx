@@ -109,10 +109,13 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
               <button className="primary big" onClick={onStart}>
                 {cta} ←
               </button>
-              <a className="button ghost big" href="#how">
-                كيف يعمل
+              <a className="button ghost big" href="#/examples">
+                أمثلة حقيقية
               </a>
             </div>
+            <a className="muted small" href="#how" style={{ display: 'inline-block', marginTop: 10 }}>
+              كيف يعمل ↓
+            </a>
             <ul className="hero-points">
               <li>القرآن الكريم وصحيحا البخاري ومسلم</li>
               <li>العربية بلهجاتها والإنجليزية</li>

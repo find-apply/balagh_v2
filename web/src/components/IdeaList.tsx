@@ -45,43 +45,54 @@ export function IdeaList({ ideas, disabled, onPick }: Props) {
             <blockquote className="hook" dir="auto">
               {idea.hook}
             </blockquote>
-            <p dir="auto">{idea.concept}</p>
-            <div className="why">
-              <span className="tag">لماذا تنجح</span>
-              <p className="muted small" dir="auto">
-                {idea.why_it_works}
-              </p>
-              <p className="muted small" dir="auto">
-                <span className="tag">المدة</span> {idea.duration_reason}
-              </p>
+            <div className="badges">
+              {idea.evidence.length > 0 ? (
+                <span className="badge ok">{idea.evidence.length} نص موثّق</span>
+              ) : (
+                <span className="badge">بلا نص شرعي</span>
+              )}
+              {idea.unverified.length > 0 && <span className="badge bad">{idea.unverified.length} غير موثّق، لن يُستعمل</span>}
             </div>
-            {idea.evidence.length > 0 && (
-              <div className="block">
-                <h4>
-                  النصوص الموثّقة <span className="count">{idea.evidence.length}</span>
-                </h4>
-                {idea.evidence.map((e) => (
-                  <EvidenceItem key={e.id} e={e} />
-                ))}
-              </div>
-            )}
-            {idea.unverified.length > 0 && (
-              <div className="block">
-                <h4>لم يُعثر عليها في المصادر، فلن تُستعمل</h4>
-                <ul className="plain">
-                  {idea.unverified.map((u) => (
-                    <li key={u}>
-                      <span className="badge bad">غير موثّق</span> {u}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
             {onPick && (
               <button className="primary block-button idea-cta" disabled={disabled} onClick={() => onPick(idea)}>
                 اكتب السيناريو ←
               </button>
             )}
+            <details className="idea-more">
+              <summary>الفكرة بالتفصيل والنصوص</summary>
+              <p dir="auto">{idea.concept}</p>
+              <div className="why">
+                <span className="tag">لماذا تنجح</span>
+                <p className="muted small" dir="auto">
+                  {idea.why_it_works}
+                </p>
+                <p className="muted small" dir="auto">
+                  <span className="tag">المدة</span> {idea.duration_reason}
+                </p>
+              </div>
+              {idea.evidence.length > 0 && (
+                <div className="block">
+                  <h4>
+                    النصوص الموثّقة <span className="count">{idea.evidence.length}</span>
+                  </h4>
+                  {idea.evidence.map((e) => (
+                    <EvidenceItem key={e.id} e={e} />
+                  ))}
+                </div>
+              )}
+              {idea.unverified.length > 0 && (
+                <div className="block">
+                  <h4>لم يُعثر عليها في المصادر، فلن تُستعمل</h4>
+                  <ul className="plain">
+                    {idea.unverified.map((u) => (
+                      <li key={u}>
+                        <span className="badge bad">غير موثّق</span> {u}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </details>
           </article>
         ))}
       </div>

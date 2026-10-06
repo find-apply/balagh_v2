@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { api } from '../api'
 import { IdeaList } from './IdeaList'
 import { Progress, ScriptSkeleton } from './Progress'
 import { Icon } from './Icon'
@@ -59,7 +61,15 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
   const scripts = Object.values(project.scripts).sort(
     (a, b) => Number(Boolean(a.localized_from)) - Number(Boolean(b.localized_from)) || a.version - b.version,
   )
-  const step = pending && writing ? 2 : !active ? 1 : !active.template ? 3 : !active.review ? 4 : !active.approved ? 5 : 6
+  // Whether the open version already has a finished video: the last step is done then.
+  const [videoOf, setVideoOf] = useState<string | null>(null)
+  useEffect(() => {
+    if (!active?.approved) return
+    const id = active.id
+    api.videos(project.id, id).then((vs) => vs.some((v) => v.status === 'done') && setVideoOf(id), () => {})
+  }, [project.id, active?.id, active?.approved])
+  const hasVideo = active !== null && videoOf === active.id
+  const step = pending && writing ? 2 : !active ? 1 : !active.template ? 3 : !active.review ? 4 : !active.approved ? 5 : hasVideo ? 7 : 6
   const brief = project.brief
 
   return (
@@ -67,7 +77,7 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
       <header className="ws-head">
         <div className="ws-title">
           <span className="eyebrow">مشروع</span>
-          <h1 dir="auto">{projectTitle(project)}</h1>
+          <h1 dir="auto" className="clamp2" title={projectTitle(project)}>{projectTitle(project)}</h1>
           <div className="badges">
             <span className="badge">{brief.audience}</span>
             <span className="badge">
@@ -100,10 +110,11 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
           <small>{project.ideas.length} أفكار</small>
         </button>
         {scripts.map((s) => (
-          <button key={s.id} className={s.id === scriptId ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id, s.id))}>
+          <button key={s.id} className={`tab${s.id === scriptId ? ' on' : ''}${s.approved ? ' approved' : ''}`} onClick={() => go(hashFor(project.id, s.id))}>
             <span dir="auto">{s.title}</span>
             <small>
               <i className={s.approved ? 'state ok' : s.review ? 'state warn' : 'state'} />
+              {s.approved ? 'معتمدة · ' : ''}
               {scriptLabel(s)}
             </small>
           </button>
