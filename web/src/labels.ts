@@ -77,6 +77,10 @@ export function toMarkdown(s: Script): string {
     r.tafsir.forEach((t) => lines.push(`  - ${t.source}: ${t.text}`))
     if (r.sharh) lines.push(`  - ${r.sharh.source} (${r.sharh.grade}، ${r.sharh.attribution}): ${r.sharh.text}`)
   })
+  if (s.unverified_claims.length) {
+    lines.push('', '## وقائع لم يُتحقق منها (للمراجع البشري)', '')
+    s.unverified_claims.forEach((c) => lines.push(`- ${c}`))
+  }
   lines.push('', '## المنشورات', '')
   s.posts.forEach((p) => lines.push(`### ${PLATFORMS[p.platform]}`, '', p.caption, '', p.hashtags.join(' '), ''))
   lines.push('## الاعتماد', '')

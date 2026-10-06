@@ -233,6 +233,7 @@ class ScriptDraft(BaseModel):
     audio: str = Field(description="Background audio direction, without instrumental music.")
     hadith_excerpts: list[HadithExcerpt] = Field(description="One entry per hadith placeholder used. Empty if none.")
     review_note: str = Field(description="What a specialist should check before publishing. Empty if nothing.")
+    historical_claims: list[str] = Field(default_factory=list, description="Every fact of seerah, history or biography the script states that is not in the evidence list, one per entry, as stated. The system cannot verify these, so the human reviewer checks them. Empty if none.")
     posts: list[PlatformPost] = Field(description="One entry per target platform.")
 
 
@@ -367,6 +368,7 @@ class Script(BaseModel):
     needs_specialist_review: bool
     review_note: str
     warnings: list[str] = Field(description="Scenes that mention a religious text without linked evidence.")
+    unverified_claims: list[str] = Field(default_factory=list, description="Facts of seerah or history the script states that no verified source backs; for the human reviewer to check.")
     posts: list[PlatformPost]
     adaptation_notes: list[AdaptationNote] = Field(default_factory=list, description="Localized scripts only.")
     terminology: list[TermCheck] = Field(default_factory=list, description="Localized scripts only.")

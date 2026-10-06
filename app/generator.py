@@ -198,16 +198,21 @@ SCHOLARLY_SYSTEM = f"""{REVIEW_COMMON}
 You are the scholarly reviewer. Look for:
 - Anything attributed to Allah, the Quran or the Prophet that is not backed by the evidence linked to that scene.
 - A paraphrase that distorts, extends or narrows the meaning of the evidence it relies on.
+- A fact of seerah or history that is wrong. (A correct fact with no source here is not a finding: the system \
+already lists such facts for the human reviewer.)
 - A disputed matter presented as settled, or one opinion presented as the only one.
 - The script drifting into a ruling on a personal situation.
 - Rewards, punishments or promises exaggerated beyond what the evidence says.
 - A scholar quoted or named.
-- The Quran's words or meaning given outside a «» quote: the Quran may only be quoted verbatim, never paraphrased.
+- The Quran's words presented as a quote outside «», or a verse paraphrased in place of quoting it. Explaining \
+a quoted verse afterwards in the script's own words, even with words close to the verse's, is allowed: at most a \
+suggestion if the explanation could be mistaken for the verse itself.
 - An explanation of a verse that goes beyond, or contradicts, the `<tafsir>` commentary given with it, or an \
 explanation of a hadith that goes beyond or contradicts its `<sharh>`. Where a text has commentary, the \
 script's explanation of it must be traceable to that commentary.
 - Words of a commentary presented as the verse or the hadith itself, or attributed to Allah or the Prophet.
-- A content level that looks wrong for what the script actually says.
+- A content level that looks wrong for what the script actually says: always a suggestion, unless the script \
+has drifted into a personal ruling (level D), which is blocking.
 
 Religious errors and misattributions are blocking.
 
@@ -222,6 +227,8 @@ You are the audience reviewer. Read the script as the target audience would. Loo
 - Examples or references that do not fit this audience's culture or daily life.
 - A hook that promises something the video does not deliver.
 - Language that is not the requested language, dialect or register.
+- For a children's audience: fear (hellfire, punishment, death, illness), any ask to like, subscribe, comment, \
+share or buy, or a mistake shown as funny or rewarded. These are blocking.
 
 Disrespect and broken terminology rules are blocking; the rest are usually suggestions.
 
@@ -242,6 +249,21 @@ Then list any religious claim the localized script makes that the source does no
 
 A quote shown inside «» comes from the same verified text in both scripts, in each one's language: treat it as \
 preserved. Be exact: a claim stated more strongly or more weakly is altered. Write claims and notes in Arabic."""
+
+CHILDREN = re.compile(r"أطفال|طفل|صغار|ناشئة|\bchild|\bkids?\b|\byoung (?:children|kids)", re.IGNORECASE)
+
+CHILDREN_RULES = """The audience is children. Binding rules on top of everything else:
+- Plain short sentences, examples from a child's day, a warm voice; never talk down.
+- Encourage, never frighten: no hellfire, punishment, death or illness details.
+- Level A topics only; no disputed matters.
+- Never ask the child to like, subscribe, comment, share, buy or send anything. The call to action is something \
+the child does in real life (with family), and any posting advice goes to the parents in the platform posts.
+- No depiction of prophets or companions as characters; their stories are told, not acted."""
+
+
+def is_children(audience: str) -> bool:
+    return bool(CHILDREN.search(audience))
+
 
 PLACEHOLDER = re.compile(r"\{\{\s*([QH]\d+)(?:\s*:\s*(\d+)(?:\s*-\s*(\d+))?)?\s*\}\}")
 ATTRIBUTION = re.compile(
@@ -268,6 +290,7 @@ def _target_block(t: AudienceSpec, platforms: list[Platform], duration: str) -> 
         f"<platforms>{', '.join(p.value for p in platforms)}</platforms>\n"
         f"<duration>{duration}</duration>\n"
         f"</target>"
+        + (f"\n\n<children_rules>\n{CHILDREN_RULES}\n</children_rules>" if is_children(t.audience) else "")
     )
 
 
@@ -459,6 +482,7 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
         references=references, content_level=idea.content_level,
         needs_specialist_review=idea.needs_specialist_review or bool(warnings),
         review_note=draft.review_note, warnings=warnings, posts=posts, draft=draft,
+        unverified_claims=[c.strip() for c in draft.historical_claims if c.strip()],
     )
 
 

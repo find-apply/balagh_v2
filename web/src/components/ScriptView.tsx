@@ -366,6 +366,21 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
 
       <section className="card" id="s-sources">
         <h3>المصادر</h3>
+        {script.unverified_claims.length > 0 && (
+          <div className="notice warn">
+            <strong>وقائع لم يُتحقق منها</strong>
+            <p className="small">
+              وقائع من السيرة أو التاريخ ذكرها السيناريو وليست في المصادر التي يفحصها النظام. يتحقق منها المراجع البشري.
+            </p>
+            <ul>
+              {script.unverified_claims.map((c) => (
+                <li key={c} dir="auto">
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {script.references.length === 0 && <p className="muted">هذا السيناريو لا يقتبس نصا شرعيا.</p>}
         {script.references.map((r) => (
           <div className="reference" key={r.evidence_id}>

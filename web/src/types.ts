@@ -213,6 +213,7 @@ export interface Script {
   needs_specialist_review: boolean
   review_note: string
   warnings: string[]
+  unverified_claims: string[]
   posts: PlatformPost[]
   adaptation_notes: { change: string; reason: string }[]
   terminology: TermCheck[]
