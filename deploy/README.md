@@ -38,6 +38,7 @@ CORS_ORIGINS=https://balagh.findapply.com
 
 - مفسّر Python الذي يثبّته `uv` يقع تحت `/root` فلا تصل إليه الخدمة التي تعمل باسم `www-data`. يُثبَّت في مكان مشترك: `UV_PYTHON_INSTALL_DIR=/opt/uv-python uv python install 3.12` ثم `uv sync -p 3.12`، مع `chmod -R o+rX /opt/uv-python`.
 - في ملف الخدمة `Environment=HOME=/var/www/balagh` و`TimeoutStartSec=180`: تحميل بيانات التفسير والشرح يأخذ ثواني عند الإقلاع، وRemotion يكتب في `$HOME`.
+- الـAPI يعمل بـ`ROOT_PATH=/api` وnginx يمرر المسار كاملا (`proxy_pass` بلا شرطة في النهاية). حذف البادئة في nginx يكسر `/media/videos` و`/docs`.
 - بعد تغيير مفتاح منطقة `limit_req_zone` يلزم `systemctl restart nginx` لا `reload`؛ المنطقة المشتركة تحتفظ بالمفتاح القديم.
 - `git config --global --add safe.directory /var/www/balagh` قبل `git pull` بصفة root في مجلد يملكه `www-data`.
 - حصة Gemini TTS في الطبقة المجانية 10 طلبات في الدقيقة لكل نموذج؛ الخط يراعيها (مقطعان في وقت واحد وانتظار ما تطلبه الواجهة)، فحلقة الأطفال تأخذ نحو 3.5 دقائق.
