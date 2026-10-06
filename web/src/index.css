@@ -3088,3 +3088,22 @@ details.small summary {
     display: none;
   }
 }
+
+.strip-title {
+  margin: 28px 0 0;
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+.reel.wide video {
+  height: auto;
+}
+
+.reels-strip:has(.reel.wide) {
+  align-items: flex-start;
+}
+
+.reels-strip:has(.reel.wide) + .reels-arrow,
+.reels:has(.reel.wide) .reels-arrow {
+  top: 120px;
+}

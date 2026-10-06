@@ -251,8 +251,10 @@ function ReelStrip({ videos }: { videos: Example['videos'] }) {
 }
 
 export function Showcase({ onStart }: { onStart: () => void }) {
-  // Vertical reels first, then the 16:9 episodes.
-  const videos = data.examples.flatMap((e) => e.videos).sort((a, b) => Number(b.aspect === '9:16') - Number(a.aspect === '9:16'))
+  // Reels (9:16) in one strip, episodes (16:9) in another: each group swipes on its own.
+  const all = data.examples.flatMap((e) => e.videos)
+  const reels = all.filter((v) => v.aspect === '9:16')
+  const episodes = all.filter((v) => v.aspect !== '9:16')
   return (
     <div className="landing showcase">
       <header className="topbar">
@@ -288,7 +290,10 @@ export function Showcase({ onStart }: { onStart: () => void }) {
           <p className="muted small">
             اسحب أو استعمل الأسهم. الصوت مولَّد للحوار والشرح؛ الآية بتلاوة قارئ، والحديث يُعرض بصمت حتى يوضع تسجيل قارئ.
           </p>
-          <ReelStrip videos={videos} />
+          <h3 className="strip-title">ريلز عمودية (9:16) · TikTok وReels وShorts</h3>
+          <ReelStrip videos={reels} />
+          <h3 className="strip-title">حلقات أفقية (16:9) · YouTube</h3>
+          <ReelStrip videos={episodes} />
         </div>
       </section>
 
