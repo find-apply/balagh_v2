@@ -101,7 +101,9 @@ async def frames(path: Path, duration: float, out_dir: Path, stem: str) -> list[
     return names
 
 
-def _overlaps(a: tuple[float, float], spans: list[tuple[float, float]], slack: float = 0.75) -> bool:
+def _overlaps(a: tuple[float, float], spans: list[tuple[float, float]], slack: float = 1.5) -> bool:
+    """A detected silence counts as meant when it sits inside a planned one, give or take the lead and tail
+    around a spoken line (a card at the end starts its silence a second early)."""
     return any(a[0] >= s0 - slack and a[1] <= s1 + slack for s0, s1 in spans)
 
 
