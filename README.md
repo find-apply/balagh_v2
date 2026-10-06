@@ -90,6 +90,8 @@ npm run dev                 # http://localhost:5173
 
 بدون uv: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
+الاختبارات (بلا نموذج ولا شبكة، نحو ثانيتين): `uv run --group dev pytest -q` أو `.venv/bin/pip install pytest && .venv/bin/python -m pytest -q`. تغطي التحقق من النصوص، وإدراج الاقتباسات، وضمان ألا يُنطق نص شرعي اصطناعيا، والاعتماد، وواجهة الـAPI.
+
 ### المتغيرات
 
 | المتغير | الوظيفة | الافتراضي |

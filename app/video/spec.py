@@ -78,12 +78,11 @@ def _quoted(script: Script) -> list[Reference]:
 def quoted_reference(part: str, quoted: list[Reference]) -> Reference | None:
     """The reference a «…» part of a scene quotes. Compared without diacritics or ayah marks: the scene's
     copy of a verse lacks the marks the source text carries, and a scene may quote a few verses of the range."""
-    inner = sources.normalize(part.strip("«» "))
-    if not inner:
+    inner = part.strip("«» ")
+    if not sources.normalize(inner):
         return None
     for r in quoted:
-        full = sources.normalize(r.text)
-        if inner in full or full in inner:
+        if sources.contains_run(r.text, inner) or sources.contains_run(inner, r.text):
             return r
     return None
 
@@ -159,6 +158,7 @@ async def build_captions(script: Script, template: dict, build: Build) -> dict:
                         c["sub"] = LABELS[lang]["silent_short"]
                 cues += quote_cues
             else:
+                part = part.strip()
                 clip = await media.speak(part, "narr")
                 d = clip.seconds + 0.25
                 audio.append({"t0": round(t, 2), "src": build.take(clip, "mp3")})

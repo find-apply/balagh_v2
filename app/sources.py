@@ -63,6 +63,13 @@ def normalize(text: str) -> str:
     return _normalize_map(text)[0].strip()
 
 
+def contains_run(haystack: str, needle: str) -> bool:
+    """Whether `needle` occurs in `haystack` as whole words, both compared without diacritics. A plain
+    substring test is not enough: «إن مع العسر يسرا» sits inside «فإن مع العسر يسرا»."""
+    n, h = normalize(needle), normalize(haystack)
+    return bool(n) and re.search(rf"(?<![^ ]){re.escape(n)}(?![^ ])", h) is not None
+
+
 _glossary = json.loads((DATA / "glossary.json").read_text(encoding="utf-8"))
 QURAN_EN_SOURCE = "Saheeh International (as listed on quranpedia.net)"
 HADITH_EN_SOURCE = {"bukhari": "Sahih al-Bukhari, tr. M. Muhsin Khan", "muslim": "Sahih Muslim, tr. Abdul Hamid Siddiqui"}

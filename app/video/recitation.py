@@ -56,9 +56,9 @@ def quoted_ayahs(ref: Reference, quoted_text: Optional[str] = None) -> list[str]
         return []
     surah = ref.quran_key.split(":")[0]
     parts = sources.verse_parts(ref.quran_key, Language.ar)
-    spoken = sources.normalize(quoted_text if quoted_text else ref.text)
-    # Compared without diacritics or the ayah marks, which the scene's copy of a verse may lack.
-    quoted = [f"{surah}:{a}" for a, text in parts.items() if sources.normalize(text) in spoken]
+    spoken = quoted_text if quoted_text else ref.text
+    # Compared as whole words without diacritics or the ayah marks, which the scene's copy of a verse may lack.
+    quoted = [f"{surah}:{a}" for a, text in parts.items() if sources.contains_run(spoken, text)]
     if not quoted:  # an English script quotes the translation: take the whole range
         quoted = [f"{surah}:{a}" for a in parts]
     return quoted
