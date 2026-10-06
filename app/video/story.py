@@ -46,8 +46,9 @@ point to it, and the `text` scene shows it. Do not write any religious text your
 
 image_prompt (story and outro scenes): an English description of one illustration in the picture-book style, \
 naming the setting and what each present character does. Describe characters by their appearance exactly as \
-written in the cast above, not by name. Never ask for text, letters, faces of prophets or companions, or \
-symbols of other faiths.
+written in the cast above, not by name, and list their keys in `present` in the same order (the renderer \
+attaches each one's reference drawing so they look the same in every scene). Never ask for text, letters, \
+faces of prophets or companions, or symbols of other faiths.
 
 {COMMON_RULES}"""
 
@@ -76,6 +77,8 @@ def _finalize(draft: StoryDraft, script: Script) -> Story:
                 raise ValueError(f"Scene {n} quotes a religious text in a line; only the text scene may show it.")
             if s.kind in (StorySceneKind.story, StorySceneKind.outro) and not s.image_prompt.strip():
                 raise ValueError(f"Scene {n} ({s.kind.value}) needs an image_prompt.")
+            if any(who not in catalog.CHARACTERS or not catalog.CHARACTERS[who]["sheet"] for who in s.present):
+                raise ValueError(f"Scene {n} lists an unknown character in present: {s.present}.")
             if s.kind == StorySceneKind.quiz and (len(s.choices) != 2 or len(s.lines) < 2):
                 raise ValueError(f"Scene {n} (quiz) needs exactly 2 choices and at least 2 lines.")
             if s.kind == StorySceneKind.words and len(s.cards) != 2:
@@ -93,7 +96,7 @@ def _finalize(draft: StoryDraft, script: Script) -> Story:
     return Story(title=draft.title, scenes=scenes, review_note=draft.review_note)
 
 
-async def write_story(script: Script) -> Story:
+async def write_story(script: Script, notes: Optional[str] = None) -> Story:
     system = STORY_SYSTEM.replace("{language}", LANGUAGE[script.target.language])
     prompt = (
         f"<script lang=\"{script.target.language.value}\">\n"
@@ -103,6 +106,10 @@ async def write_story(script: Script) -> Story:
     )
     if not any(r.usage == ReferenceUsage.quoted for r in script.references):
         prompt += "\n\nThe script quotes no verified text, so write no text scene and no words scene: Nour explains the lesson in her own words."
+    if script.story is not None:
+        prompt += f"\n\n<previous_story>{script.story.model_dump_json(include={'title', 'scenes'})}</previous_story>\nWrite a different story (another situation, not a rewrite of this one)."
+    if notes:
+        prompt += f"\n\n<creator_notes>{notes}</creator_notes>"
     error: Optional[ValueError] = None
     for _ in range(2):
         attempt = prompt if error is None else f"{prompt}\n\nYour previous attempt was rejected: {error} Fix it."

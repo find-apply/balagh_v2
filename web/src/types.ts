@@ -76,6 +76,7 @@ export interface StoryScene {
   kind: 'story' | 'text' | 'words' | 'quiz' | 'outro'
   lines: StoryLine[]
   image_prompt: string
+  present: string[]
   evidence_id: string
   cards: { word: string; meaning: string }[]
   question: string

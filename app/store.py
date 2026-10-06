@@ -67,6 +67,9 @@ def _add_scene_art(stored: dict) -> None:
     scenes += [s for draft in stored["drafts"].values() for s in draft["scenes"]]
     for scene in scenes:
         scene.setdefault("art", default)
+    for script in stored["project"]["scripts"].values():
+        for scene in (script.get("story") or {}).get("scenes", []):
+            scene.setdefault("present", [])
 
 
 def save_video(video: Video) -> None:

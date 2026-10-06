@@ -18,6 +18,7 @@ interface Props {
   onRevise: (notes: string | null) => void
   onLocalize: (body: LocalizeRequest) => void
   onTemplate: (template: VideoTemplate) => void
+  onStory: (notes: string | null) => void
   onApprove: (role: ReviewRole, name: string) => void
   shareUrl: string
 }
@@ -183,7 +184,7 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
 }
 
 export function ScriptView({
-  projectId, script, source, templates, disabled, onReview, onRevise, onLocalize, onTemplate, onApprove, shareUrl,
+  projectId, script, source, templates, disabled, onReview, onRevise, onLocalize, onTemplate, onStory, onApprove, shareUrl,
 }: Props) {
   const template = templates?.find((t) => t.id === script.template) ?? null
   const [notes, setNotes] = useState('')
@@ -390,7 +391,7 @@ export function ScriptView({
         {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={onLocalize} />}
       </section>
 
-      <StoryView script={script} />
+      <StoryView script={script} disabled={disabled} onRewrite={onStory} />
 
       <Approvals script={script} disabled={disabled} onApprove={onApprove} shareUrl={shareUrl} />
 

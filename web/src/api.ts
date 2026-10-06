@@ -47,6 +47,8 @@ export const api = {
     request<ReviewReport>('POST', `/projects/${projectId}/scripts/${scriptId}/review`),
   revise: (projectId: string, scriptId: string, notes: string | null) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/revise`, { notes }),
+  rewriteStory: (projectId: string, scriptId: string, notes: string | null) =>
+    request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/story`, { notes }),
   createVideo: (projectId: string, scriptId: string, template: string) =>
     request<Video>('POST', `/projects/${projectId}/scripts/${scriptId}/videos`, { template }),
   videos: (projectId: string, scriptId: string) => request<Video[]>('GET', `/projects/${projectId}/scripts/${scriptId}/videos`),

@@ -1,9 +1,17 @@
+import { useState } from 'react'
 import { CHARACTERS, STORY_SCENES } from '../labels'
 import type { Script } from '../types'
 
+interface Props {
+  script: Script
+  disabled: boolean
+  onRewrite: (notes: string | null) => void
+}
+
 /** The dialogue story a children's template plays. Generated text: it is approved with the script. */
-export function StoryView({ script }: { script: Script }) {
+export function StoryView({ script, disabled, onRewrite }: Props) {
   const story = script.story
+  const [notes, setNotes] = useState('')
   if (!story) return null
   const dir = script.target.language === 'en' ? 'ltr' : 'rtl'
   return (
@@ -59,6 +67,15 @@ export function StoryView({ script }: { script: Script }) {
           ملاحظة للمربّي: {story.review_note}
         </p>
       )}
+      <div className="panel">
+        <label className="field">
+          <span>قصة أخرى؟ ملاحظات (اختياري)</span>
+          <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="مثلا: موقف في المدرسة بدل البيت" />
+        </label>
+        <button disabled={disabled} onClick={() => onRewrite(notes.trim() || null)}>
+          اكتب قصة أخرى
+        </button>
+      </div>
     </section>
   )
 }

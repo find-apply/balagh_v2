@@ -20,6 +20,12 @@ export function TemplatePicker({ templates, chosen, disabled, onPick }: Props) {
         <div className="ideas">
           {templates.map((t) => (
             <article className={t.id === chosen ? 'card idea chosen' : 'card idea'} key={t.id}>
+              <img
+                className={`preview ${t.aspect === '9:16' ? 'tall' : ''}`}
+                src={`/templates/${t.id}.jpg`}
+                alt=""
+                onError={(e) => (e.currentTarget.style.display = 'none')}
+              />
               <div className="badges">
                 <span className="badge" dir="ltr">
                   {t.aspect}

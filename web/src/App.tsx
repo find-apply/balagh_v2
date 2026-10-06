@@ -175,6 +175,9 @@ export default function App() {
                   putScript(await api.chooseTemplate(pid, active.id, template.id), false),
                 )
               }
+              onStory={(notes) =>
+                run('يكتب بلاغ قصة أخرى', async () => putScript(await api.rewriteStory(pid, active.id, notes), false))
+              }
               onApprove={(role, name) =>
                 run('اعتماد', async () => putScript(await api.approve(pid, active.id, role, name), false))
               }

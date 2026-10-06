@@ -12,7 +12,7 @@ from google.genai import errors as genai_errors
 
 from . import generator, store
 from .schemas import (
-    Approval, ApproveIn, BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, TemplateIn, Video,
+    Approval, ApproveIn, BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, StoryIn, TemplateIn, Video,
     VideoIn, VideoTemplate,
 )
 from .video import catalog, render, story
@@ -200,6 +200,20 @@ async def choose_template(project_id: str, script_id: str, body: TemplateIn) -> 
         script.story = await story.write_story(script)
         script.approvals = []
     script.template = body.template
+    store.save(project)
+    return script
+
+
+@app.post("/projects/{project_id}/scripts/{script_id}/story", response_model=Script, status_code=201)
+async def rewrite_story(project_id: str, script_id: str, body: StoryIn) -> Script:
+    """Write another children's story for this script (a different situation, with the creator's notes).
+    New text: the approvals are reset."""
+    project = _get_project(project_id)
+    script = _get_script(project, script_id)
+    if not catalog.is_story(script.template):
+        raise HTTPException(status_code=409, detail="اختر قالب أطفال أولا.")
+    script.story = await story.write_story(script, body.notes)
+    script.approvals = []
     store.save(project)
     return script
 

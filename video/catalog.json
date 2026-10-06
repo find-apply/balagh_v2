@@ -57,22 +57,26 @@
     "narr": {
       "ar": "الراوي",
       "en": "Narrator",
-      "look": ""
+      "look": "",
+      "sheet": ""
     },
     "salim": {
       "ar": "سالم",
       "en": "Salim",
-      "look": "a cheerful 7-year-old boy with short black hair, a green t-shirt and blue trousers"
+      "look": "a cheerful 7-year-old boy with short black hair, a green t-shirt and blue trousers",
+      "sheet": "salim.png"
     },
     "maryam": {
       "ar": "مريم",
       "en": "Maryam",
-      "look": "a 6-year-old girl, his sister, in a pink hijab and a yellow dress"
+      "look": "a 6-year-old girl, his sister, in a pink hijab and a yellow dress",
+      "sheet": "maryam.png"
     },
     "nour": {
       "ar": "نور",
       "en": "Nour",
-      "look": "their kind young teacher, a woman in a cream hijab and a teal cardigan"
+      "look": "their kind young teacher, a woman in a cream hijab and a teal cardigan",
+      "sheet": "nour.png"
     }
   }
 }

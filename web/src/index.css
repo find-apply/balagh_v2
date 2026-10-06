@@ -584,3 +584,16 @@ td {
   border-radius: 8px;
   background: #000;
 }
+
+.preview {
+  display: block;
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #000;
+}
+
+.preview.tall {
+  max-height: 260px;
+  object-fit: contain;
+}

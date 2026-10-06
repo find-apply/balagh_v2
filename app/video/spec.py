@@ -171,13 +171,27 @@ async def build_story(script: Script, template: dict, build: Build) -> dict:
             spec["title"] = labels["story" if s.kind in (StorySceneKind.story, StorySceneKind.outro) else s.kind.value]
             spec["board"] = labels["board"]
             if s.kind in (StorySceneKind.story, StorySceneKind.outro):
-                spec["image"] = build.take(await media.illustrate(s.image_prompt, "16:9", "story"), "jpg")
+                prompt, refs = _cast_prompt(s.image_prompt, s.present, lang)
+                spec["image"] = build.take(await media.illustrate(prompt, "16:9", "story", refs), "jpg")
             if s.kind == StorySceneKind.words:
                 spec["cards"] = [c.model_dump() for c in s.cards]
             if s.kind == StorySceneKind.quiz:
                 spec.update(question=s.question, choices=s.choices, answer=0, revealAt=lines[1]["t0"])
         scenes.append(spec)
     return {"lang": lang.value, "title": script.story.title, "scenes": scenes}
+
+
+def _cast_prompt(prompt: str, present: list[str], lang: Language) -> tuple[str, list[Path]]:
+    """Attaches each present character's reference drawing and tells the model which is which."""
+    refs = [catalog.VIDEO_DIR / "characters" / catalog.CHARACTERS[who]["sheet"] for who in present]
+    if not refs:
+        return prompt, []
+    who_is = "; ".join(
+        f"reference image {i} is {catalog.CHARACTERS[who]['en']} ({catalog.CHARACTERS[who]['look']})"
+        for i, who in enumerate(present, start=1)
+    )
+    return (f"{prompt} {who_is}. Keep each character's face, hair, hijab and clothes exactly as in their "
+            f"reference image."), refs
 
 
 async def _text_scene(s: StoryScene, ref: Reference | None, spec: dict, labels: dict, build: Build) -> None:

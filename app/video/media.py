@@ -26,8 +26,11 @@ READ_ALOUD = os.getenv("VIDEO_TTS_INSTRUCTION", "Read the following text aloud e
 VOICES = {"narr": "Sulafat", "salim": "Puck", "maryam": "Leda", "nour": "Kore"}
 
 MAGNIFIC_BASE = "https://api.magnific.com"
-# classic-fast is the cheapest Magnific model (synchronous). z-image and flux-2-klein are the async task models.
-IMAGE_MODEL = os.getenv("MAGNIFIC_IMAGE_MODEL", "classic-fast")
+# classic-fast is the cheapest Magnific model (synchronous, no reference images). z-image and flux-2-klein are
+# the async task models; flux-2-klein takes up to 4 reference images, which keeps the story cast consistent.
+IMAGE_MODEL = os.getenv("MAGNIFIC_IMAGE_MODEL", "classic-fast")        # scene photos of the caption templates
+STORY_MODEL = os.getenv("MAGNIFIC_STORY_MODEL", "flux-2-klein")        # story illustrations with the cast
+REF_MODELS = {"flux-2-klein"}
 IMAGE_STYLES = {"story": "vector", "photo": "photo"}
 STORY_STYLE = "Children's picture book illustration, flat soft pastel colours, rounded shapes, friendly, clean. "
 NEGATIVE = "text, letters, words, watermark, logo, scary, realistic photo, deformed hands"
@@ -113,24 +116,28 @@ async def _tts(text: str, voice: str) -> tuple[bytes, str]:
 
 # ---- Images ----
 
-async def illustrate(prompt: str, aspect: str, look: str = "story") -> Clip:
-    """One generated image. aspect is '16:9' or '9:16'; look is 'story' (picture-book) or 'photo'."""
+async def illustrate(prompt: str, aspect: str, look: str = "story", refs: list[Path] = ()) -> Clip:
+    """One generated image. aspect is '16:9' or '9:16'; look is 'story' (picture-book) or 'photo'.
+    `refs` are reference drawings of the characters, used when the model accepts them."""
     key = os.getenv("MAGNIFIC_API_KEY")
     if not key:
         raise MediaError("MAGNIFIC_API_KEY is not set, so images cannot be generated.")
+    model = STORY_MODEL if look == "story" else IMAGE_MODEL
+    refs = list(refs)[:4] if model in REF_MODELS else []
     full = (STORY_STYLE if look == "story" else "") + prompt
     style = IMAGE_STYLES[look]
     IMAGE_CACHE.mkdir(parents=True, exist_ok=True)
-    out = IMAGE_CACHE / f"{_hash(IMAGE_MODEL, aspect, style, full)}.jpg"
+    ref_bytes = [r.read_bytes() for r in refs]
+    out = IMAGE_CACHE / f"{_hash(model, aspect, style, full, *(hashlib.sha256(b).hexdigest() for b in ref_bytes))}.jpg"
     if out.exists():
         return Clip(out, 0.0, new=False)
     size = {"16:9": "widescreen_16_9", "9:16": "social_story_9_16"}[aspect]
     headers = {"x-magnific-api-key": key, "Content-Type": "application/json", "Accept": "application/json"}
     async with _image_limit, httpx.AsyncClient(base_url=MAGNIFIC_BASE, headers=headers, timeout=90) as http:
-        if IMAGE_MODEL == "classic-fast":
+        if model == "classic-fast":
             data = await _classic_fast(http, full, size, style)
         else:
-            data = await _task_model(http, full, size)
+            data = await _task_model(http, model, full, size, ref_bytes)
     out.write_bytes(data)
     return Clip(out, 0.0, new=True)
 
@@ -159,9 +166,12 @@ async def _classic_fast(http: httpx.AsyncClient, prompt: str, size: str, style: 
         raise MediaError(f"Unexpected Magnific response: {json.dumps(d)[:200]}")
 
 
-async def _task_model(http: httpx.AsyncClient, prompt: str, size: str) -> bytes:
-    path = f"/v1/ai/text-to-image/{IMAGE_MODEL}"
-    d = await _post(http, path, {"prompt": prompt, "aspect_ratio": size})
+async def _task_model(http: httpx.AsyncClient, model: str, prompt: str, size: str, refs: list[bytes]) -> bytes:
+    path = f"/v1/ai/text-to-image/{model}"
+    body: dict = {"prompt": prompt, "aspect_ratio": size, "seed": 11}
+    for i, data in enumerate(refs):
+        body["input_image" if i == 0 else f"input_image_{i + 1}"] = base64.b64encode(data).decode()
+    d = await _post(http, path, body)
     task = d["data"]["task_id"]
     for _ in range(60):
         await asyncio.sleep(3)

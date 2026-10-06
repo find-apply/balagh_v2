@@ -429,6 +429,7 @@ class StorySceneDraft(BaseModel):
     kind: StorySceneKind
     lines: list[Line] = Field(description="Spoken lines. Empty for kind text.")
     image_prompt: str = Field(description="Kinds story and outro: an English description of the illustration. Empty otherwise.")
+    present: list[str] = Field(description="Kinds story and outro: keys of the characters drawn in the illustration (salim, maryam, nour), in the order they are described. Empty otherwise.")
     evidence_id: str = Field(description="Kind text only: the id of the quoted reference to show. Empty otherwise.")
     cards: list[WordCard] = Field(description="Kind words only: 2 cards. Empty otherwise.")
     question: str = Field(description="Kind quiz only. Empty otherwise.")
@@ -454,6 +455,10 @@ class Story(BaseModel):
     scenes: list[StoryScene]
     review_note: str
     ai_disclosure: str = AI_DISCLOSURE
+
+
+class StoryIn(BaseModel):
+    notes: Optional[str] = Field(default=None, max_length=1000, description="What the creator wants different this time.")
 
 
 class TemplateIn(BaseModel):
