@@ -1,6 +1,6 @@
-# نشر بلاغ على balagh.findapply.com
+# نشر بلاغ
 
-الموقع الحي: https://balagh.findapply.com
+الموقع الحي: https://balagh.space (النشر الأول كان على balagh.findapply.com؛ الخطوات نفسها بتغيير اسم النطاق)
 
 ## ما هو منشور على الخادم
 
@@ -33,6 +33,13 @@ MAGNIFIC_API_KEY=...
 ADMIN_TOKEN=...   # قيمة طويلة عشوائية، تفتح /#/admin
 CORS_ORIGINS=https://balagh.findapply.com
 ```
+
+## ملاحظات من نشر balagh.space
+
+- مفسّر Python الذي يثبّته `uv` يقع تحت `/root` فلا تصل إليه الخدمة التي تعمل باسم `www-data`. يُثبَّت في مكان مشترك: `UV_PYTHON_INSTALL_DIR=/opt/uv-python uv python install 3.12` ثم `uv sync -p 3.12`، مع `chmod -R o+rX /opt/uv-python`.
+- في ملف الخدمة `Environment=HOME=/var/www/balagh` و`TimeoutStartSec=180`: تحميل بيانات التفسير والشرح يأخذ ثواني عند الإقلاع، وRemotion يكتب في `$HOME`.
+- `git config --global --add safe.directory /var/www/balagh` قبل `git pull` بصفة root في مجلد يملكه `www-data`.
+- حصة Gemini TTS في الطبقة المجانية 10 طلبات في الدقيقة لكل نموذج؛ الخط يراعيها (مقطعان في وقت واحد وانتظار ما تطلبه الواجهة)، فحلقة الأطفال تأخذ نحو 3.5 دقائق.
 
 ## متطلبات الفيديو على الخادم (مرة واحدة)
 

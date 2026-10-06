@@ -4,8 +4,8 @@
 
 مشاركة في **تحدي الذكاء الاصطناعي في خدمة المحتوى الإسلامي**، المسار الثاني: صناعة المحتوى متعدد اللغات والتوطين الثقافي.
 
-- التجربة الحية: https://balagh.findapply.com
-- توثيق الـ API: https://balagh.findapply.com/api/docs
+- التجربة الحية: https://balagh.space
+- توثيق الـ API: https://balagh.space/api/docs
 
 ## المشكلة
 
