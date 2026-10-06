@@ -25,8 +25,18 @@
 
 ```
 GEMINI_API_KEY=...
+MAGNIFIC_API_KEY=...
 CORS_ORIGINS=https://balagh.findapply.com
 ```
+
+## متطلبات الفيديو على الخادم (مرة واحدة)
+
+```bash
+ssh FindApply 'apt-get install -y ffmpeg fonts-noto-color-emoji \
+  && cd /var/www/balagh/video && npm ci --silent && npx remotion browser ensure'
+```
+
+`fonts-noto-color-emoji` لازم: بدونه تظهر الرموز التعبيرية في قالب الترجمة المتحركة مربعات فارغة.
 
 بعد تغيير أي قيمة فيه:
 
