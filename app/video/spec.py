@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from ..schemas import EvidenceKind, Language, Reference, ReferenceUsage, Script, StoryScene, StorySceneKind
+from .. import sources
 from . import catalog, media, recitation
 
 LEAD = 0.3      # silence before the first line of a scene
@@ -74,10 +75,23 @@ def _quoted(script: Script) -> list[Reference]:
     return [r for r in script.references if r.usage == ReferenceUsage.quoted]
 
 
-async def recite(ref: Reference, build: Build) -> media.Clip | None:
+def quoted_reference(part: str, quoted: list[Reference]) -> Reference | None:
+    """The reference a «…» part of a scene quotes. Compared without diacritics or ayah marks: the scene's
+    copy of a verse lacks the marks the source text carries, and a scene may quote a few verses of the range."""
+    inner = sources.normalize(part.strip("«» "))
+    if not inner:
+        return None
+    for r in quoted:
+        full = sources.normalize(r.text)
+        if inner in full or full in inner:
+            return r
+    return None
+
+
+async def recite(ref: Reference, build: Build, quoted_text: str | None = None) -> media.Clip | None:
     """A real recording of the quoted text, or None (with a note) when there is none."""
     if ref.kind == EvidenceKind.quran:
-        clip = await recitation.quran_recording(ref)
+        clip = await recitation.quran_recording(ref, quoted_text)
         if clip is None:
             build.notes.append(f"تعذر جلب تلاوة {ref.source}، فعُرضت الآية بصمت.")
         return clip
@@ -128,10 +142,13 @@ async def build_captions(script: Script, template: dict, build: Build) -> dict:
                 cues += _cues(text, t, t + d, emph=True)
             t += d
         for part in parts:
-            ref = next((r for r in quoted if r.text in part), None) if part.startswith("«") else None
-            if ref is not None:
-                # A quoted text: a real recitation, or silence for reading time.
-                clip = await recite(ref, build)
+            if part.startswith("«"):
+                # A quoted text: a real recitation, or silence for reading time. Never the narrator's voice,
+                # even when the quote cannot be matched to a reference.
+                ref = quoted_reference(part, quoted)
+                clip = await recite(ref, build, part) if ref else None
+                if ref is None:
+                    build.notes.append(f"اقتباس لم يُطابق مرجعا فعُرض بصمت ولم يُنطق: {part[:40]}…")
                 d = clip.seconds + 0.4 if clip else reading_seconds(part)
                 if clip:
                     audio.append({"t0": round(t, 2), "src": build.take(clip, "mp3")})

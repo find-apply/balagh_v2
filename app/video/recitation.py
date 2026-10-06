@@ -49,21 +49,24 @@ def hadith_recording(ref: Reference) -> Optional[media.Clip]:
 
 # ---- Quran: verse by verse from everyayah.com ----
 
-def quoted_ayahs(ref: Reference) -> list[str]:
-    """Which verses of the reference's range were actually quoted (the script may quote a few of them)."""
+def quoted_ayahs(ref: Reference, quoted_text: Optional[str] = None) -> list[str]:
+    """Which verses of the reference's range were actually quoted (the script may quote a few of them).
+    `quoted_text` is the quote as it stands in the scene; without it the reference's own text decides."""
     if not ref.quran_key:
         return []
     surah = ref.quran_key.split(":")[0]
     parts = sources.verse_parts(ref.quran_key, Language.ar)
-    quoted = [f"{surah}:{a}" for a, text in parts.items() if text in ref.arabic and text in ref.text]
+    spoken = sources.normalize(quoted_text if quoted_text else ref.text)
+    # Compared without diacritics or the ayah marks, which the scene's copy of a verse may lack.
+    quoted = [f"{surah}:{a}" for a, text in parts.items() if sources.normalize(text) in spoken]
     if not quoted:  # an English script quotes the translation: take the whole range
         quoted = [f"{surah}:{a}" for a in parts]
     return quoted
 
 
-async def quran_recording(ref: Reference) -> Optional[media.Clip]:
+async def quran_recording(ref: Reference, quoted_text: Optional[str] = None) -> Optional[media.Clip]:
     """The quoted verses recited one after another. None when they cannot be fetched."""
-    keys = quoted_ayahs(ref)
+    keys = quoted_ayahs(ref, quoted_text)
     if not keys:
         return None
     QURAN_CACHE.mkdir(parents=True, exist_ok=True)
