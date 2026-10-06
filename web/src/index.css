@@ -3079,6 +3079,11 @@ details.small summary {
     width: 86vw;
   }
 
+  .reel.wide {
+    min-height: 0;
+    justify-content: flex-start;
+  }
+
   .reels-arrow {
     display: none;
   }

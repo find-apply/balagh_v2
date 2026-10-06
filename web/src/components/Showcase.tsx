@@ -251,7 +251,8 @@ function ReelStrip({ videos }: { videos: Example['videos'] }) {
 }
 
 export function Showcase({ onStart }: { onStart: () => void }) {
-  const videos = data.examples.flatMap((e) => e.videos)
+  // Vertical reels first, then the 16:9 episodes.
+  const videos = data.examples.flatMap((e) => e.videos).sort((a, b) => Number(b.aspect === '9:16') - Number(a.aspect === '9:16'))
   return (
     <div className="landing showcase">
       <header className="topbar">
