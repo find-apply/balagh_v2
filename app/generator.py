@@ -280,8 +280,19 @@ KNOWLEDGE = {
 LANGUAGE = {Language.ar: "Arabic", Language.en: "English"}
 
 
+WIDE_PLATFORMS = {Platform.youtube, Platform.linkedin, Platform.x}
+
+
+def frame_of(platforms: list[Platform]) -> str:
+    """The platform decides the frame: short-video feeds are vertical, the rest wide."""
+    return "16:9" if platforms and all(p in WIDE_PLATFORMS for p in platforms) else "9:16"
+
+
 def _target_block(t: AudienceSpec, platforms: list[Platform], duration: str) -> str:
     language = LANGUAGE[t.language] + (f" ({t.dialect})" if t.dialect else "")
+    frame = frame_of(platforms)
+    frame_rule = ("vertical 9:16 on a phone: on-screen text is 2-4 words per card, one idea per scene"
+                  if frame == "9:16" else "wide 16:9: on-screen text may be a full sentence, scenes can hold two ideas")
     return (
         f"<target>\n"
         f"<audience>{t.audience}</audience>\n"
@@ -289,6 +300,7 @@ def _target_block(t: AudienceSpec, platforms: list[Platform], duration: str) -> 
         f"<knowledge_of_islam>{KNOWLEDGE[t.audience_knowledge]}</knowledge_of_islam>\n"
         f"<tone>{t.tone or 'your choice, whatever suits this audience and topic'}</tone>\n"
         f"<platforms>{', '.join(p.value for p in platforms)}</platforms>\n"
+        f"<frame>{frame_rule}</frame>\n"
         f"<duration>{duration}</duration>\n"
         f"</target>"
         + (f"\n\n<children_rules>\n{CHILDREN_RULES}\n</children_rules>" if is_children(t.audience) else "")

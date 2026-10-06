@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
+import { aspectOf, CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
 import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, Video, VideoTemplate } from '../types'
 import { api, BASE } from '../api'
 import { reviewHash } from '../route'
@@ -444,6 +444,7 @@ export function ScriptView({ projectId, script, source, templates, disabled, tab
         <TemplatePicker
           templates={templates}
           chosen={script.template}
+          aspect={aspectOf(script.platforms)}
           disabled={disabled || !actions}
           onPick={(t) => actions?.onTemplate(t)}
         />

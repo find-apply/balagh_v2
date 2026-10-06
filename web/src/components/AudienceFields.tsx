@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
+import { ASPECTS, aspectOf, KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
 import type { AudienceKnowledge, AudienceSpec, Language, Platform } from '../types'
 import { ChoiceField } from './ChoiceField'
 import type { Option } from './ChoiceField'
@@ -167,28 +167,36 @@ interface PlatformProps {
   onChange: (value: Platform[]) => void
 }
 
+/** One platform (or the generic short-video choice, which is all of them at once). The platform fixes the
+ * frame, the duration defaults and the post, so one choice answers three questions. The API still takes a list. */
 export function PlatformPicker({ value, onChange }: PlatformProps) {
   const [more, setMore] = useState(value.some((p) => OTHER.includes(p)))
-  const toggle = (p: Platform) => onChange(value.includes(p) ? value.filter((x) => x !== p) : [...value, p])
-  const allShort = SHORT_FORM.every((p) => value.includes(p)) && value.length === SHORT_FORM.length
+  const generic = SHORT_FORM.every((p) => value.includes(p)) && value.length === SHORT_FORM.length
+  const single = value.length === 1 ? value[0] : null
   const chip = (p: Platform) => (
-    <button type="button" key={p} aria-pressed={value.includes(p)} className={value.includes(p) ? 'chip on' : 'chip'} onClick={() => toggle(p)}>
+    <button type="button" key={p} role="radio" aria-checked={single === p} className={single === p ? 'chip on' : 'chip'} onClick={() => onChange([p])}>
       {PLATFORMS[p]}
     </button>
   )
   return (
-    <div className="chips">
-      <button type="button" className={allShort ? 'chip on auto' : 'chip auto'} onClick={() => onChange(SHORT_FORM)}>
-        ✦ كل منصات الفيديو القصير
-      </button>
-      {SHORT_FORM.map(chip)}
-      {more ? (
-        OTHER.map(chip)
-      ) : (
-        <button type="button" className="chip ghost" onClick={() => setMore(true)}>
-          + منصات أخرى
+    <>
+      <div className="chips" role="radiogroup">
+        <button type="button" role="radio" aria-checked={generic} className={generic ? 'chip on auto' : 'chip auto'} onClick={() => onChange(SHORT_FORM)}>
+          ✦ عام: كل منصات الفيديو القصير
         </button>
-      )}
-    </div>
+        {SHORT_FORM.map(chip)}
+        {more ? (
+          OTHER.map(chip)
+        ) : (
+          <button type="button" className="chip ghost" onClick={() => setMore(true)}>
+            + منصات أخرى
+          </button>
+        )}
+      </div>
+      <small className="muted">
+        الصيغة: <b>{ASPECTS[aspectOf(value)]}</b>
+        {generic ? ' · منشور واحد يصلح لكل المنصات القصيرة' : single ? ` · منشور ووسوم لـ${PLATFORMS[single]}` : ''}
+      </small>
+    </>
   )
 }

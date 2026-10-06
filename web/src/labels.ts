@@ -11,6 +11,27 @@ export const PLATFORMS: Record<Platform, string> = {
   x: 'X',
 }
 
+/** The platform decides the frame, so the brief never asks for a ratio: short-video feeds are vertical,
+ * the rest wide. A mixed list (the generic choice) is vertical. */
+export type Aspect = '9:16' | '16:9'
+
+export const PLATFORM_ASPECT: Record<Platform, Aspect> = {
+  tiktok: '9:16',
+  instagram_reels: '9:16',
+  youtube_shorts: '9:16',
+  facebook_reels: '9:16',
+  snapchat: '9:16',
+  youtube: '16:9',
+  linkedin: '16:9',
+  x: '16:9',
+}
+
+export const ASPECTS: Record<Aspect, string> = { '9:16': 'عمودي 9:16', '16:9': 'عريض 16:9' }
+
+export function aspectOf(platforms: Platform[]): Aspect {
+  return platforms.length > 0 && platforms.every((p) => PLATFORM_ASPECT[p] === '16:9') ? '16:9' : '9:16'
+}
+
 export const LANGUAGES: Record<Language, string> = { ar: 'العربية', en: 'الإنجليزية' }
 
 export const KNOWLEDGE: Record<AudienceKnowledge, string> = {

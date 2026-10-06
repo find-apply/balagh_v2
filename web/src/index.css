@@ -3462,3 +3462,21 @@ details.card[open] > summary {
     font-size: 0.85rem;
   }
 }
+
+.tpl-group {
+  margin: 4px 0 8px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.tpl-rest {
+  margin-top: 12px;
+}
+
+.tpl-rest > summary {
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}

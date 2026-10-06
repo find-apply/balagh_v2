@@ -4,7 +4,7 @@ import type { AudienceSpec, Brief, Platform } from '../types'
 import { GROUPS } from '../audiences'
 import { AudienceFields, PlatformPicker } from './AudienceFields'
 import { ChoiceField } from './ChoiceField'
-import { KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
+import { ASPECTS, aspectOf, KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
 
 const TOPICS = [
   'لماذا يبتلي الله الناس؟',
@@ -123,7 +123,8 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
     ['اللغة', `${LANGUAGES[audience.language]}${audience.dialect ? ` · ${audience.dialect}` : ''}`, false],
     ['المعرفة بالإسلام', KNOWLEDGE[audience.audience_knowledge], false],
     ['الأسلوب', audience.tone ?? 'تلقائي', !audience.tone],
-    ['المنصات', platforms.map((p) => PLATFORMS[p]).join('، ') || '—', false],
+    ['المنصة', platforms.length === 4 ? 'عام، كل المنصات القصيرة' : platforms.map((p) => PLATFORMS[p]).join('، ') || '—', false],
+    ['الصيغة', ASPECTS[aspectOf(platforms)], false],
     ['المدة', duration ? `${duration} ث` : 'يقترحها بلاغ', !duration],
   ]
 
