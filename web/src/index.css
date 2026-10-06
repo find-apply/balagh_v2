@@ -3270,3 +3270,58 @@ button.big {
   from { opacity: 0.4; }
   to { opacity: 1; }
 }
+
+/* Folded cards: the sources on the script tab, the story and AI findings on the reviewer page. */
+details.card > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+}
+
+details.card > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.card > summary h3 {
+  margin: 0;
+}
+
+details.card > summary h3::before {
+  content: '▸';
+  display: inline-block;
+  margin-inline-end: 8px;
+  color: var(--brand);
+  transition: transform 0.15s;
+}
+
+details.card[open] > summary h3::before {
+  transform: rotate(90deg);
+}
+
+details.card[open] > summary {
+  margin-bottom: 14px;
+}
+
+.chip.example {
+  border-color: var(--brand);
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.notice.bad button {
+  margin-top: 8px;
+}
+
+@media (max-width: 760px) {
+  /* The part tabs stay reachable under the mobile bar while a long script scrolls. */
+  .jump {
+    position: sticky;
+    top: 50px;
+    z-index: 10;
+    background: var(--bg, #f7f6f2);
+    padding-top: 4px;
+  }
+}

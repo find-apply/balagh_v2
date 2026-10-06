@@ -47,10 +47,15 @@ export function IdeaList({ ideas, disabled, onPick }: Props) {
             </blockquote>
             <div className="badges">
               {idea.evidence.length > 0 ? (
-                <span className="badge ok">{idea.evidence.length} نص موثّق</span>
+                idea.evidence.slice(0, 3).map((e) => (
+                  <span className="badge ok" key={e.id}>
+                    {e.source}
+                  </span>
+                ))
               ) : (
                 <span className="badge">بلا نص شرعي</span>
               )}
+              {idea.evidence.length > 3 && <span className="badge ok">+{idea.evidence.length - 3}</span>}
               {idea.unverified.length > 0 && <span className="badge bad">{idea.unverified.length} غير موثّق، لن يُستعمل</span>}
             </div>
             {onPick && (

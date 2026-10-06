@@ -26,6 +26,18 @@ const DURATIONS = [
 
 const LAST_KEY = 'balagh.lastBrief'
 
+/** A complete brief a first-time visitor can run as is, to see the whole flow before writing their own. */
+const EXAMPLE: Brief = {
+  idea: 'الصدق في البيع: لماذا يرزق الله التاجر الصادق؟',
+  audience: GROUPS[1].label,
+  language: 'ar',
+  dialect: 'الدارجة الجزائرية',
+  audience_knowledge: GROUPS[1].knowledge,
+  tone: null,
+  platforms: ['tiktok'],
+  duration_seconds: 45,
+}
+
 const MOD = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl'
 
 const DEFAULT_AUDIENCE: AudienceSpec = {
@@ -160,6 +172,20 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
             />
             <div className="chips">
               <span className="muted small">مواضيع جاهزة:</span>
+              <button
+                type="button"
+                className="chip small example"
+                title="يملأ الموضوع والجمهور والمنصة والمدة بمثال كامل"
+                onClick={() => {
+                  setIdea(EXAMPLE.idea ?? '')
+                  setAudience({ audience: EXAMPLE.audience, language: EXAMPLE.language, dialect: EXAMPLE.dialect, audience_knowledge: EXAMPLE.audience_knowledge, tone: EXAMPLE.tone })
+                  setPlatforms(EXAMPLE.platforms)
+                  setDuration(String(EXAMPLE.duration_seconds))
+                  setFormKey((k) => k + 1)
+                }}
+              >
+                ★ جرّب مثالا كاملا
+              </button>
               {TOPICS.map((t) => (
                 <button type="button" key={t} className={idea === t ? 'chip small on' : 'chip small'} onClick={() => setIdea(idea === t ? '' : t)}>
                   {t}

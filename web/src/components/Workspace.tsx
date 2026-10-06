@@ -10,7 +10,7 @@ import { go, projectHash } from '../route'
 import type { Busy } from '../tasks'
 import type { Idea, LocalizeRequest, Project, ReviewRole, VideoTemplate } from '../types'
 
-const STEPS = ['الموجز', 'الأفكار', 'السيناريو', 'القالب', 'المعاينة', 'المراجعة', 'الاعتماد', 'النهائي']
+const STEPS = ['الموجز', 'الأفكار', 'السيناريو', 'القالب', 'فيديو المعاينة', 'المراجعة', 'الاعتماد', 'الفيديو النهائي']
 
 function Stepper({ current }: { current: number }) {
   return (

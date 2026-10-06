@@ -159,14 +159,19 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
       </section>
 
       {script.story && (
-        <section className="card">
-          <h3>4. قصة الأطفال</h3>
+        <details className="card rv-fold">
+          <summary><h3>4. قصة الأطفال</h3><span className="muted small">الحوار الذي يُسمع في الفيديو؛ النص الشرعي فيه من المرجع حرفيا</span></summary>
           <StoryView script={script} disabled onRewrite={() => {}} />
-        </section>
+        </details>
       )}
 
-      <section className="card">
-        <h3>{script.story ? '5' : '4'}. ما وجده المراجع الآلي</h3>
+      <details className="card rv-fold" open={(script.review?.blocking ?? 0) > 0}>
+        <summary>
+          <h3>{script.story ? '5' : '4'}. ما وجده المراجع الآلي</h3>
+          <span className="muted small">
+            {!script.review ? 'لم تُراجَع آليا بعد' : script.review.findings.length === 0 ? 'لا ملاحظات' : `${script.review.findings.length} ملاحظة، منها ${script.review.blocking} مانعة`}
+          </span>
+        </summary>
         {!script.review && <p className="muted">لم تُراجَع آليا بعد.</p>}
         {script.review && script.review.findings.length === 0 && script.review.claims.length === 0 && (
           <p className="notice ok">لا ملاحظات آلية. {script.review.note}</p>
@@ -198,7 +203,7 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
             </tbody>
           </table>
         )}
-      </section>
+      </details>
 
       <section className="card rv-decision" id="decision">
         <h3>{script.story ? '6' : '5'}. قرارك بصفتك {ROLES[role]}</h3>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, ApiError } from './api'
 import { AdminApp } from './admin/AdminApp'
 import { BriefForm } from './components/BriefForm'
@@ -14,6 +14,7 @@ import { loadHistory, saveHistory, upsertEntry } from './history'
 import type { HistoryEntry } from './history'
 import { go, parseRoute, projectHash } from './route'
 import { TASKS } from './tasks'
+import { askToNotify, notifyIfAway } from './notify'
 import type { Busy } from './tasks'
 import type { Brief, Project, Script, VideoTemplate } from './types'
 
@@ -39,6 +40,8 @@ export default function App() {
   const [draft, setDraft] = useState<Brief | null>(null)
   const [formKey, setFormKey] = useState(0)
   const [templates, setTemplates] = useState<VideoTemplate[] | null>(null)
+  // The last request that failed, so the error notice can offer to run it again.
+  const failed = useRef<{ b: Busy; work: () => Promise<void> } | null>(null)
 
   useEffect(() => {
     api.templates().then(setTemplates, () => setTemplates(null))
@@ -127,9 +130,13 @@ export default function App() {
     setReferral(null)
     try {
       await work()
+      failed.current = null
     } catch (e) {
       if (e instanceof ApiError && e.referral) setReferral(e.message)
-      else setError(e instanceof Error ? e.message : String(e))
+      else {
+        failed.current = { b, work }
+        setError(e instanceof Error ? e.message : String(e))
+      }
     } finally {
       setBusy(null)
     }
@@ -157,6 +164,7 @@ export default function App() {
     const pending = projectHash(pid, 'new')
     go(pending)
     const step = autoReview ? 'الخطوة 1 من 2' : undefined
+    askToNotify()
     job({ task: TASKS[kind], projectId: pid, kind: 'script', step }, async () => {
       let script: Script
       try {
@@ -166,6 +174,7 @@ export default function App() {
         throw e
       }
       putScript(pid, script)
+      notifyIfAway('بلاغ: السيناريو جاهز', script.title)
       if (location.hash === pending) go(projectHash(pid, script.id), true)
       if (autoReview) {
         setBusy({ task: TASKS.review, projectId: pid, kind: 'review', scriptId: script.id, step: 'الخطوة 2 من 2' })
@@ -223,6 +232,11 @@ export default function App() {
             <div className="notice bad" role="alert">
               <strong>تعذر إكمال الطلب</strong>
               <p>{error}</p>
+              {failed.current && (
+                <button type="button" disabled={busy !== null} onClick={() => failed.current && job(failed.current.b, failed.current.work)}>
+                  أعد المحاولة
+                </button>
+              )}
             </div>
           )}
           {referral && route.view === 'new' && (

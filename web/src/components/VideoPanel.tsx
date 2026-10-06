@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, BASE } from '../api'
 import { VIDEO_STATUS } from '../labels'
+import { askToNotify, notifyIfAway } from '../notify'
 import type { Script, Video, VideoTemplate } from '../types'
 
 interface Props {
@@ -33,6 +34,7 @@ function Waiting({ video, template }: { video: Video; template: VideoTemplate | 
   }, [video.created_at])
   const typical = template?.typical_seconds ?? null
   const share = typical ? Math.min(0.95, elapsed / typical) : null
+  const [copied, setCopied] = useState(false)
   const mm = String(Math.floor(elapsed / 60))
   const ss = String(Math.floor(elapsed % 60)).padStart(2, '0')
   return (
@@ -45,7 +47,13 @@ function Waiting({ video, template }: { video: Video; template: VideoTemplate | 
         {typical
           ? ` · هذا القالب يستغرق عادة ${minutes(typical)}${elapsed > typical * 1.3 ? '، وهذا يطول أكثر من المعتاد: الخادم يصيّر فيديو آخر على الأرجح' : ''}`
           : ' · يستغرق الفيديو عادة بين 3 و8 دقائق'}
-        . يمكنك متابعة العمل في الصفحة، أو تركها: الفيديو يُحفظ هنا.
+        .
+      </p>
+      <p className="muted small">
+        يمكنك متابعة العمل أو إغلاق الصفحة: الفيديو يُحفظ هنا، وإن سمحت بالإشعارات نبّهناك عند اكتماله.{' '}
+        <button type="button" className="link inline" onClick={() => navigator.clipboard.writeText(location.href).then(() => setCopied(true))}>
+          {copied ? 'نُسخ رابط الصفحة' : 'انسخ رابط الصفحة'}
+        </button>
       </p>
     </div>
   )
@@ -66,6 +74,12 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
     if (!running) return
     const timer = setInterval(async () => {
       const fresh = await Promise.all(videos.map((v) => (ACTIVE.has(v.status) ? api.video(v.id).catch(() => v) : v)))
+      for (const v of fresh) {
+        const before = videos.find((x) => x.id === v.id)
+        if (before && ACTIVE.has(before.status) && v.status === 'done')
+          notifyIfAway('بلاغ: الفيديو جاهز', v.preview ? 'فيديو المعاينة جاهز للمشاهدة.' : 'الفيديو النهائي جاهز للتنزيل.')
+        if (before && ACTIVE.has(before.status) && v.status === 'failed') notifyIfAway('بلاغ: تعذر إنشاء الفيديو', v.error ?? '')
+      }
       setVideos(fresh)
     }, 4000)
     return () => clearInterval(timer)
@@ -75,6 +89,7 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
     if (!template) return
     setStarting(true)
     setError(null)
+    askToNotify()
     try {
       const video = await api.createVideo(projectId, script.id, template.id)
       setVideos((vs) => [video, ...vs])
@@ -140,7 +155,7 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
                 <span className={`badge ${v.status === 'done' ? 'ok' : v.status === 'failed' ? 'bad' : 'info'}`}>
                   {VIDEO_STATUS[v.status]}
                 </span>
-                <span className={v.preview ? 'badge warn' : 'badge ok'}>{v.preview ? 'معاينة بعلامة مائية' : 'نهائي'}</span>
+                <span className={v.preview ? 'badge warn' : 'badge ok'}>{v.preview ? 'فيديو المعاينة · بعلامة مائية' : 'الفيديو النهائي'}</span>
                 <span className="badge">{templates?.find((t) => t.id === v.template)?.name ?? v.template}</span>
                 {v.duration_seconds != null && <span className="badge">{Math.round(v.duration_seconds)} ث</span>}
                 {v.status === 'done' && (

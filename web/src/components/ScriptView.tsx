@@ -160,7 +160,7 @@ function PreviewForReview({ projectId, script, onGo }: { projectId: string; scri
   return (
     <div className="review-preview">
       <div className="badges">
-        <span className={video.preview ? 'badge warn' : 'badge ok'}>{video.preview ? 'معاينة بعلامة مائية' : 'فيديو نهائي'}</span>
+        <span className={video.preview ? 'badge warn' : 'badge ok'}>{video.preview ? 'فيديو المعاينة · بعلامة مائية' : 'الفيديو النهائي'}</span>
         <span className="badge">{Math.round(video.duration_seconds ?? 0)} ث</span>
       </div>
       <video controls preload="metadata" src={BASE + video.url} className="player" />
@@ -184,6 +184,25 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
         المراجع يشاهد المعاينة ثم يوقّع.
       </p>
       <PreviewForReview projectId={projectId} script={script} onGo={onGo} />
+      {script.approved && (
+        <div className="notice ok">
+          <strong>اكتمل الاعتماد.</strong>
+          <p className="small">
+            الخطوة التالية: الفيديو النهائي بلا علامة مائية.{' '}
+            {onGo && (
+              <a href="#s-video" onClick={(e) => { e.preventDefault(); onGo('video') }}>
+                أنشئ الفيديو النهائي ←
+              </a>
+            )}
+          </p>
+        </div>
+      )}
+      {!script.approved && script.approvals.length > 0 && script.change_requests.length === 0 && (
+        <div className="notice">
+          <strong>سُجّل توقيع {script.approvals.map((a) => ROLES[a.role]).join(' و')}.</strong>
+          <p className="small">بانتظار: {pending.map((r) => ROLES[r.role]).join('، ')}. أرسل لهم رابط صفحة المراجع أدناه.</p>
+        </div>
+      )}
       {script.change_requests.length > 0 && (
         <div className="notice bad">
           <strong>طلب تعديل: هذه النسخة لا تُعتمد. صحّحها في نسخة جديدة ثم يراجعها من جديد.</strong>
@@ -295,7 +314,7 @@ function NextStep({ script, disabled, onReview, go }: { script: Script; disabled
     return (
       <div className="next">
         <div>
-          <strong>الخطوة التالية: قالب الفيديو ومعاينته</strong>
+          <strong>الخطوة التالية: قالب الفيديو وفيديو المعاينة</strong>
           <p className="muted small">اختر قالبا وأنشئ معاينة بعلامة مائية يشاهدها المراجع قبل أن يوقّع.</p>
         </div>
         <TabLink to="template" go={go} className="button primary">
@@ -311,7 +330,7 @@ function NextStep({ script, disabled, onReview, go }: { script: Script; disabled
           <p className="muted small">أنشئ معاينة بعلامة مائية، ثم يوقّع كل من تتطلبه هذه النسخة بعد مشاهدتها.</p>
         </div>
         <TabLink to="video" go={go} className="button">
-          المعاينة
+          فيديو المعاينة
         </TabLink>
         <TabLink to="approve" go={go} className="button primary">
           الاعتماد
@@ -429,8 +448,11 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
         </p>
       </section>
 
-      <section className="card" id="s-sources">
-        <h3>المصادر</h3>
+      <details className="card sources" id="s-sources" open={script.references.length <= 1}>
+        <summary>
+          <h3>المصادر ({script.references.length})</h3>
+          <span className="muted small">النص الحرفي من المصحف والصحيحين، مع التفسير أو الشرح المعتمد</span>
+        </summary>
         {script.unverified_claims.length > 0 && (
           <div className="notice warn">
             <strong>وقائع لم يُتحقق منها</strong>
@@ -489,7 +511,7 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
             ))}
           </div>
         ))}
-      </section>
+      </details>
 
       {script.localized_from && (
         <section className="card">
