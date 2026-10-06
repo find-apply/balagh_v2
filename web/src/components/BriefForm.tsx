@@ -5,6 +5,7 @@ import { GROUPS } from '../audiences'
 import { AudienceFields, PlatformPicker } from './AudienceFields'
 import { ChoiceField } from './ChoiceField'
 import { ASPECTS, aspectOf, KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
+import { api } from '../api'
 
 const TOPICS = [
   'لماذا يبتلي الله الناس؟',
@@ -31,7 +32,7 @@ const EXAMPLE: Brief = {
   idea: 'الصدق في البيع: لماذا يرزق الله التاجر الصادق؟',
   audience: GROUPS[0].label,
   language: 'ar',
-  dialect: null,
+  dialect: 'الفصحى المبسطة',
   audience_knowledge: GROUPS[0].knowledge,
   tone: null,
   platforms: ['tiktok'],
@@ -40,10 +41,11 @@ const EXAMPLE: Brief = {
 
 const MOD = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl'
 
+// Simplified standard Arabic by default: left "automatic", the model drifts to one regional dialect.
 const DEFAULT_AUDIENCE: AudienceSpec = {
   audience: GROUPS[0].label,
   language: 'ar',
-  dialect: null,
+  dialect: 'الفصحى المبسطة',
   audience_knowledge: GROUPS[0].knowledge,
   tone: null,
 }
@@ -83,9 +85,15 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
   const remembered = !initial && start !== null
   // Bumping it remounts the audience pickers, whose group and region selections are local to them.
   const [formKey, setFormKey] = useState(0)
+  // Optional source for the ideas: a YouTube link or a file; the file is uploaded when the brief is sent.
+  const [sourceOpen, setSourceOpen] = useState(false)
+  const [sourceUrl, setSourceUrl] = useState('')
+  const [sourceFile, setSourceFile] = useState<File | null>(null)
+  const [sourceError, setSourceError] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
 
-  const send = () => {
-    if (disabled || platforms.length === 0) return
+  const send = async () => {
+    if (disabled || platforms.length === 0 || uploading) return
     const brief: Brief = {
       ...audience,
       idea: idea.trim() || null,
@@ -97,12 +105,29 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
     } catch {
       // Not remembering the brief is harmless.
     }
+    setSourceError(null)
+    if (sourceUrl.trim() && sourceFile) {
+      setSourceError('اختر مصدرا واحدا: رابط أو ملف.')
+      return
+    }
+    if (sourceUrl.trim()) brief.source_url = sourceUrl.trim()
+    if (sourceFile) {
+      setUploading(true)
+      try {
+        brief.source_file = (await api.upload(sourceFile)).id
+      } catch (e) {
+        setSourceError(e instanceof Error ? e.message : String(e))
+        return
+      } finally {
+        setUploading(false)
+      }
+    }
     onSubmit(brief)
   }
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
-    send()
+    void send()
   }
 
   const resetPrefs = () => {
@@ -166,7 +191,7 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault()
-                  send()
+                  void send()
                 }
               }}
               placeholder="مثال: كيف يتعامل المسلم مع القلق من المستقبل؟"
@@ -194,6 +219,34 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
               ))}
             </div>
           </div>
+          <details className="source-field" open={sourceOpen} onToggle={(e) => setSourceOpen((e.target as HTMLDetailsElement).open)}>
+            <summary>
+              مصدر للإلهام <span className="muted small">(اختياري): محاضرة على يوتيوب، أو ملف PDF، أو صورة منشور</span>
+            </summary>
+            <p className="muted small">
+              يأخذ بلاغ من المصدر الزاوية والأمثلة فقط. كل نص شرعي يُتحقق منه في القرآن والصحيحين كالمعتاد؛ ما ذكره المصدر ولم يوجد فيهما يُعرض ولا يُستعمل.
+              الملف يُقرأ مرة واحدة لهذا الطلب ثم يُحذف.
+            </p>
+            <div className="source-inputs">
+              <label className="field">
+                <span>رابط يوتيوب (حتى 20 دقيقة)</span>
+                <input dir="ltr" inputMode="url" placeholder="https://www.youtube.com/watch?v=…" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} disabled={Boolean(sourceFile)} />
+              </label>
+              <label className="field">
+                <span>أو ملف: PDF، صورة، نص (حتى 10 م.ب)</span>
+                <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.md,application/pdf,image/*,text/plain" onChange={(e) => setSourceFile(e.target.files?.[0] ?? null)} disabled={Boolean(sourceUrl.trim())} />
+              </label>
+            </div>
+            {(sourceUrl.trim() || sourceFile) && (
+              <p className="small">
+                <span className="badge info">{sourceFile ? `ملف: ${sourceFile.name}` : 'فيديو يوتيوب'}</span>{' '}
+                <button type="button" className="link inline" onClick={() => { setSourceUrl(''); setSourceFile(null); setFormKey((k) => k + 1) }}>
+                  إزالة
+                </button>
+              </p>
+            )}
+            {sourceError && <p className="error-text">{sourceError}</p>}
+          </details>
         </section>
 
         <section className="card form-section">
@@ -247,8 +300,8 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
               </div>
             ))}
           </dl>
-          <button className="primary big block-button" disabled={disabled || platforms.length === 0}>
-            {idea.trim() ? 'اقترح 3 أفكار' : 'اقترح عليّ 3 أفكار'}
+          <button className="primary big block-button" disabled={disabled || platforms.length === 0 || uploading}>
+            {uploading ? 'يرفع الملف…' : idea.trim() || sourceUrl.trim() || sourceFile ? 'اقترح 3 أفكار' : 'اقترح عليّ 3 أفكار'}
           </button>
           <p className="kbd-hint muted small">
             أو <kbd>{MOD}</kbd> + <kbd>Enter</kbd> من خانة الموضوع

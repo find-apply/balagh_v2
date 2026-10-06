@@ -46,6 +46,7 @@ export function IdeaList({ ideas, disabled, onPick }: Props) {
               {idea.hook}
             </blockquote>
             <div className="badges">
+              {idea.source_locus && <span className="badge info">من المصدر: {idea.source_locus}</span>}
               {idea.evidence.length > 0 ? (
                 idea.evidence.slice(0, 3).map((e) => (
                   <span className="badge ok" key={e.id}>
@@ -83,6 +84,18 @@ export function IdeaList({ ideas, disabled, onPick }: Props) {
                   {idea.evidence.map((e) => (
                     <EvidenceItem key={e.id} e={e} />
                   ))}
+                </div>
+              )}
+              {idea.source_mentions.length > 0 && (
+                <div className="block">
+                  <h4>ذكرها المصدر وهي خارج نطاق مصادرنا الحالية (ليس تضعيفا)، فلن تُستعمل</h4>
+                  <ul className="plain">
+                    {idea.source_mentions.map((m) => (
+                      <li key={m} dir="auto">
+                        <span className="badge">خارج النطاق</span> {m}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
               {idea.unverified.length > 0 && (

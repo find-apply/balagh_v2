@@ -5,16 +5,16 @@ from datetime import datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from google.genai import errors as genai_errors
 
-from . import admin, flow_settings, generator, store
+from . import admin, flow_settings, generator, inspiration, store
 from .schemas import (
     Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, HistoryEntry, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, StoryIn,
-    TemplateIn, Video, VideoIn, VideoTemplate,
+    SourceInfo, TemplateIn, Video, VideoIn, VideoTemplate,
 )
 from .video import catalog, render, story
 
@@ -23,6 +23,8 @@ logger = logging.getLogger("balagh")
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     store.fail_unfinished_videos("انقطع التصيير بإعادة تشغيل الخادم. أعد إنشاء الفيديو.")
+
+    inspiration.sweep()  # uploads older than their TTL are leftovers
     yield
 
 
@@ -136,13 +138,34 @@ async def list_templates() -> list[dict]:
 
 @app.post("/projects", response_model=Project, status_code=201, dependencies=[Depends(generation_open)])
 async def create_project(brief: BriefIn, x_client_id: Optional[str] = Header(default=None)) -> Project:
-    """Step 1: submit the brief, get back 3 video ideas with their verified evidence."""
-    ideas = await generator.generate_ideas(brief)
-    project = Project(id=uuid4().hex, brief=brief, ideas=ideas)
+    """Step 1: submit the brief, get back 3 video ideas with their verified evidence. With `source_url` or
+    `source_file`, the ideas take their angles from that source; the texts are verified all the same."""
+    try:
+        source = await inspiration.resolve(brief.source_url, brief.source_file)
+    except inspiration.SourceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    try:
+        ideas, summary = await generator.generate_ideas_from(brief, source.part if source else None)
+    finally:
+        inspiration.discard(source)
+    info = SourceInfo(kind=source.kind, label=source.label, url=source.url, summary=summary) if source else None
+    project = Project(id=uuid4().hex, brief=brief.model_copy(update={"source_file": None}), ideas=ideas, source=info)
     store.save(project)
     if x_client_id:
         store.remember(x_client_id[:64], project.id, shared=False)
     return project
+
+
+@app.post("/uploads", status_code=201, dependencies=[Depends(generation_open)])
+async def upload_source(file: UploadFile) -> dict:
+    """A PDF, image or text file (up to 10 MB) to draw the ideas from. Returns an id for `source_file` in
+    POST /projects. The file is read once for that brief and then deleted; it is never kept."""
+    data = await file.read()
+    try:
+        upload_id = inspiration.save_upload(data, file.content_type or "", file.filename or "")
+    except inspiration.SourceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"id": upload_id, "name": file.filename}
 
 
 @app.get("/projects", response_model=list[HistoryEntry])

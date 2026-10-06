@@ -54,6 +54,22 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 
 export const api = {
   createProject: (brief: Brief) => request<Project>('POST', '/projects', brief),
+  /** A PDF, image or text file to draw the ideas from; the id goes in the brief's source_file. */
+  upload: async (file: File): Promise<{ id: string; name: string }> => {
+    const form = new FormData()
+    form.append('file', file)
+    let response: Response
+    try {
+      response = await fetch(BASE + '/uploads', { method: 'POST', body: form, headers: clientId() ? { 'X-Client-Id': clientId() } : {} })
+    } catch {
+      throw new ApiError(0, `تعذر الاتصال بالخادم (${BASE}).`)
+    }
+    if (!response.ok) {
+      const data = await response.json().catch(() => null)
+      throw new ApiError(response.status, typeof data?.detail === 'string' ? data.detail : `خطأ ${response.status}`)
+    }
+    return response.json()
+  },
   listProjects: () => request<HistoryEntry[]>('GET', '/projects'),
   hideProject: (id: string) => request<void>('DELETE', `/projects/${id}`),
   getProject: (id: string) => request<Project>('GET', `/projects/${id}`),

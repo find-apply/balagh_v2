@@ -25,6 +25,16 @@ export interface Brief extends AudienceSpec {
   idea: string | null
   platforms: Platform[]
   duration_seconds: number | null
+  /** Optional source the ideas take their angles from: a public YouTube link, or an upload id. */
+  source_url?: string | null
+  source_file?: string | null
+}
+
+export interface SourceInfo {
+  kind: 'youtube' | 'file'
+  label: string
+  url: string | null
+  summary: string
 }
 
 export interface LocalizeRequest extends AudienceSpec {
@@ -55,6 +65,10 @@ export interface Idea {
   needs_specialist_review: boolean
   evidence: Evidence[]
   unverified: string[]
+  /** For ideas drawn from a source: about where in it. */
+  source_locus: string
+  /** Texts the source cites that are outside the verified sources: shown, never used. */
+  source_mentions: string[]
 }
 
 export interface VideoTemplate {
@@ -243,4 +257,5 @@ export interface Project {
   brief: Brief
   ideas: Idea[]
   scripts: Record<string, Script>
+  source: SourceInfo | null
 }

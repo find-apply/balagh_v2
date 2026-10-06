@@ -142,6 +142,17 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
             <span className="badge">{KNOWLEDGE[brief.audience_knowledge]}</span>
             <span className="badge">{brief.platforms.map((p) => PLATFORMS[p]).join('، ')}</span>
           </div>
+          {project.source && (
+            <p className="muted small source-line" dir="auto">
+              <span className="badge info">{project.source.kind === 'youtube' ? 'مصدر الإلهام: فيديو' : 'مصدر الإلهام: ملف'}</span>{' '}
+              {project.source.url ? (
+                <a href={project.source.url} target="_blank" rel="noreferrer">{project.source.label}</a>
+              ) : (
+                project.source.label
+              )}
+              {project.source.summary && <> · {project.source.summary}</>}
+            </p>
+          )}
         </div>
         {actions && (
         <div className="ws-tools">

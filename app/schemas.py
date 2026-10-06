@@ -59,6 +59,15 @@ class BriefIn(AudienceSpec):
         default=None, min_length=3, max_length=2000, examples=["فضل صلاة الفجر"],
         description="Leave null to let the AI pick the topics itself.",
     )
+    source_url: Optional[str] = Field(
+        default=None, max_length=300, examples=["https://www.youtube.com/watch?v=9bf3L7IO3vE"],
+        description="Optional: a public YouTube video (up to 20 minutes) the ideas take their angles from. "
+                    "The model reads it; every religious text is still verified against the sources.",
+    )
+    source_file: Optional[str] = Field(
+        default=None, max_length=40,
+        description="Optional: the id returned by POST /uploads for a PDF, image or text file to take the angles from.",
+    )
     platforms: list[Platform] = Field(min_length=1)
     duration_seconds: Optional[int] = Field(
         default=None, ge=5, le=600,
@@ -280,11 +289,32 @@ class ClaimsDraft(BaseModel):
 
 # ---- Responses ----
 
+class SourcedIdeaDraft(IdeaDraft):
+    """An idea drawn from an attached source (a video, a document or an image)."""
+    source_locus: str = Field(description="Where in the source this angle comes from: a timestamp mm:ss for a video, a page or heading for a document, 'the image' for an image. Empty if not from the source.")
+    source_claims: list[str] = Field(description="Every religious text the SOURCE itself cites that this idea leans on, as the source words it, one per entry. Empty if none.")
+
+
+class SourcedIdeasDraft(IdeasDraft):
+    ideas: list[SourcedIdeaDraft] = Field(description="Exactly 3 ideas, or empty when brief_level is D.")
+    source_summary: str = Field(description="Two sentences in the brief's language: what the source is about and which religious texts it cites.")
+
+
 class Idea(IdeaCore):
     id: str
     needs_specialist_review: bool
     evidence: list[Evidence] = Field(description="Texts verified in the sources. The script may only quote these.")
     unverified: list[str] = Field(description="Texts the AI wanted but that were not found in the sources, so they are not used.")
+    source_locus: str = Field(default="", description="For ideas drawn from an attached source: where in it (about a minute, a page, a heading).")
+    source_mentions: list[str] = Field(default_factory=list, description="Texts the source cites that are outside the verified sources (not the two Sahihs or the Quran); shown, never used.")
+
+
+class SourceInfo(BaseModel):
+    """What the ideas were inspired by, kept with the project for the record."""
+    kind: str = Field(examples=["youtube", "file"])
+    label: str = Field(description="The video title or the file name.")
+    url: Optional[str] = None
+    summary: str = Field(default="", description="The model's two-sentence summary of the source.")
 
 
 class Scene(SceneDraft):
@@ -432,6 +462,7 @@ class Project(BaseModel):
     id: str
     brief: BriefIn
     ideas: list[Idea]
+    source: Optional[SourceInfo] = Field(default=None, description="The optional source the ideas were drawn from.")
     scripts: dict[str, Script] = Field(default_factory=dict, description="Keyed by script id.")
 
 

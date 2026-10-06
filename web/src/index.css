@@ -3503,3 +3503,41 @@ details.card[open] > summary {
   margin: 0;
   padding: 8px 12px;
 }
+
+.source-field {
+  margin-top: 14px;
+  border-top: 1px dashed var(--line);
+  padding-top: 10px;
+}
+
+.source-field > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--brand);
+  list-style: none;
+}
+
+.source-field > summary::-webkit-details-marker {
+  display: none;
+}
+
+.source-field > summary::before {
+  content: '▸';
+  display: inline-block;
+  margin-inline-end: 6px;
+  transition: transform 0.15s;
+}
+
+.source-field[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.source-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.source-line {
+  margin: 6px 0 0;
+}

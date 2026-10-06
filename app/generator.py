@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from . import flow_settings, sources, store
 from .video import catalog
 from .schemas import (
+    SourcedIdeaDraft, SourcedIdeasDraft,
     AudienceKnowledge, AudienceSpec, BriefIn, ClaimsDraft, ClaimStatus, ContentLevel, Evidence, EvidenceKind,
     Finding, FindingsDraft, Idea, IdeasDraft, Language, LocalizedDraft, Platform, Reference, ReferenceUsage,
     Reviewer, ReviewReport, Scene, Script, ScriptDraft, Severity,
@@ -96,7 +97,8 @@ Religious texts are verified separately against the Quran and the two Sahihs (al
 write out any verse or hadith in the idea. Describe it ("a hadith about ...") and request it: verses by surah and \
 ayah number, hadiths by a distinctive run of their Arabic wording as you remember it (the Prophet's words, not the \
 chain of narrators), in Arabic whatever the brief's language. Request only hadiths you believe are in al-Bukhari \
-or Muslim. An idea must still make sense if a requested text turns out not to be found.
+or Muslim. Request at most 5 consecutive verses per item (a longer passage is taken in pieces). An idea must still \
+make sense if a requested text turns out not to be found.
 
 {GLOSSARY}
 
@@ -342,8 +344,10 @@ def models() -> tuple[str, str]:
     return flow.generation_model, flow.review_model
 
 
-async def _generate(system: str, prompt: str, output: type[T], role: str = "generation") -> T:
-    """Runs one model call with the admin's current settings, and records it for the admin's run log."""
+async def _generate(system: str, prompt: str, output: type[T], role: str = "generation",
+                    parts: tuple[types.Part, ...] = ()) -> T:
+    """Runs one model call with the admin's current settings, and records it for the admin's run log.
+    `parts` are attachments (a video, a document, an image) the model reads before the prompt."""
     flow = flow_settings.defaults() if PLAIN else flow_settings.current()
     model = flow.review_model if role == "review" else flow.generation_model
     if flow.extra_rules.strip():
@@ -352,7 +356,7 @@ async def _generate(system: str, prompt: str, output: type[T], role: str = "gene
     error = None
     try:
         try:
-            return await _call_model(system, prompt, output, model)
+            return await _call_model(system, prompt, output, model, parts)
         except genai_errors.APIError as unavailable:
             # 429 is the quota or rate limit; 503 is the model being overloaded. Both are the model
             # being unavailable rather than the request being wrong, so try the smaller model once.
@@ -360,7 +364,7 @@ async def _generate(system: str, prompt: str, output: type[T], role: str = "gene
                 raise
             logger.warning("model %s unavailable (%s); falling back to %s", model, unavailable.code, FALLBACK_MODEL)
             model = FALLBACK_MODEL
-            return await _call_model(system, prompt, output, model)
+            return await _call_model(system, prompt, output, model, parts)
     except Exception as e:
         error = f"{type(e).__name__}: {e}"
         raise
@@ -369,10 +373,11 @@ async def _generate(system: str, prompt: str, output: type[T], role: str = "gene
             store.log_run(output.__name__, model, time.monotonic() - started, error)
 
 
-async def _call_model(system: str, prompt: str, output: type[T], model: str) -> T:
+async def _call_model(system: str, prompt: str, output: type[T], model: str, parts: tuple[types.Part, ...] = ()) -> T:
+    contents = [types.Content(role="user", parts=[*parts, types.Part.from_text(text=prompt)])] if parts else prompt
     response = await client.aio.models.generate_content(
         model=model,
-        contents=prompt,
+        contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=system,
             response_mime_type="application/json",
@@ -393,29 +398,66 @@ async def _call_model(system: str, prompt: str, output: type[T], model: str) -> 
 
 # ---- Ideas ----
 
+SOURCE_RULES = """A SOURCE is attached (a video, a document or an image). Use it for the angles, the examples, the \
+stories and the questions the audience has, and say in `source_locus` where in the source each idea comes from \
+(a timestamp mm:ss for a video, a page or heading for a document). Do not copy the source's wording: write your own. \
+Religious texts work exactly as without a source: describe and request them, and the system verifies them; a text \
+is not verified by appearing in the source. In `source_claims` list, for each idea, the religious texts the source \
+itself cites that the idea leans on, as the source words them, so the creator can see what was and was not verified. \
+Ideas that rest on a verifiable text come before ideas that rest on none."""
+
+def _source_mentions(claims: list[str], evidence: list[Evidence]) -> list[str]:
+    """Texts the source cites that no verified evidence covers: shown to the creator as outside the sources."""
+    verified = " ".join(sources.normalize(e.text) for e in evidence)
+    out = []
+    for claim in claims:
+        words = sources.normalize(claim).split()
+        runs = [" ".join(words[i:i + 3]) for i in range(max(1, len(words) - 2))]
+        if not any(run in verified for run in runs[:12]):
+            out.append(claim.strip())
+    return out
+
+
 async def generate_ideas(brief: BriefIn) -> list[Idea]:
+    """Three ideas with their verified evidence."""
+    ideas, _ = await generate_ideas_from(brief, None)
+    return ideas
+
+
+async def generate_ideas_from(brief: BriefIn, source_part: Optional[types.Part]) -> tuple[list[Idea], str]:
+    """Three ideas with their verified evidence, and (with a source) the model's summary of that source."""
     duration = f"{brief.duration_seconds} seconds (fixed by the creator)" if brief.duration_seconds else "not set, suggest one per idea"
     prompt = (
-        f"<idea>{brief.idea or 'not given, choose the topics yourself'}</idea>\n\n"
+        f"<idea>{brief.idea or ('not given: take the topics from the attached source' if source_part else 'not given, choose the topics yourself')}</idea>\n\n"
         f"{_target_block(brief, brief.platforms, duration)}"
     )
-    draft = await _generate(IDEAS_SYSTEM, prompt, IdeasDraft)
+    if source_part is not None:
+        draft = await _generate(f"{IDEAS_SYSTEM}\n\n{SOURCE_RULES}", prompt, SourcedIdeasDraft, parts=(source_part,))
+    else:
+        draft = await _generate(IDEAS_SYSTEM, prompt, IdeasDraft)
     if draft.brief_level == ContentLevel.D:
         raise Referral(draft.referral_message or "هذه المسألة تحتاج إلى مفتٍ أو جهة إفتاء مؤهلة تسمع تفاصيلها.")
     if len(draft.ideas) != 3 or any(i.content_level == ContentLevel.D for i in draft.ideas):
         raise RuntimeError("The model did not return 3 usable ideas")
     ideas = []
-    for n, d in enumerate(draft.ideas, start=1):
+    for d in draft.ideas:
         evidence, unverified = sources.build_evidence(d.quran_requests, d.hadith_queries)
+        sourced = isinstance(d, SourcedIdeaDraft)
         ideas.append(Idea(
-            id=str(n),
-            **d.model_dump(exclude={"quran_requests", "hadith_queries", "duration_seconds"}),
+            id="",
+            **d.model_dump(exclude={"quran_requests", "hadith_queries", "duration_seconds", "source_locus", "source_claims"}),
             duration_seconds=brief.duration_seconds or d.duration_seconds,
             needs_specialist_review=d.content_level == ContentLevel.C,
             evidence=evidence,
             unverified=unverified,
+            source_locus=d.source_locus if sourced else "",
+            source_mentions=_source_mentions(d.source_claims, evidence) if sourced else [],
         ))
-    return ideas
+    # Ideas that rest on a verified text first; the order is otherwise the model's.
+    ideas.sort(key=lambda i: not i.evidence)
+    for n, idea in enumerate(ideas, start=1):
+        idea.id = str(n)
+    return ideas, (draft.source_summary if isinstance(draft, SourcedIdeasDraft) else "")
 
 
 # ---- Scripts ----

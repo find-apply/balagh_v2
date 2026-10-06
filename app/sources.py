@@ -105,6 +105,7 @@ def _hadith_number(h: dict) -> str:
 
 
 _hadith_tokens = [_tokens(h["t"]) for h in _hadith]
+_hadith_norm = [normalize(h["t"]) for h in _hadith]
 _index: dict[str, set[int]] = defaultdict(set)
 for _i, _toks in enumerate(_hadith_tokens):
     for _t in _toks:
@@ -167,11 +168,34 @@ def verse_parts(quran_key: str, lang: Language) -> dict[int, str]:
     return {a: texts[f"{surah}:{a}"] for a in range(start, end + 1)}
 
 
+def _evidence_for(h: dict) -> Evidence:
+    return Evidence(
+        id="", kind=EvidenceKind.hadith, text=h["t"],
+        source=f"{COLLECTIONS[h['c']]}، حديث رقم {_hadith_number(h)}",
+        hadith_key=f"{h['c']}:{_hadith_number(h)}" if h.get("a") is not None else f"{h['c']}:seq{h['n']}",
+        translation_en=h.get("e"),
+        translation_source=f"{HADITH_EN_SOURCE[h['c']]}, no. {_hadith_number(h)}" if h.get("e") else None,
+        sharh=get_sharh(h["c"], h["n"]),
+    )
+
+
+def _search_short(query: str, limit: int) -> list[Evidence]:
+    """Famous short hadiths («من غش فليس مني») have no distinctive words for the token index, so they are
+    looked up as an exact run of words instead; the shortest hadiths that contain the run come first."""
+    needle = normalize(query)
+    if len(needle.split()) < 2:
+        return []
+    pattern = re.compile(rf"(?<![^ ]){re.escape(needle)}(?![^ ])")
+    hits = [h for h, norm in zip(_hadith, _hadith_norm) if len(h["t"]) <= MAX_HADITH_CHARS and pattern.search(norm)]
+    hits.sort(key=lambda h: len(h["t"]))
+    return [_evidence_for(h) for h in hits[:limit]]
+
+
 def search_hadith(query: str, limit: int = 2) -> list[Evidence]:
     """Find hadiths in the two Sahihs matching a remembered Arabic wording."""
     q = _tokens(query)
     if len(q) < 3:
-        return []
+        return _search_short(query, limit)
     counts: dict[int, int] = defaultdict(int)
     for t in q:
         for i in _index.get(t, ()):
@@ -187,18 +211,8 @@ def search_hadith(query: str, limit: int = 2) -> list[Evidence]:
         if order >= 0.5:
             hits.append((order, n / len(q), i))
     hits.sort(key=lambda x: (-x[0], -x[1], len(_hadith[x[2]]["t"])))
-    found = []
-    for _, _, i in hits[:limit]:
-        h = _hadith[i]
-        found.append(Evidence(
-            id="", kind=EvidenceKind.hadith, text=h["t"],
-            source=f"{COLLECTIONS[h['c']]}، حديث رقم {_hadith_number(h)}",
-            hadith_key=f"{h['c']}:{_hadith_number(h)}" if h.get("a") is not None else f"{h['c']}:seq{h['n']}",
-            translation_en=h.get("e"),
-            translation_source=f"{HADITH_EN_SOURCE[h['c']]}, no. {_hadith_number(h)}" if h.get("e") else None,
-            sharh=get_sharh(h["c"], h["n"]),
-        ))
-    return found
+    found = [_evidence_for(_hadith[i]) for _, _, i in hits[:limit]]
+    return found or _search_short(query, limit)
 
 
 def verify_excerpt(excerpt: str, source_text: str) -> Optional[str]:
@@ -230,10 +244,13 @@ def build_evidence(quran_requests, hadith_queries: list[str]) -> tuple[list[Evid
             evidence.append(e.model_copy(update={"id": f"{prefix}{n}"}))
 
     for r in quran_requests:
-        found = get_verses(r.surah, r.ayah_start, r.ayah_end)
-        if found is None:
-            unverified.append(f"قرآن {r.surah}:{r.ayah_start}-{r.ayah_end}")
-        else:
+        # A range longer than MAX_VERSES is real text, not an error: it is taken in consecutive pieces.
+        for start in range(r.ayah_start, r.ayah_end + 1, MAX_VERSES):
+            end = min(start + MAX_VERSES - 1, r.ayah_end)
+            found = get_verses(r.surah, start, end)
+            if found is None:
+                unverified.append(f"قرآن {r.surah}:{start}-{end}")
+                break
             add(found, "Q")
     for query in hadith_queries:
         results = search_hadith(query)
