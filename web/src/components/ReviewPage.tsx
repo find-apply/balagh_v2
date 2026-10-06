@@ -19,6 +19,16 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
   const [project, setProject] = useState<Project | null>(null)
   const [video, setVideo] = useState<Video | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
+  // The fixed "to your decision" button goes away once the decision card itself is on screen.
+  const [decisionSeen, setDecisionSeen] = useState(false)
+  useEffect(() => {
+    if (!project) return
+    const card = document.getElementById('decision')
+    if (!card || !('IntersectionObserver' in window)) return
+    const io = new IntersectionObserver(([e]) => setDecisionSeen(e.isIntersecting), { threshold: 0.15 })
+    io.observe(card)
+    return () => io.disconnect()
+  }, [project])
   const [name, setName] = useState('')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
@@ -215,7 +225,7 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
         {requested && !done && (
           <p className="notice warn">طلب {requested.name} تعديلا على هذه النسخة: «{requested.note}». تُصحَّح في نسخة جديدة.</p>
         )}
-        {!done && !already && !requested && (
+        {!done && !already && !requested && !decisionSeen && (
           <form className="rv-form" onSubmit={(e) => act('approve', e)}>
             <label className="field">
               <span>اسمك وصفتك (يُسجَّلان مع القرار)</span>
