@@ -237,6 +237,11 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
       <p className="disclosure">
         أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
       </p>
+      {!done && !already && !requested && (
+        <a className="rv-jump" href="#decision" onClick={(e) => { e.preventDefault(); document.getElementById('decision')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>
+          قرارك في آخر الصفحة: أعتمد أو أطلب تعديلا ↓
+        </a>
+      )}
     </Shell>
   )
 }

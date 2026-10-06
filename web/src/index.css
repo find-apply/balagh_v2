@@ -3218,3 +3218,24 @@ button.big {
   font-size: 0.82rem;
   margin-top: 6px;
 }
+
+.rv-jump {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: var(--brand);
+  color: var(--brand-ink);
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+}
+
+.rv-decision:target ~ .rv-jump,
+.rv-decision:focus-within ~ .rv-jump {
+  display: none;
+}
