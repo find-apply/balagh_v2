@@ -271,7 +271,7 @@ ATTRIBUTION = re.compile(
     r"|\bprophet\b|\bhadith\b|\bquran\b|\bverse\b|\bmessenger\b",
     re.IGNORECASE,
 )
-REPORTED = re.compile(r"قال|يقول|قالت|أخبر|أمر|نهى|وعد|علّمنا|علمنا|«|\bsaid\b|\bsays\b|\btold\b|\btaught\b|\bpromis", re.IGNORECASE)
+REPORTED = re.compile(r"\bقال|يقول|قالت|أخبر|أمر|نهى|وعد|«|\bsaid\b|\bsays\b|\btold\b|\btaught\b|\bpromis", re.IGNORECASE)
 KNOWLEDGE = {
     AudienceKnowledge.familiar: "familiar (knows Islamic terms)",
     AudienceKnowledge.basic: "basic (some acquaintance, few terms)",
