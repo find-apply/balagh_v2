@@ -22,14 +22,14 @@ _sharh = json.loads((DATA / "hadith_sharh.json").read_text(encoding="utf-8"))
 
 # The hadith files mark the Prophet's words with ‏"‏ and sentence ends with ‏.‏ (right-to-left marks around
 # punctuation). Those are typesetting, not words: a quoted run must not carry them onto the screen or into speech.
-def _clean_hadith(text: str) -> str:
+def clean_hadith(text: str) -> str:
     text = text.replace("\u200f", "").replace('"', " ")
     text = re.sub(r"\s+\.\s*", ". ", text)
     return re.sub(r"\s{2,}", " ", text).strip()
 
 
 for _h in _hadith:
-    _h["t"] = _clean_hadith(_h["t"])
+    _h["t"] = clean_hadith(_h["t"])
 
 # The mushaf's hizb and sajdah marks sit in the verse text; they are page furniture, not words of the verse.
 _quran["verses"] = {k: re.sub(r"\s*[۞۩]\s*", " ", v).strip() for k, v in _quran["verses"].items()}

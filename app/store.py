@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Boolean, cast, Column, DateTime, Float, Integer, MetaData, String, Table, Text, create_engine, delete, func, insert, inspect, select, text, update
 
+from . import sources
 from .schemas import DEFAULT_ART, HistoryEntry, LocalizedDraft, Project, ScriptDraft, Video, VideoStatus
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -90,6 +91,7 @@ def load(project_id: str) -> Optional[Project]:
         return None
     stored = json.loads(row[0])
     _add_scene_art(stored)
+    _clean_quotes(stored)
     project = Project.model_validate(stored["project"])
     for sid, draft in stored["drafts"].items():
         script = project.scripts[sid]
@@ -107,6 +109,25 @@ def _add_scene_art(stored: dict) -> None:
     for script in stored["project"]["scripts"].values():
         for scene in (script.get("story") or {}).get("scenes", []):
             scene.setdefault("present", [])
+
+
+def _clean_quotes(stored: dict) -> None:
+    """Scripts written before hadith texts were cleaned carry the files' quote marks inside their quotes."""
+    marks = "\u200f"
+    for script in stored["project"]["scripts"].values():
+        for r in script["references"]:
+            if r["kind"] == "hadith":
+                r["text"], r["arabic"] = sources.clean_hadith(r["text"]), sources.clean_hadith(r["arabic"])
+        for field in ("hook", "call_to_action"):
+            if marks in script[field]:
+                script[field] = sources.clean_hadith(script[field])
+        for sc in script["scenes"]:
+            for field in ("voiceover", "on_screen_text"):
+                if marks in sc[field]:
+                    sc[field] = sources.clean_hadith(sc[field])
+        for sc in (script.get("story") or {}).get("scenes", []):
+            if marks in sc.get("quote", ""):
+                sc["quote"] = sources.clean_hadith(sc["quote"])
 
 
 def save_video(video: Video) -> None:
