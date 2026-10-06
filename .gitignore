@@ -11,3 +11,7 @@ dist/
 .DS_Store
 
 eval/cache/
+
+# Rendered videos, generated audio and images
+media/
+video/out/

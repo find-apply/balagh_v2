@@ -2,15 +2,32 @@ import os
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from google.genai import errors as genai_errors
 
 from . import generator, store
-from .schemas import Approval, ApproveIn, BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn
+from .schemas import (
+    Approval, ApproveIn, BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, TemplateIn, Video,
+    VideoIn, VideoTemplate,
+)
+from .video import catalog, render, story
 
-app = FastAPI(title="بلاغ", description="Brief -> 3 video ideas -> verified script -> localization -> review.")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    store.fail_unfinished_videos("انقطع التصيير بإعادة تشغيل الخادم. أعد إنشاء الفيديو.")
+    yield
+
+
+app = FastAPI(title="بلاغ", description="Brief -> 3 video ideas -> verified script -> localization -> review -> video.",
+              lifespan=lifespan)
+render.VIDEOS.mkdir(parents=True, exist_ok=True)
+app.mount("/media/videos", StaticFiles(directory=render.VIDEOS), name="videos")
 
 app.add_middleware(
     CORSMiddleware,
@@ -62,9 +79,30 @@ def _get_idea(project: Project, idea_id: str):
     return idea
 
 
+def _check_template(template_id: str) -> None:
+    template = catalog.get(template_id)
+    if template is None:
+        raise HTTPException(status_code=422, detail="Unknown video template")
+    if not template["ready"]:
+        raise HTTPException(status_code=409, detail="This video template is not ready yet")
+
+
+def _drop_story_template(script: Script) -> None:
+    """A new version's text differs, so a story written for the old one does not carry over: the template
+    is chosen again and the story rewritten from the new text."""
+    if catalog.is_story(script.template):
+        script.template = None
+
+
 @app.get("/", include_in_schema=False)
 async def root() -> RedirectResponse:
     return RedirectResponse("/docs")
+
+
+@app.get("/video/templates", response_model=list[VideoTemplate])
+async def list_templates() -> list[dict]:
+    """The video template library. A template is chosen for a script once it is written."""
+    return catalog.TEMPLATES
 
 
 @app.post("/projects", response_model=Project, status_code=201)
@@ -86,7 +124,11 @@ async def create_script(project_id: str, idea_id: str, body: ScriptIn) -> Script
     """Step 2: pick an idea, get the full script for the brief's audience."""
     project = _get_project(project_id)
     idea = _get_idea(project, idea_id)
-    script = await generator.generate_script(project.brief, idea, body.duration_seconds or idea.duration_seconds, body.notes)
+    if body.template is not None:
+        _check_template(body.template)
+    script = await generator.generate_script(
+        project.brief, idea, body.duration_seconds or idea.duration_seconds, body.notes, body.template,
+    )
     project.scripts[script.id] = script
     store.save(project)
     return script
@@ -102,6 +144,7 @@ async def localize_script(project_id: str, script_id: str, body: LocalizeIn) -> 
         source, _get_idea(project, source.idea_id), target,
         body.platforms or source.platforms, body.duration_seconds or source.duration_seconds, body.notes,
     )
+    _drop_story_template(script)
     project.scripts[script.id] = script
     store.save(project)
     return script
@@ -127,6 +170,7 @@ async def revise_script(project_id: str, script_id: str, body: ReviseIn) -> Scri
         revised = await generator.revise_script(script, _get_idea(project, script.idea_id), body.notes)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
+    _drop_story_template(revised)
     project.scripts[revised.id] = revised
     store.save(project)
     return revised
@@ -142,3 +186,47 @@ async def approve_script(project_id: str, script_id: str, body: ApproveIn) -> Sc
     script.approvals.append(Approval(role=body.role, name=body.name.strip(), at=datetime.now(timezone.utc)))
     store.save(project)
     return script
+
+
+@app.put("/projects/{project_id}/scripts/{script_id}/template", response_model=Script)
+async def choose_template(project_id: str, script_id: str, body: TemplateIn) -> Script:
+    """Pick the video template this script will be rendered with. The script's text does not change, so its
+    approvals stand, except that choosing a children's template for the first time writes the dialogue story:
+    that is new text, so the approvals are reset until a human signs off on it too."""
+    project = _get_project(project_id)
+    script = _get_script(project, script_id)
+    _check_template(body.template)
+    if catalog.is_story(body.template) and script.story is None:
+        script.story = await story.write_story(script)
+        script.approvals = []
+    script.template = body.template
+    store.save(project)
+    return script
+
+
+@app.post("/projects/{project_id}/scripts/{script_id}/videos", response_model=Video, status_code=202)
+async def create_video(project_id: str, script_id: str, body: VideoIn) -> Video:
+    """Step 7: render the approved script as a video with the given template. Runs in the background:
+    poll GET /videos/{id} until status is done or failed."""
+    project = _get_project(project_id)
+    script = _get_script(project, script_id)
+    _check_template(body.template)
+    if not script.approved:
+        raise HTTPException(status_code=409, detail="التصدير مقفل: يلزم اعتماد هذه النسخة أولا.")
+    if catalog.is_story(body.template) and script.story is None:
+        raise HTTPException(status_code=409, detail="اختر هذا القالب أولا حتى تُكتب القصة، ثم اعتمدها.")
+    return render.start(project_id, script, body.template)
+
+
+@app.get("/projects/{project_id}/scripts/{script_id}/videos", response_model=list[Video])
+async def list_videos(project_id: str, script_id: str) -> list[Video]:
+    _get_script(_get_project(project_id), script_id)
+    return store.videos_for(script_id)
+
+
+@app.get("/videos/{video_id}", response_model=Video)
+async def get_video(video_id: str) -> Video:
+    video = store.load_video(video_id)
+    if video is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return video

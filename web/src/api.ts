@@ -1,6 +1,6 @@
-import type { Brief, LocalizeRequest, Project, ReviewReport, ReviewRole, Script } from './types'
+import type { Brief, LocalizeRequest, Project, ReviewReport, ReviewRole, Script, Video, VideoTemplate } from './types'
 
-const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8010').replace(/\/$/, '')
+export const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8010').replace(/\/$/, '')
 
 export class ApiError extends Error {
   status: number
@@ -36,14 +36,21 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const api = {
   createProject: (brief: Brief) => request<Project>('POST', '/projects', brief),
   getProject: (id: string) => request<Project>('GET', `/projects/${id}`),
+  templates: () => request<VideoTemplate[]>('GET', '/video/templates'),
   createScript: (projectId: string, ideaId: string, notes: string | null) =>
     request<Script>('POST', `/projects/${projectId}/ideas/${ideaId}/script`, { notes }),
+  chooseTemplate: (projectId: string, scriptId: string, template: string) =>
+    request<Script>('PUT', `/projects/${projectId}/scripts/${scriptId}/template`, { template }),
   localize: (projectId: string, scriptId: string, body: LocalizeRequest) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/localize`, body),
   review: (projectId: string, scriptId: string) =>
     request<ReviewReport>('POST', `/projects/${projectId}/scripts/${scriptId}/review`),
   revise: (projectId: string, scriptId: string, notes: string | null) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/revise`, { notes }),
+  createVideo: (projectId: string, scriptId: string, template: string) =>
+    request<Video>('POST', `/projects/${projectId}/scripts/${scriptId}/videos`, { template }),
+  videos: (projectId: string, scriptId: string) => request<Video[]>('GET', `/projects/${projectId}/scripts/${scriptId}/videos`),
+  video: (id: string) => request<Video>('GET', `/videos/${id}`),
   approve: (projectId: string, scriptId: string, role: ReviewRole, name: string) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/approve`, { role, name }),
 }

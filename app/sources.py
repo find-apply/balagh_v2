@@ -143,6 +143,7 @@ def search_hadith(query: str, limit: int = 2) -> list[Evidence]:
         found.append(Evidence(
             id="", kind=EvidenceKind.hadith, text=h["t"],
             source=f"{COLLECTIONS[h['c']]}، حديث رقم {_hadith_number(h)}",
+            hadith_key=f"{h['c']}:{_hadith_number(h)}" if h.get("a") is not None else f"{h['c']}:seq{h['n']}",
             translation_en=h.get("e"),
             translation_source=f"{HADITH_EN_SOURCE[h['c']]}, no. {_hadith_number(h)}" if h.get("e") else None,
         ))

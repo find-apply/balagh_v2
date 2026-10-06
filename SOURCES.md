@@ -44,6 +44,10 @@
 | Google Gemini API (`gemini-pro-latest`) | توليد الأفكار والسيناريوهات والتوطين | شروط خدمة Gemini API |
 | Google Gemini API (`gemini-flash-latest`) | المراجعون الآليون الثلاثة | شروط خدمة Gemini API |
 | واجهة quran.com (api.quran.com) | جلب نص القرآن والترجمة مرة واحدة عند إعداد البيانات، لا أثناء التشغيل | شروط استعمال quran.com |
+| Google Gemini API (`gemini-2.5-flash-preview-tts`) | توليد الكلام في الفيديو: الحوار والتعليق وقراءة الحديث. لا يُستعمل لتلاوة القرآن | شروط خدمة Gemini API، وتُراجع شروط Google للصوت المولَّد قبل النشر |
+| Magnific API (`classic-fast` افتراضيا) | توليد صور مشاهد الفيديو وقصة الأطفال | شروط Magnific، وتُراجع قبل الاستعمال التجاري |
+| everyayah.com | تلاوة الآيات المقتبسة آيةً آية بصوت قارئ (مشاري العفاسي افتراضيا)، تُجلب عند التصيير وتُخزَّن محليا | الموقع يتيح التسجيلات للاستعمال غير التجاري؛ يُراجع صاحب الحق قبل أي نشر تجاري |
+| تسجيلات الأحاديث في `data/recitations/` | يضعها صانع المحتوى بنفسه، ويوثق القارئ والحقوق في `index.json` | على صانع المحتوى |
 
 ## 3. المكتبات البرمجية
 
@@ -59,8 +63,12 @@
 | React, React DOM | MIT |
 | Vite | MIT |
 | TypeScript | Apache-2.0 |
+| Remotion | رخصة Remotion: مجانية للأفراد والشركات الصغيرة، وتتطلب رخصة شركة فوق حد معين من الموظفين |
+| ffmpeg | LGPL/GPL، يُستدعى من النظام |
 
-الخطوط: IBM Plex Sans Arabic و Amiri، كلاهما برخصة SIL Open Font License، ويُحمَّلان من Google Fonts.
+الخطوط: IBM Plex Sans Arabic و Amiri في الواجهة، و Amiri و Cairo و Reem Kufi و Aref Ruqaa و Inter و Patrick Hand في الفيديو، كلها برخصة SIL Open Font License، وتُحمَّل من Google Fonts.
+
+صور العينة في `video/public/samples/` مولَّدة بـ Magnific (flux-2-klein) لمعاينة القوالب في Remotion Studio فقط.
 
 ## 4. البيانات الشخصية
 

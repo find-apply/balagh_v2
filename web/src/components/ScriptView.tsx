@@ -1,17 +1,23 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
-import type { AudienceSpec, LocalizeRequest, ReviewRole, Script } from '../types'
+import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, VideoTemplate } from '../types'
 import { GROUPS } from '../audiences'
 import { AudienceFields } from './AudienceFields'
+import { StoryView } from './StoryView'
+import { TemplatePicker } from './TemplatePicker'
+import { VideoPanel } from './VideoPanel'
 
 interface Props {
+  projectId: string
   script: Script
   source: Script | null
+  templates: VideoTemplate[] | null
   disabled: boolean
   onReview: () => void
   onRevise: (notes: string | null) => void
   onLocalize: (body: LocalizeRequest) => void
+  onTemplate: (template: VideoTemplate) => void
   onApprove: (role: ReviewRole, name: string) => void
   shareUrl: string
 }
@@ -47,6 +53,11 @@ function Scenes({ script }: { script: Script }) {
             <p className="muted small">
               <span className="tag">الصورة</span> {s.visual}
             </p>
+            {s.art.keyword && (
+              <p className="muted small">
+                <span className="tag">رسم القالب</span> {[s.art.emoji, s.art.keyword, s.art.detail].filter(Boolean).join(' · ')}
+              </p>
+            )}
             {s.evidence_ids.length > 0 && (
               <div className="badges">
                 {s.evidence_ids.map((id) => (
@@ -171,7 +182,10 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
   )
 }
 
-export function ScriptView({ script, source, disabled, onReview, onRevise, onLocalize, onApprove, shareUrl }: Props) {
+export function ScriptView({
+  projectId, script, source, templates, disabled, onReview, onRevise, onLocalize, onTemplate, onApprove, shareUrl,
+}: Props) {
+  const template = templates?.find((t) => t.id === script.template) ?? null
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
   const [compare, setCompare] = useState(false)
@@ -189,6 +203,7 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
           <span className={`badge level-${script.content_level}`}>{LEVELS[script.content_level]}</span>
           <span className="badge">{script.duration_seconds} ث</span>
           <span className="badge">نسخة {script.version}</span>
+          {template && <span className="badge info">قالب: {template.name}</span>}
           {script.localized_from && <span className="badge info">موطَّن</span>}
           {script.approved ? <span className="badge ok">معتمد</span> : <span className="badge warn">غير معتمد</span>}
         </div>
@@ -375,7 +390,13 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
         {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={onLocalize} />}
       </section>
 
+      <StoryView script={script} />
+
       <Approvals script={script} disabled={disabled} onApprove={onApprove} shareUrl={shareUrl} />
+
+      <TemplatePicker templates={templates} chosen={script.template} disabled={disabled} onPick={onTemplate} />
+
+      <VideoPanel projectId={projectId} script={script} template={template} disabled={disabled} />
 
       <section className="card">
         <h3>المنشورات</h3>

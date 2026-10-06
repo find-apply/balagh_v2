@@ -30,6 +30,19 @@ export const REVIEWERS = { scholarly: 'المراجع العلمي', audience: '
 
 export const ROLES = { creator: 'صانع المحتوى', scholar: 'مراجع شرعي', language: 'مراجع لغوي وثقافي' }
 
+export const CHARACTERS: Record<string, string> = { narr: 'الراوي', salim: 'سالم', maryam: 'مريم', nour: 'نور' }
+
+export const STORY_SCENES = { story: 'مشهد', text: 'النص الشرعي', words: 'نفهم معا', quiz: 'سؤال', outro: 'الخاتمة' }
+
+export const VIDEO_STATUS = {
+  queued: 'في الانتظار',
+  voicing: 'يولّد الصوت والصور',
+  imaging: 'يولّد الصور',
+  rendering: 'يصيّر الفيديو',
+  done: 'جاهز',
+  failed: 'فشل',
+}
+
 export const CLAIMS = { preserved: 'محفوظ', altered: 'تغيّر', dropped: 'محذوف', added: 'مضاف' }
 
 export function scriptLabel(s: Script): string {

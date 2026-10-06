@@ -57,10 +57,71 @@ export interface Idea {
   unverified: string[]
 }
 
+export interface VideoTemplate {
+  id: string
+  name: string
+  description: string
+  aspect: string
+  uses_images: boolean
+  story: boolean
+  ready: boolean
+}
+
+export interface StoryLine {
+  who: string
+  text: string
+}
+
+export interface StoryScene {
+  kind: 'story' | 'text' | 'words' | 'quiz' | 'outro'
+  lines: StoryLine[]
+  image_prompt: string
+  evidence_id: string
+  cards: { word: string; meaning: string }[]
+  question: string
+  choices: string[]
+  quote: string
+  source: string
+  quote_kind: 'quran' | 'hadith' | null
+}
+
+export interface Story {
+  title: string
+  scenes: StoryScene[]
+  review_note: string
+  ai_disclosure: string
+}
+
+export type VideoStatus = 'queued' | 'voicing' | 'imaging' | 'rendering' | 'done' | 'failed'
+
+export interface Video {
+  id: string
+  project_id: string
+  script_id: string
+  template: string
+  status: VideoStatus
+  url: string | null
+  error: string | null
+  duration_seconds: number | null
+  new_images: number
+  new_clips: number
+  notes: string[]
+  created_at: string
+}
+
+export interface SceneArt {
+  kind: string
+  keyword: string
+  detail: string
+  emoji: string
+  image_prompt: string
+}
+
 export interface Scene {
   start_second: number
   end_second: number
   visual: string
+  art: SceneArt
   voiceover: string
   on_screen_text: string
   evidence_ids: string[]
@@ -144,6 +205,8 @@ export interface Script {
   approvals: Approval[]
   required_approvals: { role: ReviewRole; reason: string }[]
   approved: boolean
+  template: string | null
+  story: Story | null
   ai_disclosure: string
 }
 

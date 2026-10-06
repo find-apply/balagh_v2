@@ -1,0 +1,78 @@
+{
+  "templates": [
+    {
+      "id": "captions",
+      "name": "الترجمة المتحركة",
+      "description": "جمل تظهر مع الصوت، وفوقها رسم متحرك يتغير مع كل مشهد.",
+      "composition": "Captions",
+      "aspect": "9:16",
+      "uses_images": true,
+      "story": false,
+      "ready": true
+    },
+    {
+      "id": "geo",
+      "name": "الزخرفة الهندسية",
+      "description": "كلمة مفتاحية في نجمة زخرفية بألوان الأحجار الكريمة. بلا صور.",
+      "composition": "Geo",
+      "aspect": "9:16",
+      "uses_images": false,
+      "story": false,
+      "ready": true
+    },
+    {
+      "id": "kids",
+      "name": "القصة المصورة",
+      "description": "قصة حوار للأطفال بشخصيات ثابتة (سالم ومريم والمعلمة نور): مشاهد مصورة، ثم النص الشرعي، ومعاني الكلمات، وسؤال.",
+      "composition": "Kids",
+      "aspect": "16:9",
+      "uses_images": true,
+      "story": true,
+      "ready": true
+    },
+    {
+      "id": "chalk",
+      "name": "السبورة",
+      "description": "القصة نفسها في شكل درس على سبورة: صور مثبتة على السبورة ورسوم بالطباشير.",
+      "composition": "Chalk",
+      "aspect": "16:9",
+      "uses_images": true,
+      "story": true,
+      "ready": true
+    }
+  ],
+  "art_kinds": {
+    "word": "the keyword alone, very large. The default when nothing else fits.",
+    "meter_down": "a battery-style gauge draining from full to almost empty; keyword is its title. For decline, weakness, neglect.",
+    "meter_up": "the same gauge filling up; keyword is its title. For renewal, growth, recovery.",
+    "compare": "two things side by side, the first shrinking and the second (a glowing heart) growing; keyword labels the first, detail labels the second, emoji is one emoji for the first.",
+    "medallions": "one or two round medallions holding short words: keyword and optionally detail.",
+    "lock": "a padlock closing; keyword is its label. For closing doors to harm, protecting oneself.",
+    "warning": "a pulsing warning sign on dark red; keyword is its label. For dangers to avoid.",
+    "dua": "raised hands with rising light. For supplication.",
+    "phones": "a phone shaking with notifications. For distraction and screens.",
+    "image": "a generated still photo with a slow zoom, described in image_prompt. Only when no other kind can show the scene."
+  },
+  "characters": {
+    "narr": {
+      "ar": "الراوي",
+      "en": "Narrator",
+      "look": ""
+    },
+    "salim": {
+      "ar": "سالم",
+      "en": "Salim",
+      "look": "a cheerful 7-year-old boy with short black hair, a green t-shirt and blue trousers"
+    },
+    "maryam": {
+      "ar": "مريم",
+      "en": "Maryam",
+      "look": "a 6-year-old girl, his sister, in a pink hijab and a yellow dress"
+    },
+    "nour": {
+      "ar": "نور",
+      "en": "Nour",
+      "look": "their kind young teacher, a woman in a cream hijab and a teal cardigan"
+    }
+  }
+}

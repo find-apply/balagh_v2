@@ -67,6 +67,10 @@ class BriefIn(AudienceSpec):
 
 
 class ScriptIn(BaseModel):
+    template: Optional[str] = Field(
+        default=None, max_length=40, examples=["captions"],
+        description="Video template the script is written for (GET /video/templates). Leave null to choose later.",
+    )
     duration_seconds: Optional[int] = Field(
         default=None, ge=5, le=600,
         description="Overrides the idea's duration. Leave null to keep it.",
@@ -114,6 +118,7 @@ class Evidence(BaseModel):
     translation_en: Optional[str] = None
     translation_source: Optional[str] = None
     quran_key: Optional[str] = Field(default=None, description="Quran only: surah:first-last ayah, e.g. 112:1-4.")
+    hadith_key: Optional[str] = Field(default=None, description="Hadith only: collection:number, e.g. bukhari:13.")
 
 
 class PlatformPost(BaseModel):
@@ -159,10 +164,36 @@ class IdeasDraft(BaseModel):
     ideas: list[IdeaDraft] = Field(description="Exactly 3 ideas, or empty when brief_level is D.")
 
 
+class ArtKind(str, Enum):
+    """What the animated video template draws for a scene. Mirrors art_kinds in video/catalog.json."""
+    word = "word"
+    meter_down = "meter_down"
+    meter_up = "meter_up"
+    compare = "compare"
+    medallions = "medallions"
+    lock = "lock"
+    warning = "warning"
+    dua = "dua"
+    phones = "phones"
+    image = "image"
+
+
+class SceneArt(BaseModel):
+    kind: ArtKind
+    keyword: str = Field(description="1-3 words in the script's language, shown large. Never a verse or hadith.")
+    detail: str = Field(description="1-3 more words where the kind uses them. Empty string otherwise.")
+    emoji: str = Field(description="One emoji where the kind uses one. Empty string otherwise.")
+    image_prompt: str = Field(description="Only for kind image: an English description of a still photo. Empty string otherwise.")
+
+
+DEFAULT_ART = SceneArt(kind=ArtKind.word, keyword="", detail="", emoji="", image_prompt="")
+
+
 class SceneDraft(BaseModel):
     start_second: int
     end_second: int
     visual: str = Field(description="What the viewer sees: shot, framing, action, b-roll.")
+    art: SceneArt = Field(description="What the animated video template draws for this scene.")
     voiceover: str = Field(description="Exact words spoken. Empty string if none.")
     on_screen_text: str = Field(description="Text overlay. Empty string if none.")
     evidence_ids: list[str] = Field(description="Ids of the evidence this scene quotes, relies on, or introduces. Empty if none.")
@@ -252,6 +283,8 @@ class Reference(BaseModel):
     arabic: str = Field(description="The original Arabic text in full.")
     source: str
     translation_source: Optional[str] = Field(default=None, description="Set when `text` comes from an approved translation.")
+    quran_key: Optional[str] = None
+    hadith_key: Optional[str] = None
 
 
 class TermStatus(str, Enum):
@@ -321,6 +354,8 @@ class Script(BaseModel):
     terminology: list[TermCheck] = Field(default_factory=list, description="Localized scripts only.")
     review: Optional[ReviewReport] = None
     approvals: list[Approval] = Field(default_factory=list, description="Human sign-offs on this exact version.")
+    template: Optional[str] = Field(default=None, description="Video template chosen for this script.")
+    story: Optional["Story"] = Field(default=None, description="Dialogue story, written when a children's template is chosen.")
     ai_disclosure: str = AI_DISCLOSURE
     # The model's draft with quote placeholders, kept for localization and revision.
     draft: Optional[ScriptDraft] = Field(default=None, exclude=True)
@@ -355,3 +390,102 @@ class Project(BaseModel):
     brief: BriefIn
     ideas: list[Idea]
     scripts: dict[str, Script] = Field(default_factory=dict, description="Keyed by script id.")
+
+
+# ---- Video ----
+
+class VideoTemplate(BaseModel):
+    """One entry of the template library in video/catalog.json."""
+    id: str
+    name: str
+    description: str
+    aspect: str = Field(examples=["9:16"])
+    uses_images: bool = Field(description="Whether scenes may use generated still photos.")
+    story: bool = Field(description="True for templates that play a children's dialogue story written from the script.")
+    ready: bool = Field(description="False while the template cannot be chosen yet.")
+
+
+# ---- Story (children's templates) ----
+
+class StorySceneKind(str, Enum):
+    story = "story"      # characters talk over an illustrated scene
+    text = "text"        # the verified verse or hadith, shown alone
+    words = "words"      # word cards explaining terms of the text
+    quiz = "quiz"        # one question with two choices
+    outro = "outro"      # the lesson in one line
+
+
+class Line(BaseModel):
+    who: str = Field(description="Character key: narr, salim, maryam or nour.")
+    text: str = Field(description="What the character says, in the script's language. One short sentence or two.")
+
+
+class WordCard(BaseModel):
+    word: str = Field(description="A word from the quoted text, copied as it appears there.")
+    meaning: str = Field(description="Its meaning in a few simple words.")
+
+
+class StorySceneDraft(BaseModel):
+    kind: StorySceneKind
+    lines: list[Line] = Field(description="Spoken lines. Empty for kind text.")
+    image_prompt: str = Field(description="Kinds story and outro: an English description of the illustration. Empty otherwise.")
+    evidence_id: str = Field(description="Kind text only: the id of the quoted reference to show. Empty otherwise.")
+    cards: list[WordCard] = Field(description="Kind words only: 2 cards. Empty otherwise.")
+    question: str = Field(description="Kind quiz only. Empty otherwise.")
+    choices: list[str] = Field(description="Kind quiz only: exactly 2 short choices, the right one first. Empty otherwise.")
+
+
+class StoryDraft(BaseModel):
+    title: str
+    scenes: list[StorySceneDraft]
+    review_note: str = Field(description="What an educator should check before publishing. Empty if nothing.")
+
+
+class StoryScene(StorySceneDraft):
+    quote: str = Field(default="", description="Kind text: the verified text, inserted by the system.")
+    source: str = Field(default="", description="Kind text: where the quote comes from.")
+    quote_kind: Optional[EvidenceKind] = Field(default=None, description="Kind text: quran or hadith.")
+
+
+class Story(BaseModel):
+    """A dialogue story for the children's templates, written from an approved-or-not script. Its lines are
+    generated, so the script's approvals are reset when it is (re)written."""
+    title: str
+    scenes: list[StoryScene]
+    review_note: str
+    ai_disclosure: str = AI_DISCLOSURE
+
+
+class TemplateIn(BaseModel):
+    template: str = Field(max_length=40, examples=["captions"], description="A ready template from GET /video/templates.")
+
+
+class VideoIn(BaseModel):
+    template: str = Field(max_length=40, examples=["captions"])
+
+
+class VideoStatus(str, Enum):
+    queued = "queued"
+    voicing = "voicing"      # generating speech and recitation
+    imaging = "imaging"      # generating images
+    rendering = "rendering"
+    done = "done"
+    failed = "failed"
+
+
+class Video(BaseModel):
+    id: str
+    project_id: str
+    script_id: str
+    template: str
+    status: VideoStatus = VideoStatus.queued
+    url: Optional[str] = Field(default=None, description="Path of the MP4 under the API, once done.")
+    error: Optional[str] = None
+    duration_seconds: Optional[float] = None
+    new_images: int = Field(default=0, description="Images generated (and paid for) for this video.")
+    new_clips: int = Field(default=0, description="Speech clips synthesized (and paid for) for this video.")
+    notes: list[str] = Field(default_factory=list, description="What the render could not do as intended, e.g. a hadith shown without a recording.")
+    created_at: datetime
+
+
+Script.model_rebuild()

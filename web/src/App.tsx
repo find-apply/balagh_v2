@@ -4,7 +4,7 @@ import { BriefForm } from './components/BriefForm'
 import { IdeaList } from './components/IdeaList'
 import { ScriptView } from './components/ScriptView'
 import { scriptLabel } from './labels'
-import type { Project, Script } from './types'
+import type { Project, Script, VideoTemplate } from './types'
 
 const STORAGE_KEY = 'balagh.project'
 
@@ -24,9 +24,14 @@ function Busy({ label }: { label: string }) {
 export default function App() {
   const [project, setProject] = useState<Project | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [templates, setTemplates] = useState<VideoTemplate[] | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [referral, setReferral] = useState<string | null>(null)
+
+  useEffect(() => {
+    api.templates().then(setTemplates, () => setTemplates(null))
+  }, [])
 
   useEffect(() => {
     // A review link (?project=…&script=…) opens that script directly for the reviewer.
@@ -147,8 +152,10 @@ export default function App() {
           {active && (
             <ScriptView
               key={active.id}
+              projectId={pid}
               script={active}
               source={source}
+              templates={templates}
               disabled={busy !== null}
               onReview={() =>
                 run('ثلاثة مراجعين آليين يفحصون السيناريو', async () => {
@@ -162,6 +169,11 @@ export default function App() {
               }
               onLocalize={(body) =>
                 run('يوطّن بلاغ السيناريو للجمهور الجديد', async () => putScript(await api.localize(pid, active.id, body)))
+              }
+              onTemplate={(template) =>
+                run(template.story && !active.story ? 'يكتب بلاغ قصة الأطفال' : 'حفظ القالب', async () =>
+                  putScript(await api.chooseTemplate(pid, active.id, template.id), false),
+                )
               }
               onApprove={(role, name) =>
                 run('اعتماد', async () => putScript(await api.approve(pid, active.id, role, name), false))

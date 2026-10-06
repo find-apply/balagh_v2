@@ -11,6 +11,7 @@ from google.genai import types
 from pydantic import BaseModel
 
 from . import sources
+from .video import catalog
 from .schemas import (
     AudienceKnowledge, AudienceSpec, BriefIn, ClaimsDraft, ClaimStatus, ContentLevel, Evidence, EvidenceKind,
     Finding, FindingsDraft, Idea, IdeasDraft, Language, LocalizedDraft, Platform, Reference, ReferenceUsage,
@@ -52,8 +53,10 @@ video does not honour. The tone is respectful and sincere, never mocking or sens
 - No instrumental music. Audio is the speaker's voice, optionally with vocal-only nasheed, recitation where \
 fitting, or natural ambience."""
 
-AUDIENCE_RULES = """Write in the target language, in the register that audience actually speaks. If a dialect is \
-given, write in that dialect, not in the formal standard. If a tone is given, deliver the script in it.
+AUDIENCE_RULES = """Write in the target language. If a dialect is given, write in that dialect, not in the formal \
+standard. If no dialect is given, write in the standard language (Modern Standard Arabic for Arabic), in a plain \
+register that audience follows easily; never pick a regional dialect yourself. If a tone is given, deliver the \
+script in it.
 
 Audience knowledge of Islam shapes the explanation, never the content:
 - familiar: use Islamic terms directly.
@@ -364,7 +367,7 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
         if not ids and ATTRIBUTION.search(f"{s.voiceover} {s.on_screen_text}"):
             warnings.append(f"المشهد {n} يذكر نصا شرعيا أو ينسب قولا دون دليل موثق مرتبط به.")
         scenes.append(Scene(
-            start_second=s.start_second, end_second=s.end_second, visual=s.visual,
+            start_second=s.start_second, end_second=s.end_second, visual=s.visual, art=s.art,
             voiceover=fill(s.voiceover), on_screen_text=fill(s.on_screen_text), evidence_ids=ids,
         ))
     hook, cta = fill(draft.hook), fill(draft.call_to_action)
@@ -384,6 +387,7 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
             usage=ReferenceUsage.quoted if i in quoted else ReferenceUsage.paraphrased,
             text=inserts.get(i, _evidence_text(e, lang)),
             translation_source=e.translation_source if translated else None,
+            quran_key=e.quran_key, hadith_key=e.hadith_key,
         )
         for i, e in evidence.items() if i in quoted or i in relied
     ]
@@ -421,18 +425,24 @@ def _new_id() -> str:
     return uuid4().hex[:8]
 
 
-async def generate_script(brief: BriefIn, idea: Idea, duration_seconds: int, notes: Optional[str]) -> Script:
+def _art_block(template: Optional[str]) -> str:
+    return f"<video_art>\n{catalog.art_rules(template)}\n</video_art>"
+
+
+async def generate_script(brief: BriefIn, idea: Idea, duration_seconds: int, notes: Optional[str],
+                          template: Optional[str] = None) -> Script:
     target = AudienceSpec(**brief.model_dump(include=set(AudienceSpec.model_fields)))
     prompt = (
         f"{_target_block(target, brief.platforms, f'{duration_seconds} seconds')}\n\n"
         f"{_idea_block(idea)}\n\n"
-        f"{_evidence_block(idea.evidence, target.language)}"
+        f"{_evidence_block(idea.evidence, target.language)}\n\n"
+        f"{_art_block(template)}"
     )
     if notes:
         prompt += f"\n\n<creator_notes>{notes}</creator_notes>"
     fields = await _write(SCRIPT_SYSTEM, prompt, ScriptDraft, idea, target.language)
     return Script(id=_new_id(), idea_id=idea.id, target=target, platforms=brief.platforms,
-                  duration_seconds=duration_seconds, **fields)
+                  duration_seconds=duration_seconds, template=template, **fields)
 
 
 def _spoken_text(script: Script) -> str:
@@ -450,13 +460,14 @@ async def localize_script(source: Script, idea: Idea, target: AudienceSpec, plat
         f"{source.draft.model_dump_json(exclude={'hadith_excerpts'})}\n"
         f"</source_script>\n\n"
         f"{_target_block(target, platforms, f'{duration_seconds} seconds')}\n\n"
-        f"{_evidence_block(idea.evidence, target.language)}"
+        f"{_evidence_block(idea.evidence, target.language)}\n\n"
+        f"{_art_block(source.template)}"
     )
     if notes:
         prompt += f"\n\n<creator_notes>{notes}</creator_notes>"
     fields = await _write(LOCALIZE_SYSTEM, prompt, LocalizedDraft, idea, target.language)
     script = Script(id=_new_id(), idea_id=idea.id, localized_from=source.id, target=target, platforms=platforms,
-                    duration_seconds=duration_seconds, adaptation_notes=fields["draft"].adaptation_notes, **fields)
+                    duration_seconds=duration_seconds, template=source.template, adaptation_notes=fields["draft"].adaptation_notes, **fields)
     script.terminology = sources.check_terms(
         _spoken_text(source), source.target.language, _spoken_text(script), target.language,
     )
@@ -522,6 +533,7 @@ async def revise_script(script: Script, idea: Idea, notes: Optional[str]) -> Scr
     prompt = (
         f"{_target_block(script.target, script.platforms, f'{script.duration_seconds} seconds')}\n\n"
         f"{_evidence_block(idea.evidence, script.target.language)}\n\n"
+        f"{_art_block(script.template)}\n\n"
         f"<current_script>\n{script.draft.model_dump_json()}\n</current_script>\n\n"
         f"Reviewers found the problems below in the current script. Return the full script with only these "
         f"corrected: keep everything else, including the quote placeholders, as it is.\n"
