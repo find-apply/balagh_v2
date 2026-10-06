@@ -203,7 +203,6 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
                 onStory: (notes) => actions.onStory(active.id, notes),
               }
             }
-            shareUrl={`${location.origin}${location.pathname}${projectHash(project.id, active.id)}`}
           />
         </>
       )}

@@ -96,6 +96,7 @@ class ReviewRole(str, Enum):
 class ApproveIn(BaseModel):
     role: ReviewRole
     name: str = Field(min_length=2, max_length=80, description="Who is approving, in their own name.")
+    note: Optional[str] = Field(default=None, max_length=1000, description="Optional remark recorded with the signature.")
 
 
 class ReviseIn(BaseModel):
@@ -342,6 +343,22 @@ class Approval(BaseModel):
     role: ReviewRole
     name: str
     at: datetime
+    note: str = Field(default="", description="What the reviewer wanted noted when signing. Empty if nothing.")
+
+
+class ChangeRequest(BaseModel):
+    """A reviewer declined to sign this version and said what must change. It closes that role's approval
+    on this version: the fix goes into a new version, which the reviewer looks at again."""
+    role: ReviewRole
+    name: str
+    note: str
+    at: datetime
+
+
+class ChangeRequestIn(BaseModel):
+    role: ReviewRole
+    name: str = Field(min_length=2, max_length=80)
+    note: str = Field(min_length=3, max_length=2000, description="What must change before this reviewer signs.")
 
 
 class RequiredApproval(BaseModel):
@@ -377,6 +394,7 @@ class Script(BaseModel):
     terminology: list[TermCheck] = Field(default_factory=list, description="Localized scripts only.")
     review: Optional[ReviewReport] = None
     approvals: list[Approval] = Field(default_factory=list, description="Human sign-offs on this exact version.")
+    change_requests: list[ChangeRequest] = Field(default_factory=list, description="Reviewers who declined this version and what they asked for.")
     template: Optional[str] = Field(default=None, description="Video template chosen for this script.")
     story: Optional["Story"] = Field(default=None, description="Dialogue story, written when a children's template is chosen.")
     ai_disclosure: str = AI_DISCLOSURE
@@ -404,6 +422,8 @@ class Script(BaseModel):
     @computed_field(description="True once every required role has signed off. Required before export.")
     @property
     def approved(self) -> bool:
+        if self.change_requests:
+            return False
         signed = {a.role for a in self.approvals}
         return all(r.role in signed for r in self.required_approvals)
 

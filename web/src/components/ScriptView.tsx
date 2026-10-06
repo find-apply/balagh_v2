@@ -3,6 +3,7 @@ import type { FormEvent, MouseEvent, ReactNode } from 'react'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
 import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, Video, VideoTemplate } from '../types'
 import { api, BASE } from '../api'
+import { reviewHash } from '../route'
 import { GROUPS } from '../audiences'
 import { AudienceFields } from './AudienceFields'
 import { StoryView } from './StoryView'
@@ -26,7 +27,6 @@ interface Props {
   templates: VideoTemplate[] | null
   disabled: boolean
   actions?: ScriptActions
-  shareUrl: string
 }
 
 type Handlers = Pick<ScriptActions, 'onReview' | 'onLocalize' | 'onApprove'>
@@ -66,7 +66,7 @@ function TabLink({ to, go, className, children }: { to: Tab; go: (t: Tab) => voi
   )
 }
 
-function Scenes({ script }: { script: Script }) {
+export function Scenes({ script }: { script: Script }) {
   return (
     <ol className="scenes" dir={script.target.language === 'en' ? 'ltr' : 'rtl'}>
       {script.scenes.map((s, i) => (
@@ -168,13 +168,12 @@ function PreviewForReview({ projectId, script, onGo }: { projectId: string; scri
   )
 }
 
-function Approvals({ projectId, script, disabled, onApprove, shareUrl, onGo }: { projectId: string; script: Script; disabled: boolean; onApprove?: Handlers['onApprove']; shareUrl: string; onGo?: (part: 'video') => void }) {
+function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId: string; script: Script; disabled: boolean; onApprove?: Handlers['onApprove']; onGo?: (part: 'video') => void }) {
   const pending = script.required_approvals.filter((r) => !script.approvals.some((a) => a.role === r.role))
   const [name, setName] = useState('')
   const [role, setRole] = useState<ReviewRole | null>(null)
   const [copied, setCopied] = useState(false)
   const chosen = pending.some((r) => r.role === role) ? role : (pending[0]?.role ?? null)
-  const others = pending.some((r) => r.role !== 'creator')
   const editable = Boolean(onApprove)
 
   return (
@@ -185,6 +184,18 @@ function Approvals({ projectId, script, disabled, onApprove, shareUrl, onGo }: {
         المراجع يشاهد المعاينة ثم يوقّع.
       </p>
       <PreviewForReview projectId={projectId} script={script} onGo={onGo} />
+      {script.change_requests.length > 0 && (
+        <div className="notice bad">
+          <strong>طلب تعديل: هذه النسخة لا تُعتمد. صحّحها في نسخة جديدة ثم يراجعها من جديد.</strong>
+          <ul>
+            {script.change_requests.map((c) => (
+              <li key={c.role} dir="auto">
+                <b>{ROLES[c.role]} · {c.name}:</b> {c.note}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <ul className="approvals">
         {script.required_approvals.map((r) => {
           const done = script.approvals.find((a) => a.role === r.role)
@@ -198,7 +209,17 @@ function Approvals({ projectId, script, disabled, onApprove, shareUrl, onGo }: {
               {done && (
                 <p className="small">
                   {done.name} · <span dir="ltr">{new Date(done.at).toLocaleString('ar-DZ', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                  {done.note && <span className="muted"> · {done.note}</span>}
                 </p>
+              )}
+              {!done && r.role !== 'creator' && editable && (
+                <button
+                  type="button"
+                  className="small-button"
+                  onClick={() => navigator.clipboard.writeText(`${location.origin}${location.pathname}${reviewHash(projectId, script.id, r.role)}`).then(() => setCopied(true))}
+                >
+                  {copied ? 'نُسخ' : `انسخ رابط صفحة ${ROLES[r.role]}`}
+                </button>
               )}
             </li>
           )
@@ -233,16 +254,6 @@ function Approvals({ projectId, script, disabled, onApprove, shareUrl, onGo }: {
       )}
       {editable && (
       <div className="actions">
-        {others && (
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard.writeText(shareUrl).then(() => setCopied(true))
-            }}
-          >
-            {copied ? 'نُسخ الرابط' : 'انسخ رابط المراجعة للمراجع'}
-          </button>
-        )}
         <button disabled={!script.approved} onClick={() => download(script)} title="يتاح بعد اكتمال الاعتماد">
           صدّر Markdown
         </button>
@@ -332,7 +343,7 @@ function NextStep({ script, disabled, onReview, go }: { script: Script; disabled
   )
 }
 
-export function ScriptView({ projectId, script, source, templates, disabled, actions, shareUrl }: Props) {
+export function ScriptView({ projectId, script, source, templates, disabled, actions }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
   const [compare, setCompare] = useState(false)
@@ -613,7 +624,6 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
           script={script}
           disabled={disabled}
           onApprove={actions?.onApprove}
-          shareUrl={shareUrl}
           onGo={(part) => {
             setTab(part)
             document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })

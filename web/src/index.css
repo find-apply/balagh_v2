@@ -3156,3 +3156,65 @@ details.small summary {
 .review-preview .player {
   max-height: 360px;
 }
+
+/* ---- Reviewer page ---- */
+.review-page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.rv-main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.rv-head {
+  margin: 8px 0 20px;
+}
+
+.rv-head h1 {
+  margin: 6px 0 10px;
+  font-size: 1.6rem;
+}
+
+.rv-player {
+  max-width: 100%;
+  max-height: 480px;
+}
+
+.rv-commentary {
+  background: #f1eee5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  line-height: 1.8;
+}
+
+.rv-source > summary {
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.rv-decision {
+  border: 2px solid var(--brand);
+}
+
+.rv-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+button.big {
+  padding: 12px 22px;
+  font-size: 1.05rem;
+}
+
+.small-button {
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  margin-top: 6px;
+}

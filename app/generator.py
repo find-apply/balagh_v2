@@ -619,6 +619,8 @@ async def revise_script(script: Script, idea: Idea, notes: Optional[str], earlie
                    if f.severity == Severity.blocking]
     kept = [f"- {f.issue} (fixed in version {e.version}: keep that fix)"
             for e in earlier if e.review for f in e.review.findings if f.severity == Severity.blocking]
+    for c in script.change_requests:
+        corrections.append(f"- From the human reviewer ({c.role.value}, {c.name}): {c.note}")
     if notes:
         corrections.append(f"- From the human reviewer: {notes}")
     if not corrections:

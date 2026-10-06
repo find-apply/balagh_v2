@@ -193,6 +193,14 @@ export interface Approval {
   role: ReviewRole
   name: string
   at: string
+  note: string
+}
+
+export interface ChangeRequest {
+  role: ReviewRole
+  name: string
+  note: string
+  at: string
 }
 
 export interface Script {
@@ -220,6 +228,7 @@ export interface Script {
   terminology: TermCheck[]
   review: ReviewReport | null
   approvals: Approval[]
+  change_requests: ChangeRequest[]
   required_approvals: { role: ReviewRole; reason: string }[]
   approved: boolean
   template: string | null

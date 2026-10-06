@@ -67,8 +67,10 @@ export const api = {
     request<ReviewReport>('POST', `/projects/${projectId}/scripts/${scriptId}/review`),
   revise: (projectId: string, scriptId: string, notes: string | null) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/revise`, { notes }),
-  approve: (projectId: string, scriptId: string, role: ReviewRole, name: string) =>
-    request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/approve`, { role, name }),
+  approve: (projectId: string, scriptId: string, role: ReviewRole, name: string, note?: string) =>
+    request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/approve`, { role, name, note: note ?? null }),
+  requestChanges: (projectId: string, scriptId: string, role: ReviewRole, name: string, note: string) =>
+    request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/request-changes`, { role, name, note }),
   templates: () => request<VideoTemplate[]>('GET', '/video/templates'),
   chooseTemplate: (projectId: string, scriptId: string, template: string) =>
     request<Script>('PUT', `/projects/${projectId}/scripts/${scriptId}/template`, { template }),
