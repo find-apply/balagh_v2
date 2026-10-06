@@ -26,6 +26,9 @@ interface Props {
   source: Script | null
   templates: VideoTemplate[] | null
   disabled: boolean
+  /** The part shown; the workspace's stepper selects it. */
+  tab: Tab
+  onTab: (tab: Tab) => void
   actions?: ScriptActions
 }
 
@@ -40,24 +43,15 @@ function download(script: Script) {
   URL.revokeObjectURL(url)
 }
 
-/** The script page shows one part at a time; after the ideas, one long page was too much to scroll. */
-type Tab = 'script' | 'template' | 'review' | 'approve' | 'video' | 'posts'
+/** The script page shows one part at a time, chosen from the workspace's stepper; after the ideas, one long
+ * page was too much to scroll. The posts live with the video they accompany. */
+export type Tab = 'script' | 'template' | 'review' | 'approve' | 'video'
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'script', label: 'السيناريو والمصادر' },
-  { id: 'template', label: 'القالب والقصة' },
-  { id: 'review', label: 'المراجعة' },
-  { id: 'approve', label: 'الاعتماد' },
-  { id: 'video', label: 'الفيديو' },
-  { id: 'posts', label: 'المنشورات' },
-]
-
-/** A tab link inside the page: switches the part shown and scrolls back to the top of the script. */
+/** A link inside the page to another part: the workspace switches the part and scrolls back to the top. */
 function TabLink({ to, go, className, children }: { to: Tab; go: (t: Tab) => void; className?: string; children: ReactNode }) {
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     go(to)
-    document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
   return (
     <a className={className} href={`#s-${to}`} onClick={onClick}>
@@ -362,41 +356,32 @@ function NextStep({ script, disabled, onReview, go }: { script: Script; disabled
   )
 }
 
-export function ScriptView({ projectId, script, source, templates, disabled, actions }: Props) {
+export function ScriptView({ projectId, script, source, templates, disabled, tab, onTab, actions }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
   const [compare, setCompare] = useState(false)
-  const [tab, setTab] = useState<Tab>('script')
+  const setTab = onTab
   const review = script.review
+  // One quiet line instead of a row of badges: the language is in the project header, the version in its
+  // list when there are several, and the approval state in the stepper and the next-step card.
+  const meta = [
+    script.target.dialect ?? LANGUAGES[script.target.language],
+    script.target.tone,
+    KNOWLEDGE[script.target.audience_knowledge],
+    `مستوى ${LEVELS[script.content_level]}`,
+    `${script.duration_seconds} ث`,
+    script.localized_from ? 'موطَّن' : null,
+  ].filter(Boolean)
   const canRevise = Boolean(notes.trim()) || (review?.blocking ?? 0) > 0
 
   return (
     <div className="script" id="script-top">
       <div className="script-head">
-        <div className="badges">
-          <span className="badge">{LANGUAGES[script.target.language]}</span>
-          {script.target.dialect && <span className="badge">{script.target.dialect}</span>}
-          {script.target.tone && <span className="badge">{script.target.tone}</span>}
-          <span className="badge">{KNOWLEDGE[script.target.audience_knowledge]}</span>
-          <span className={`badge level-${script.content_level}`}>{LEVELS[script.content_level]}</span>
-          <span className="badge">{script.duration_seconds} ث</span>
-          <span className="badge">نسخة {script.version}</span>
-          {script.localized_from && <span className="badge info">موطَّن</span>}
-          {script.approved ? <span className="badge ok">معتمد</span> : <span className="badge warn">غير معتمد</span>}
-        </div>
         <h2 dir="auto">{script.title}</h2>
-        <p className="muted" dir="auto">
-          الجمهور: {script.target.audience}
+        <p className="muted small" dir="auto">
+          {script.target.audience} · {meta.join(' · ')}
         </p>
       </div>
-      <nav className="jump" aria-label="أجزاء السيناريو">
-        {TABS.map((t) => (
-          <TabLink key={t.id} to={t.id} go={setTab} className={tab === t.id ? 'on' : undefined}>
-            {t.label}
-            {t.id === 'script' && ` (${script.references.length})`}
-          </TabLink>
-        ))}
-      </nav>
 
       {actions && <NextStep script={script} disabled={disabled} onReview={actions.onReview} go={setTab} />}
 
@@ -646,10 +631,7 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
           script={script}
           disabled={disabled}
           onApprove={actions?.onApprove}
-          onGo={(part) => {
-            setTab(part)
-            document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }}
+          onGo={setTab}
         />
       </div>
 
@@ -660,16 +642,10 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
           template={templates?.find((t) => t.id === script.template) ?? null}
           templates={templates}
           disabled={disabled || !actions}
-          onGo={(part) => {
-            setTab(part)
-            document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-          }}
+          onGo={setTab}
         />
-      </div>
-
-      <div hidden={tab !== 'posts'}>
       <section className="card" id="s-posts">
-        <h3>المنشورات</h3>
+        <h3>نص المنشور المرافق</h3>
         {script.posts.map((p) => (
           <div className="post" key={p.platform}>
             <strong>{PLATFORMS[p.platform]}</strong>

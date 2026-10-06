@@ -4,6 +4,7 @@ import { IdeaList } from './IdeaList'
 import { Progress, ScriptSkeleton } from './Progress'
 import { Icon } from './Icon'
 import { ScriptView } from './ScriptView'
+import type { Tab } from './ScriptView'
 import { projectTitle } from '../history'
 import { KNOWLEDGE, LANGUAGES, PLATFORMS, scriptLabel } from '../labels'
 import { go, projectHash } from '../route'
@@ -12,13 +13,24 @@ import type { Idea, LocalizeRequest, Project, ReviewRole, VideoTemplate } from '
 
 const STEPS = ['الموجز', 'الأفكار', 'السيناريو', 'القالب', 'فيديو المعاينة', 'المراجعة', 'الاعتماد', 'الفيديو النهائي']
 
-function Stepper({ current }: { current: number }) {
+/** Which part of the script each step opens; the brief (0) and the ideas (1) are not script parts. */
+const STEP_TAB: Record<number, Tab> = { 2: 'script', 3: 'template', 4: 'video', 5: 'review', 6: 'approve', 7: 'video' }
+
+/** The stepper is the navigation too: steps already done are ticked, and clicking any step opens its part.
+ * It replaced a second row of tabs that repeated the same names. */
+function Stepper({ progress, selected, onSelect }: { progress: number; selected: number; onSelect: (i: number) => void }) {
+  const ref = useRef<HTMLOListElement>(null)
+  useEffect(() => {
+    ref.current?.querySelector('li.on')?.scrollIntoView({ block: 'nearest', inline: 'center' })
+  }, [selected])
   return (
-    <ol className="stepper">
+    <ol className="stepper" ref={ref} aria-label="خطوات المشروع">
       {STEPS.map((s, i) => (
-        <li key={s} className={i < current ? 'done' : i === current ? 'now' : ''}>
-          <span className="step-num">{i < current ? '✓' : i + 1}</span>
-          <span className="step-label">{s}</span>
+        <li key={s} className={`${i < progress ? 'done' : ''}${i === selected ? ' on' : ''}`}>
+          <button type="button" className="step" disabled={i === 0} aria-current={i === selected ? 'step' : undefined} onClick={() => onSelect(i)}>
+            <span className="step-num">{i < progress ? '✓' : i + 1}</span>
+            <span className="step-label">{s}</span>
+          </button>
         </li>
       ))}
     </ol>
@@ -95,6 +107,25 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
   const step = pending && writing ? 2 : !active ? 1 : !active.template ? 3 : !vids?.preview && !vids?.final ? 4 : !active.review ? 5 : !active.approved ? 6 : vids?.final ? 8 : 7
   const brief = project.brief
 
+  // The open part of the script; the stepper shows it as the selected step.
+  const [tab, setTab] = useState<Tab>('script')
+  const selected = !active ? 1 : tab === 'video' ? (active.approved ? 7 : 4) : (Object.entries(STEP_TAB).find(([, t]) => t === tab)?.[0] ?? '2')
+  const openTab = (t: Tab) => {
+    setTab(t)
+    document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  const selectStep = (i: number) => {
+    if (i === 1) return go(hashFor(project.id))
+    const target = STEP_TAB[i]
+    if (!target) return
+    if (!active) {
+      const first = heads[0]
+      if (!first) return
+      go(hashFor(project.id, first.id))
+    }
+    openTab(target)
+  }
+
   return (
     <div className="workspace">
       <header className="ws-head">
@@ -125,8 +156,10 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
         )}
       </header>
 
-      <Stepper current={step} />
+      <Stepper progress={step} selected={Number(selected)} onSelect={selectStep} />
 
+      {/* One tab per line of work, shown only once there is more than one: an original alone needs no tab. */}
+      {(heads.length > 1 || writing) && (
       <nav className="tabs" aria-label="نسخ المشروع" ref={tabsRef}>
         <button className={!scriptId ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id))}>
           <span>الأفكار</span>
@@ -156,6 +189,7 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
           </button>
         )}
       </nav>
+      )}
 
       {pending && writing && here && (
         <div className="gen-flow">
@@ -193,6 +227,8 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
             source={source}
             templates={templates}
             disabled={busy !== null}
+            tab={tab}
+            onTab={openTab}
             actions={
               actions && {
                 onReview: () => actions.onReview(active.id),

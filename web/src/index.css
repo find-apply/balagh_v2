@@ -1037,15 +1037,42 @@ button.link {
   color: #fff;
 }
 
-.stepper li.now {
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.step:disabled {
+  cursor: default;
+}
+
+.step:not(:disabled):hover .step-label {
+  color: var(--brand);
+}
+
+.stepper li.on {
   color: var(--ink);
   font-weight: 600;
 }
 
-.stepper li.now .step-num {
+.stepper li.on .step-num {
   border-color: var(--brand);
   color: var(--brand);
   box-shadow: 0 0 0 4px var(--brand-soft);
+}
+
+.stepper li.on.done .step-num {
+  color: #fff;
 }
 
 .disclosure {
@@ -1509,10 +1536,6 @@ button.link {
 /* Script */
 
 .script-head {
-  margin-bottom: 4px;
-}
-
-.jump {
   margin-bottom: 16px;
 }
 
@@ -1525,32 +1548,6 @@ button.link {
   margin-bottom: 14px;
 }
 
-.jump {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--line);
-}
-
-.jump a {
-  padding: 8px 12px;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-}
-
-.jump a:hover,
-.jump a.on {
-  color: var(--brand);
-  border-bottom-color: var(--brand);
-}
-
-.jump a.on {
-  font-weight: 700;
-}
 
 [hidden] {
   display: none !important;
@@ -1847,12 +1844,21 @@ td {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 1000px) {
-  .stepper .step-label {
+  /* On a phone the stepper scrolls sideways with every label readable, since it is the navigation. */
+  .workspace > .stepper {
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: 50px;
+    z-index: 10;
+  }
+
+  .workspace > .stepper::-webkit-scrollbar {
     display: none;
   }
 
-  .stepper li.now .step-label {
-    display: inline;
+  .stepper li {
+    flex: none;
   }
 
   .brief {
@@ -3319,14 +3325,3 @@ details.card[open] > summary {
   margin-top: 8px;
 }
 
-@media (max-width: 760px) {
-  /* The part tabs stay reachable under the mobile bar while a long script scrolls. */
-  .jump {
-    position: sticky;
-    top: 50px;
-    z-index: 10;
-    background: var(--bg);
-    padding-top: 4px;
-    margin-bottom: 16px;
-  }
-}
