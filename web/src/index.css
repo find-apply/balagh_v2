@@ -3436,3 +3436,29 @@ details.card[open] > summary {
     display: none;
   }
 }
+
+@media (min-width: 1100px) {
+  /* The library fits one row: five cards, nothing to scroll past before the story. */
+  .templates {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .templates .idea {
+    padding: 10px;
+  }
+
+  .templates .preview,
+  .templates .preview.tall {
+    height: 120px;
+  }
+
+  .templates p {
+    font-size: 0.78rem;
+  }
+
+  .templates .primary {
+    padding-inline: 8px;
+    font-size: 0.85rem;
+  }
+}
