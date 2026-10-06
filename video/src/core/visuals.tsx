@@ -225,6 +225,69 @@ export const Dua: React.FC = () => {
   );
 };
 
+const Label: React.FC<{text?: string; color?: string; top?: number}> = ({text, color = '#fff', top = 640}) => {
+  const fam = useFam();
+  const p = useP(8);
+  if (!text) return null;
+  return <div style={{position: 'absolute', top, width: '100%', textAlign: 'center', fontFamily: fam, fontWeight: 800, fontSize: 56, color, opacity: p, textShadow: '0 4px 20px rgba(0,0,0,.4)'}}>{text}</div>;
+};
+
+/** Dark clouds and rain that clear into light. */
+export const Storm: React.FC<{dur: number; label?: string}> = ({dur, label}) => {
+  const f = useCurrentFrame();
+  const clear = interpolate(f, [dur * 0.45, dur * 0.95], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  const drops = Array.from({length: 26}, (_, i) => i);
+  return (
+    <Full bg={`linear-gradient(#1b2a44, ${clear > 0.5 ? '#0b78d1' : '#223a5e'})`}>
+      <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 30%, rgba(255,230,140,.9), rgba(255,230,140,0) 45%)', opacity: clear}} />
+      {[0, 1, 2].map((i) => (
+        <div key={i} style={{position: 'absolute', left: 60 + i * 190 + Math.sin((f + i * 30) / 40) * 20, top: 170 + (i % 2) * 60, fontSize: 190, opacity: 1 - clear * 0.9, transform: `translateX(${clear * (i - 1) * 260}px)`}}>☁️</div>
+      ))}
+      {drops.map((i) => (
+        <div key={i} style={{position: 'absolute', left: (i * 97) % 700, top: ((f * 9 + i * 53) % 420) + 300, width: 4, height: 30, borderRadius: 2, background: 'rgba(200,225,255,.8)', opacity: 1 - clear}} />
+      ))}
+      <Label text={label} />
+    </Full>
+  );
+};
+
+/** A closed door that opens onto light. */
+export const Door: React.FC<{dur: number; label?: string}> = ({dur, label}) => {
+  const f = useCurrentFrame();
+  const open = interpolate(f, [dur * 0.25, dur * 0.8], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+  return (
+    <Full bg="radial-gradient(circle at 50% 45%, #0e3f85, #06142b)">
+      <div style={{position: 'absolute', left: 230, top: 200, width: 260, height: 420, background: `rgba(255,236,170,${open})`, boxShadow: `0 0 ${open * 160}px ${open * 80}px rgba(255,236,170,${open * 0.6})`, borderRadius: 8}} />
+      <div style={{position: 'absolute', left: 230, top: 200, width: 260, height: 420, border: '10px solid #e8d9b0', borderRadius: 8, boxSizing: 'border-box'}} />
+      <div style={{position: 'absolute', left: 240, top: 210, width: 240, height: 400, background: 'linear-gradient(#8b5a2b, #5a3718)', transformOrigin: 'left center', transform: `perspective(900px) rotateY(${-open * 95}deg)`, borderRadius: 4, boxShadow: '0 10px 30px rgba(0,0,0,.4)'}}>
+        <div style={{position: 'absolute', right: 22, top: 190, width: 16, height: 16, borderRadius: '50%', background: '#f3d27a'}} />
+      </div>
+      <Label text={label} top={660} />
+    </Full>
+  );
+};
+
+/** Ornamental frame with soft light for a quoted verse or hadith. */
+export const Verse: React.FC<{label?: string}> = ({label}) => {
+  const f = useCurrentFrame();
+  const p = useP(0, 14);
+  const glow = 0.5 + Math.sin(f / 18) * 0.2;
+  const pts = (cx: number, cy: number, R: number, r: number, n = 8) => Array.from({length: n * 2}, (_, i) => {
+    const rad = i % 2 ? r : R, a = -Math.PI / 2 + (i * Math.PI) / n;
+    return `${(cx + Math.cos(a) * rad).toFixed(1)},${(cy + Math.sin(a) * rad).toFixed(1)}`;
+  }).join(' ');
+  return (
+    <Full bg="radial-gradient(circle at 50% 40%, #0f4e9e, #061a3a)">
+      <svg width="720" height="760" style={{position: 'absolute', top: 60, left: 0, opacity: p}}>
+        <polygon points={pts(360, 400, 300, 240)} fill="none" stroke="#e2bf62" strokeWidth="3" opacity={glow} />
+        <polygon points={pts(360, 400, 230, 180)} fill="none" stroke="#f6e3a6" strokeWidth="1.5" opacity={glow * 0.8} />
+        <circle cx="360" cy="400" r="140" fill="rgba(255,255,255,.06)" stroke="#e2bf62" strokeWidth="2" />
+      </svg>
+      <div style={{position: 'absolute', top: 400, width: '100%', textAlign: 'center', fontFamily: amiri, fontWeight: 700, fontSize: 64, color: '#f6e3a6', transform: 'translateY(-50%)', opacity: p}}>{label}</div>
+    </Full>
+  );
+};
+
 /** Shirt shrinks while the heart (faith) grows. */
 export const Compare: React.FC<{dur: number; labelA?: string; labelB?: string; emojiA?: string; emojiB?: string}> = ({dur, labelA = 'الثوب', labelB = 'الإيمان', emojiA = '👕', emojiB = '❤️'}) => {
   const f = useCurrentFrame();
@@ -323,6 +386,9 @@ export const renderVisual = (v: Visual) => {
     case 'waves': return <Waves />;
     case 'shirt': return <Shirt dur={dur} s0={v.s0} s1={v.s1} bubbles={v.bubbles} magnify={v.magnify} glow={v.glow} />;
     case 'dua': return <Dua />;
+    case 'storm': return <Storm dur={dur} label={v.label} />;
+    case 'door': return <Door dur={dur} label={v.label} />;
+    case 'verse': return <Verse label={v.label} />;
     case 'dog': return <Dog dur={dur} chase={v.chase} label={v.label} labelAt={v.labelAt} lungeAt={v.lungeAt} />;
     case 'paths': return <Paths />;
     case 'eye': return <Eye />;

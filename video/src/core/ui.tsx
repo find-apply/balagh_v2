@@ -116,8 +116,10 @@ export const CaptionStage: React.FC<{cues: Cue[]; visuals?: Visual[]; hook?: str
   return (
     <>
       {visuals.map((v, i) => {
-        const from = Math.round(v.t0 * fps);
-        const dur = Math.round((v.t1 - v.t0) * fps);
+        // The hook card sits over the first visual's spot for 3.4 s, so that visual waits for it to leave.
+        const wait = hook && i === 0 ? 3.4 : 0;
+        const from = Math.round((v.t0 + wait) * fps);
+        const dur = Math.round((v.t1 - v.t0 - wait) * fps);
         return (
           <Sequence key={i} from={from} durationInFrames={dur + 10}>
             <FadeIn>{renderVisual(v)}</FadeIn>

@@ -60,6 +60,9 @@
     "lock": "a padlock closing; keyword is its label. For closing doors to harm, protecting oneself.",
     "warning": "a pulsing warning sign on dark red; keyword is its label. For dangers to avoid.",
     "dua": "raised hands with rising light. For supplication.",
+    "storm": "dark clouds and rain that clear into light; keyword is its label. For hardship, worry, distress.",
+    "door": "a closed door that opens onto light; keyword is its label. For relief, an opening, an answer, mercy.",
+    "verse": "an ornamental frame with soft light, for the scene that quotes a verse or hadith; keyword is a short title such as the surah's name or 'hadith'.",
     "phones": "a phone shaking with notifications. For distraction and screens.",
     "image": "a generated still photo with a slow zoom, described in image_prompt. Only when no other kind can show the scene."
   },

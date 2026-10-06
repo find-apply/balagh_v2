@@ -64,6 +64,8 @@ async def _render(composition: str, props: media.Path, public: media.Path, out: 
     cmd = [
         "npx", "remotion", "render", "src/index.ts", composition, str(out),
         f"--props={props}", f"--public-dir={public}", "--log=error", "--overwrite",
+        # crf 24 is visually close to the default 18 at under half the file size; phones load it faster.
+        "--crf=24",
         f"--concurrency={os.getenv('VIDEO_RENDER_CONCURRENCY', '2')}",
     ]
     proc = await asyncio.create_subprocess_exec(

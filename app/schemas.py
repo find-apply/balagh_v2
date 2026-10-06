@@ -190,6 +190,9 @@ class ArtKind(str, Enum):
     lock = "lock"
     warning = "warning"
     dua = "dua"
+    storm = "storm"
+    door = "door"
+    verse = "verse"
     phones = "phones"
     image = "image"
 

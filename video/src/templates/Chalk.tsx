@@ -148,6 +148,7 @@ const Text: React.FC<{s: StoryScene}> = ({s}) => {
         <div style={{marginTop: 26}}><ChalkWords text={quote} size={size} t0={s.quoteLead ?? 1} t1={s.quoteEnd ?? s.duration - 0.7} font={fonts.quote} /></div>
         <svg width="520" height="26" style={{marginTop: 30}}><path d="M4 14 Q 70 2 130 14 T 260 14 T 390 14 T 516 14" stroke={CH.yellow} strokeWidth="5" fill="none" filter="url(#chalk)" strokeLinecap="round" /></svg>
         <div style={{fontFamily: fonts.chalk, fontSize: 38, color: CH.orange, filter: 'url(#chalk)', marginTop: 4}}>{s.source}</div>
+        {s.silentNote && <div style={{fontFamily: fonts.chalk, fontSize: 30, color: CH.blue, filter: 'url(#chalk)', marginTop: 16}}>{s.silentNote}</div>}
       </div>
     </Board>
   );

@@ -26,6 +26,7 @@ LABELS = {
         "said_hadith": "قَالَ النَّبِيُّ ﷺ:", "said_quran": "قَالَ اللهُ تَعَالَى:",
         "teaser_intro": "حَلْقَةٌ جَدِيدَةٌ لِأَطْفَالِكُمْ", "teaser_lesson": "الدَّرْسُ", "teaser_from": "النَّصُّ الشَّرْعِيُّ فِي الْحَلْقَةِ",
         "teaser_cta": "شَاهِدُوا الْحَلْقَةَ كَامِلَةً مَعَ أَطْفَالِكُمْ",
+        "silent": "اقْرَأْ مَعَنَا: يُضَافُ صَوْتُ الْقَارِئِ عِنْدَ تَوَفُّرِ التَّسْجِيلِ",
     },
     Language.en: {
         "story": "Listen and learn", "board": "Lesson board", "words": "Let's understand", "quiz": "Question",
@@ -33,6 +34,7 @@ LABELS = {
         "said_hadith": "The Prophet ﷺ said:", "said_quran": "Allah says (translation of the meaning):",
         "teaser_intro": "A new episode for your children", "teaser_lesson": "The lesson", "teaser_from": "The text in this episode",
         "teaser_cta": "Watch the full episode with your children",
+        "silent": "Read along: a reciter's voice is added once a recording is available",
     },
 }
 
@@ -207,9 +209,9 @@ async def _text_scene(s: StoryScene, ref: Reference | None, spec: dict, labels: 
         spec.update(audio=build.take(clip, "mp3"), audioAt=LEAD, duration=round(LEAD + clip.seconds + 1.0, 2),
                     quoteLead=LEAD, quoteEnd=round(LEAD + clip.seconds, 2))
     else:
-        # No recording: shown in silence for reading time, never synthesized.
+        # No recording: shown in silence for reading time, never synthesized, and the viewer is told why.
         d = reading_seconds(s.quote) + 1.5
-        spec.update(duration=round(LEAD + d + TAIL, 2), quoteLead=LEAD, quoteEnd=round(LEAD + d, 2))
+        spec.update(duration=round(LEAD + d + TAIL, 2), quoteLead=LEAD, quoteEnd=round(LEAD + d, 2), silentNote=labels["silent"])
 
 
 # ---- Parents' teaser: cut from the story, nothing new generated ----

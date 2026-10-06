@@ -83,6 +83,7 @@ const Text: React.FC<{s: StoryScene}> = ({s}) => {
         <div style={{fontFamily: fonts.body, fontWeight: 800, fontSize: 38, color: C.tealDark, direction: dir}}>{s.text}</div>
         <div style={{marginTop: 24}}><Words text={quote} size={size} font={fonts.quote} t0={s.quoteLead ?? 1} t1={s.quoteEnd ?? s.duration - 0.7} /></div>
         <div style={{marginTop: 26, fontFamily: fonts.body, fontWeight: 600, fontSize: 32, color: '#6b7a80', direction: dir}}>{s.source}</div>
+        {s.silentNote && <div style={{marginTop: 18, fontFamily: fonts.body, fontWeight: 600, fontSize: 24, color: C.teal, direction: dir, background: C.cream, padding: '6px 18px', borderRadius: 16}}>{s.silentNote}</div>}
       </div>
     </Chrome>
   );

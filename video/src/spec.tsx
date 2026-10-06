@@ -47,6 +47,7 @@ export type StoryScene = {
   quoteEnd?: number;
   audio?: string;
   audioAt?: number;
+  silentNote?: string;
   // type words
   cards?: {word: string; meaning: string}[];
   // type quiz

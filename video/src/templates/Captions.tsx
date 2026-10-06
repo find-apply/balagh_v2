@@ -16,6 +16,9 @@ const toVisual = (a: Art): Visual => {
     case 'lock': return {...base, kind: 'lock', label: a.keyword};
     case 'warning': return {...base, kind: 'warning', label: a.keyword};
     case 'dua': return {...base, kind: 'dua'};
+    case 'storm': return {...base, kind: 'storm', label: a.keyword};
+    case 'door': return {...base, kind: 'door', label: a.keyword};
+    case 'verse': return {...base, kind: 'verse', label: a.keyword};
     case 'phones': return {...base, kind: 'phoneStorm'};
     case 'image': return a.image ? {...base, kind: 'photo', src: a.image} : {...base, kind: 'word', text: a.keyword};
     default: return {...base, kind: 'word', text: a.keyword};
