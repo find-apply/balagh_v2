@@ -27,6 +27,7 @@ LABELS = {
         "teaser_intro": "حَلْقَةٌ جَدِيدَةٌ لِأَطْفَالِكُمْ", "teaser_lesson": "الدَّرْسُ", "teaser_from": "النَّصُّ الشَّرْعِيُّ فِي الْحَلْقَةِ",
         "teaser_cta": "شَاهِدُوا الْحَلْقَةَ كَامِلَةً مَعَ أَطْفَالِكُمْ",
         "silent": "اقْرَأْ مَعَنَا: يُضَافُ صَوْتُ الْقَارِئِ عِنْدَ تَوَفُّرِ التَّسْجِيلِ",
+        "silent_short": "يُعرض النص للقراءة · صوت القارئ يُضاف عند توفر التسجيل",
     },
     Language.en: {
         "story": "Listen and learn", "board": "Lesson board", "words": "Let's understand", "quiz": "Question",
@@ -35,12 +36,14 @@ LABELS = {
         "teaser_intro": "A new episode for your children", "teaser_lesson": "The lesson", "teaser_from": "The text in this episode",
         "teaser_cta": "Watch the full episode with your children",
         "silent": "Read along: a reciter's voice is added once a recording is available",
+        "silent_short": "Shown for reading · a reciter's voice is added once recorded",
     },
 }
 
 
 def reading_seconds(text: str) -> float:
-    return max(3.0, 0.5 * len(text.split()) + 1.0)
+    """Time to read a shown text: about 2.5 words a second, never under 3 s."""
+    return max(3.0, 0.4 * len(text.split()) + 1.0)
 
 
 @dataclass
@@ -130,7 +133,12 @@ async def build_captions(script: Script, template: dict, build: Build) -> dict:
                 d = clip.seconds + 0.4 if clip else reading_seconds(part)
                 if clip:
                     audio.append({"t0": round(t, 2), "src": build.take(clip, "mp3")})
-                cues += _cues(part, t, t + (clip.seconds if clip else d), emph=True, max_words=12)
+                quote_cues = _cues(part, t, t + (clip.seconds if clip else d), emph=True, max_words=12)
+                if not clip:
+                    # Silence is deliberate here; say so under the caption, or the viewer suspects a fault.
+                    for c in quote_cues:
+                        c["sub"] = LABELS[lang]["silent_short"]
+                cues += quote_cues
             else:
                 clip = await media.speak(part, "narr")
                 d = clip.seconds + 0.25
