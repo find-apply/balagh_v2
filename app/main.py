@@ -213,7 +213,12 @@ async def revise_script(project_id: str, script_id: str, body: ReviseIn) -> Scri
     project = _get_project(project_id)
     script = _get_script(project, script_id)
     try:
-        revised = await generator.revise_script(script, _get_idea(project, script.idea_id), body.notes)
+        # The chain of versions this one corrects, so fixes made earlier are not undone.
+        earlier, cursor = [], script
+        while cursor.revised_from and cursor.revised_from in project.scripts and len(earlier) < 6:
+            cursor = project.scripts[cursor.revised_from]
+            earlier.append(cursor)
+        revised = await generator.revise_script(script, _get_idea(project, script.idea_id), body.notes, earlier)
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
     _drop_story_template(revised)

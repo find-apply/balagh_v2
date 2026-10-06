@@ -271,6 +271,7 @@ ATTRIBUTION = re.compile(
     r"|\bprophet\b|\bhadith\b|\bquran\b|\bverse\b|\bmessenger\b",
     re.IGNORECASE,
 )
+REPORTED = re.compile(r"قال|يقول|قالت|أخبر|أمر|نهى|وعد|علّمنا|علمنا|«|\bsaid\b|\bsays\b|\btold\b|\btaught\b|\bpromis", re.IGNORECASE)
 KNOWLEDGE = {
     AudienceKnowledge.familiar: "familiar (knows Islamic terms)",
     AudienceKnowledge.basic: "basic (some acquaintance, few terms)",
@@ -448,7 +449,9 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
         ids += [m.group(1) for m in PLACEHOLDER.finditer(s.voiceover + s.on_screen_text)
                 if m.group(1) in evidence and m.group(1) not in ids]
         relied.update(ids)
-        if not ids and ATTRIBUTION.search(f"{s.voiceover} {s.on_screen_text}"):
+        text = f"{s.voiceover} {s.on_screen_text}"
+        # Defining a word ("the hadith is the Prophet's words") is not an attribution; reporting or quoting is.
+        if not ids and ATTRIBUTION.search(text) and REPORTED.search(text):
             warnings.append(f"المشهد {n} يذكر نصا شرعيا أو ينسب قولا دون دليل موثق مرتبط به.")
         scenes.append(Scene(
             start_second=s.start_second, end_second=s.end_second, visual=s.visual, art=s.art,
@@ -608,10 +611,14 @@ async def review_script(script: Script, idea: Idea, source: Optional[Script]) ->
     return ReviewReport(findings=findings, claims=claims, blocking=sum(f.severity == Severity.blocking for f in findings))
 
 
-async def revise_script(script: Script, idea: Idea, notes: Optional[str]) -> Script:
-    """One correction pass applying the review's blocking findings and the human reviewer's notes."""
+async def revise_script(script: Script, idea: Idea, notes: Optional[str], earlier: list[Script] = ()) -> Script:
+    """One correction pass applying the review's blocking findings and the human reviewer's notes.
+    `earlier` are the versions this one corrected, oldest last: what their reviews had fixed must stay fixed,
+    or a later pass drifts back to a wording an earlier pass removed (seen in practice)."""
     corrections = [f"- Scene {f.scene}: {f.issue} Fix: {f.fix}" for f in (script.review.findings if script.review else [])
                    if f.severity == Severity.blocking]
+    kept = [f"- {f.issue} (fixed in version {e.version}: keep that fix)"
+            for e in earlier if e.review for f in e.review.findings if f.severity == Severity.blocking]
     if notes:
         corrections.append(f"- From the human reviewer: {notes}")
     if not corrections:
@@ -625,6 +632,7 @@ async def revise_script(script: Script, idea: Idea, notes: Optional[str]) -> Scr
         f"Reviewers found the problems below in the current script. Return the full script with only these "
         f"corrected: keep everything else, including the quote placeholders, as it is.\n"
         + "\n".join(corrections)
+        + (f"\n\nEarlier versions were corrected for the problems below; do not reintroduce any of them:\n" + "\n".join(kept) if kept else "")
     )
     fields = await _write(SCRIPT_SYSTEM, prompt, LocalizedDraft if localized else ScriptDraft, idea, script.target.language)
     return script.model_copy(update=dict(

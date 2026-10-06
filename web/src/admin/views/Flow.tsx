@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { adminApi } from '../adminApi'
 import type { FlowSettings } from '../adminApi'
 import { STAGES } from '../format'
@@ -14,7 +14,9 @@ export function Flow() {
   const [saving, setSaving] = useState(false)
   const [open, setOpen] = useState<string | null>(null)
 
-  useEffect(() => setForm(settings.data), [settings.data])
+  // The form starts from the loaded settings once; later edits stay local until saved.
+  const loaded = settings.data
+  if (loaded && form === null) setForm(loaded)
 
   if (!flow.data || !form) return <Status error={flow.error ?? settings.error} loading />
   const set = <K extends keyof FlowSettings>(k: K, v: FlowSettings[K]) => {

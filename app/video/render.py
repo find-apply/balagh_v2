@@ -12,7 +12,7 @@ from . import catalog, media, spec
 
 VIDEOS = media.MEDIA / "videos"
 JOBS = media.MEDIA / "jobs"
-_render_lock = asyncio.Semaphore(1)
+_render_lock = asyncio.Semaphore(int(os.getenv("VIDEO_PARALLEL_RENDERS", "2")))
 _tasks: set[asyncio.Task] = set()
 
 
@@ -56,8 +56,7 @@ async def _run(video: Video, script: Script) -> None:
         video.status, video.error = VideoStatus.failed, str(e)[:500]
     finally:
         store.save_video(video)
-        if video.status == VideoStatus.done:
-            shutil.rmtree(job, ignore_errors=True)
+        shutil.rmtree(job, ignore_errors=True)
 
 
 async def _render(composition: str, props: media.Path, public: media.Path, out: media.Path) -> None:

@@ -1,5 +1,6 @@
 """Settings the admin can change without a redeploy. Stored values override the environment defaults."""
 import os
+import time
 
 from pydantic import BaseModel, Field
 
@@ -21,11 +22,23 @@ def defaults() -> FlowSettings:
     )
 
 
+_cache: tuple[float, FlowSettings] | None = None
+_TTL = 15.0  # seconds: a save takes effect within this, and the DB is not hit on every model call
+
+
 def current() -> FlowSettings:
+    global _cache
+    now = time.monotonic()
+    if _cache and now - _cache[0] < _TTL:
+        return _cache[1]
     stored = store.get_settings()
-    return defaults().model_copy(update={k: v for k, v in stored.items() if k in FlowSettings.model_fields})
+    value = defaults().model_copy(update={k: v for k, v in stored.items() if k in FlowSettings.model_fields})
+    _cache = (now, value)
+    return value
 
 
 def save(new: FlowSettings) -> FlowSettings:
+    global _cache
     store.put_settings(new.model_dump())
+    _cache = (time.monotonic(), new)
     return new

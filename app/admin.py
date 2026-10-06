@@ -1,6 +1,7 @@
 """Admin API: oversight of projects, approvals and model runs, plus the flow settings.
 Protected by the ADMIN_TOKEN environment variable; without it the admin is disabled."""
 import os
+import time
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -59,6 +60,21 @@ class RunRow(BaseModel):
     error: Optional[str]
 
 
+_projects_cache: tuple[float, list] | None = None
+
+
+def _all_projects() -> list:
+    """store.all_projects() parses every stored project; the admin views call it on every keystroke,
+    so the parsed list is kept for a few seconds."""
+    global _projects_cache
+    now = time.monotonic()
+    if _projects_cache and now - _projects_cache[0] < 10:
+        return _projects_cache[1]
+    rows = store.all_projects()
+    _projects_cache = (now, rows)
+    return rows
+
+
 def _title(p: Project) -> str:
     return (p.brief.idea or "").strip() or (p.ideas[0].title if p.ideas else "")
 
@@ -81,7 +97,7 @@ async def session() -> dict:
 
 @router.get("/overview")
 async def overview() -> dict:
-    projects = store.all_projects()
+    projects = _all_projects()
     scripts = [s for p, _ in projects for s in p.scripts.values()]
     now = datetime.now(timezone.utc)
     day = now - timedelta(hours=24)
@@ -116,7 +132,7 @@ async def overview() -> dict:
 
 @router.get("/projects", response_model=list[ProjectRow])
 async def projects(q: str = "", limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)) -> list[ProjectRow]:
-    rows = [_row(p, c) for p, c in store.all_projects()]
+    rows = [_row(p, c) for p, c in _all_projects()]
     needle = q.strip().lower()
     if needle:
         rows = [r for r in rows if needle in f"{r.title} {r.audience} {r.id}".lower()]
@@ -133,9 +149,11 @@ async def project(project_id: str) -> Project:
 
 @router.delete("/projects/{project_id}", status_code=204)
 async def delete_project(project_id: str, confirm: bool = Query(False, description="Must be true: deletion is final.")) -> Response:
+    """Permanently removes a project and every review link to it."""
+    global _projects_cache
     if not confirm:
         raise HTTPException(status_code=400, detail="أضف confirm=true لتأكيد الحذف؛ الحذف نهائي.")
-    """Permanently removes a project and every review link to it."""
+    _projects_cache = None
     if not store.delete_project(project_id):
         raise HTTPException(status_code=404, detail="Project not found")
     return Response(status_code=204)
@@ -145,7 +163,7 @@ async def delete_project(project_id: str, confirm: bool = Query(False, descripti
 async def approvals() -> list[PendingApproval]:
     """Script versions that still lack a sign-off, most recent project first."""
     out = []
-    for p, _ in store.all_projects():
+    for p, _ in _all_projects():
         for s in p.scripts.values():
             if s.approved:
                 continue
