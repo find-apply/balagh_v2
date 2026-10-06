@@ -9,12 +9,14 @@ interface Props {
   template: VideoTemplate | null
   templates: VideoTemplate[] | null
   disabled: boolean
+  /** Opens the part of the page a blocked state points to (template or approval). */
+  onGo?: (part: 'template' | 'approve') => void
 }
 
 const ACTIVE = new Set(['queued', 'voicing', 'imaging', 'rendering'])
 
 /** Renders the approved script with its template and follows the job until the MP4 is ready. */
-export function VideoPanel({ projectId, script, template, templates, disabled }: Props) {
+export function VideoPanel({ projectId, script, template, templates, disabled, onGo }: Props) {
   const [videos, setVideos] = useState<Video[]>([])
   const [error, setError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
@@ -57,11 +59,25 @@ export function VideoPanel({ projectId, script, template, templates, disabled }:
         المختار. النصوص الشرعية لا تُقرأ بصوت اصطناعي: القرآن بتلاوة قارئ، والحديث من تسجيل يضعه صانع المحتوى في
         data/recitations، وإلا عُرض بصمت.
       </p>
-      {blocked && <p className="muted small">{blocked}</p>}
       {error && <div className="notice bad">{error}</div>}
-      <button className="primary" disabled={disabled || starting || running || Boolean(blocked)} onClick={start}>
-        {running ? 'يُنشأ الفيديو…' : `أنشئ الفيديو${template ? ` بقالب «${template.name}»` : ''}`}
-      </button>
+      {blocked ? (
+        // Instead of a grey button, the one action that unblocks it.
+        <div className="next">
+          <div>
+            <strong>{blocked}</strong>
+            <p className="muted small">{!template ? 'القالب يحدد شكل الفيديو وما يُولَّد له.' : 'يوقّع كل من تتطلبه هذه النسخة بالاسم، ثم يُفتح الإنشاء.'}</p>
+          </div>
+          {onGo && (
+            <button className="primary" disabled={disabled} onClick={() => onGo(!template ? 'template' : 'approve')}>
+              {!template ? 'اختر قالبا' : 'اذهب إلى الاعتماد'}
+            </button>
+          )}
+        </div>
+      ) : (
+        <button className="primary" disabled={disabled || starting || running} onClick={start}>
+          {running ? 'يُنشأ الفيديو…' : `أنشئ الفيديو بقالب «${template!.name}»`}
+        </button>
+      )}
       {videos.length > 0 && (
         <ul className="plain videos">
           {videos.map((v, i) => (

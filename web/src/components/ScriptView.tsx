@@ -208,6 +208,7 @@ function Approvals({ script, disabled, onApprove, shareUrl }: { script: Script; 
         <button disabled={!script.approved} onClick={() => download(script)} title="يتاح بعد اكتمال الاعتماد">
           صدّر Markdown
         </button>
+        {!script.approved && <span className="muted small">التصدير يُفتح بعد اكتمال الاعتماد.</span>}
       </div>
       )}
     </section>
@@ -564,6 +565,10 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
           template={templates?.find((t) => t.id === script.template) ?? null}
           templates={templates}
           disabled={disabled || !actions}
+          onGo={(part) => {
+            setTab(part)
+            document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }}
         />
       </div>
 
