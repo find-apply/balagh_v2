@@ -537,7 +537,7 @@ class Video(BaseModel):
     new_clips: int = Field(default=0, description="Speech clips synthesized (and paid for) for this video.")
     notes: list[str] = Field(default_factory=list, description="What the render could not do as intended, e.g. a hadith shown without a recording.")
     created_at: datetime
-    render_seconds: Optional[float] = Field(default=None, description="Wall time of the whole job, once it ended.")
+    render_seconds: Optional[float] = Field(default=None, description="Wall time of the job once it ended, minus any wait for a free render slot.")
 
 
 Script.model_rebuild()

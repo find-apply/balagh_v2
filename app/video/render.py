@@ -30,6 +30,7 @@ def start(project_id: str, script: Script, template_id: str, preview: bool = Fal
 async def _run(video: Video, script: Script) -> None:
     template = catalog.get(video.template)
     job = JOBS / video.id
+    waited = 0.0  # time spent in line for a render slot: the job's own duration excludes it
     try:
         job.mkdir(parents=True, exist_ok=True)
         VIDEOS.mkdir(parents=True, exist_ok=True)
@@ -50,7 +51,9 @@ async def _run(video: Video, script: Script) -> None:
         video.status = VideoStatus.rendering
         store.save_video(video)
         out = VIDEOS / f"{video.id}.mp4"
+        queued = datetime.now(timezone.utc)
         async with _render_lock:
+            waited = (datetime.now(timezone.utc) - queued).total_seconds()
             await _render(template["composition"], job / "props.json", job, out)
         video.duration_seconds = round(media.seconds_of(out), 2)
         video.url = f"/media/videos/{video.id}.mp4"
@@ -58,7 +61,7 @@ async def _run(video: Video, script: Script) -> None:
     except Exception as e:  # the job must always end in a stored status
         video.status, video.error = VideoStatus.failed, str(e)[:500]
     finally:
-        video.render_seconds = round((datetime.now(timezone.utc) - video.created_at).total_seconds(), 1)
+        video.render_seconds = round((datetime.now(timezone.utc) - video.created_at).total_seconds() - waited, 1)
         store.save_video(video)
         shutil.rmtree(job, ignore_errors=True)
 
