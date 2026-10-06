@@ -1,19 +1,19 @@
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Optional
 from uuid import uuid4
 
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from google.genai import errors as genai_errors
 
-from . import generator, store
+from . import admin, flow_settings, generator, store
 from .schemas import (
-    Approval, ApproveIn, BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, StoryIn, TemplateIn, Video,
-    VideoIn, VideoTemplate,
+    Approval, ApproveIn, BriefIn, HistoryEntry, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, StoryIn,
+    TemplateIn, Video, VideoIn, VideoTemplate,
 )
 from .video import catalog, render, story
 
@@ -35,6 +35,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(admin.router)
+
+
+def generation_open() -> None:
+    cfg = flow_settings.current()
+    if cfg.paused:
+        raise HTTPException(status_code=503, detail=cfg.paused_message or "التوليد متوقف مؤقتا للصيانة، حاول لاحقا.")
+
 
 @app.exception_handler(generator.GenerationRefused)
 async def refused_handler(request: Request, exc: generator.GenerationRefused):
@@ -111,7 +120,15 @@ async def create_project(brief: BriefIn) -> Project:
     ideas = await generator.generate_ideas(brief)
     project = Project(id=uuid4().hex, brief=brief, ideas=ideas)
     store.save(project)
+    if x_client_id:
+        store.remember(x_client_id[:64], project.id, shared=False)
     return project
+
+
+@app.get("/projects", response_model=list[HistoryEntry])
+async def list_projects(x_client_id: Optional[str] = Header(default=None)) -> list[HistoryEntry]:
+    """The calling client's history, newest first: projects it created or opened from a review link."""
+    return store.list_history(x_client_id[:64]) if x_client_id else []
 
 
 @app.get("/projects/{project_id}", response_model=Project)
@@ -119,7 +136,25 @@ async def get_project(project_id: str) -> Project:
     return _get_project(project_id)
 
 
-@app.post("/projects/{project_id}/ideas/{idea_id}/script", response_model=Script, status_code=201)
+@app.post("/projects/{project_id}/open", response_model=Project)
+async def open_project(project_id: str, shared: bool = False, x_client_id: Optional[str] = Header(default=None)) -> Project:
+    """Adds the project to the calling client's history: its own project (registered from an earlier browser
+    history) or, with shared=true, one that arrived through someone's review link. Reading never records."""
+    project = _get_project(project_id)
+    if x_client_id:
+        store.remember(x_client_id[:64], project_id, shared=shared)
+    return project
+
+
+@app.delete("/projects/{project_id}", status_code=204)
+async def hide_project(project_id: str, x_client_id: Optional[str] = Header(default=None)) -> Response:
+    """Removes a project from the client's history only; the project and its review link keep working."""
+    if x_client_id:
+        store.forget(x_client_id[:64], project_id)
+    return Response(status_code=204)
+
+
+@app.post("/projects/{project_id}/ideas/{idea_id}/script", response_model=Script, status_code=201, dependencies=[Depends(generation_open)])
 async def create_script(project_id: str, idea_id: str, body: ScriptIn) -> Script:
     """Step 2: pick an idea, get the full script for the brief's audience."""
     project = _get_project(project_id)
@@ -134,7 +169,7 @@ async def create_script(project_id: str, idea_id: str, body: ScriptIn) -> Script
     return script
 
 
-@app.post("/projects/{project_id}/scripts/{script_id}/localize", response_model=Script, status_code=201)
+@app.post("/projects/{project_id}/scripts/{script_id}/localize", response_model=Script, status_code=201, dependencies=[Depends(generation_open)])
 async def localize_script(project_id: str, script_id: str, body: LocalizeIn) -> Script:
     """Step 3: adapt a script for another language, culture or level of knowledge, keeping its meaning."""
     project = _get_project(project_id)
@@ -150,7 +185,7 @@ async def localize_script(project_id: str, script_id: str, body: LocalizeIn) -> 
     return script
 
 
-@app.post("/projects/{project_id}/scripts/{script_id}/review", response_model=ReviewReport)
+@app.post("/projects/{project_id}/scripts/{script_id}/review", response_model=ReviewReport, dependencies=[Depends(generation_open)])
 async def review_script(project_id: str, script_id: str) -> ReviewReport:
     """Step 4: AI pre-review (scholarly, audience, and meaning preservation for localized scripts)."""
     project = _get_project(project_id)
@@ -161,7 +196,7 @@ async def review_script(project_id: str, script_id: str) -> ReviewReport:
     return script.review
 
 
-@app.post("/projects/{project_id}/scripts/{script_id}/revise", response_model=Script, status_code=201)
+@app.post("/projects/{project_id}/scripts/{script_id}/revise", response_model=Script, status_code=201, dependencies=[Depends(generation_open)])
 async def revise_script(project_id: str, script_id: str, body: ReviseIn) -> Script:
     """Step 5: one correction pass applying the review's blocking findings and the human reviewer's notes."""
     project = _get_project(project_id)

@@ -494,3 +494,14 @@ class Video(BaseModel):
 
 
 Script.model_rebuild()
+
+class HistoryEntry(BaseModel):
+    """One row of a client's generation history."""
+    id: str
+    title: str
+    audience: str
+    language: Language
+    at: datetime
+    scripts: int
+    approved: int
+    shared: bool = Field(description="Opened from someone else's review link rather than created by this client.")

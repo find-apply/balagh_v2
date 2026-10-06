@@ -17,47 +17,49 @@ export function EvidenceItem({ e }: { e: Evidence }) {
 interface Props {
   ideas: Idea[]
   disabled: boolean
-  onPick: (idea: Idea) => void
+  /** Leave out to show the ideas without a way to pick one. */
+  onPick?: (idea: Idea) => void
 }
 
 export function IdeaList({ ideas, disabled, onPick }: Props) {
   return (
-    <div className="ideas">
-      {ideas.map((idea, n) => (
-        <article className="card idea" key={idea.id}>
-          <div className="badges">
-            <span className={`badge level-${idea.content_level}`}>{LEVELS[idea.content_level]}</span>
-            <span className="badge">{idea.duration_seconds} ث</span>
-            {idea.needs_specialist_review && <span className="badge warn">تحتاج مراجعة مختص</span>}
-          </div>
-          <span className="idea-num">الفكرة {n + 1}</span>
-          <h3 dir="auto">{idea.title}</h3>
-          <p className="hook" dir="auto">
-            {idea.hook}
-          </p>
-          <p className="sources-line">
-            {idea.evidence.length > 0 ? (
-              <span className="badge ok">{idea.evidence.length} نص موثّق</span>
-            ) : (
-              <span className="badge">بلا نص شرعي</span>
-            )}
-            {idea.unverified.length > 0 && <span className="badge bad">{idea.unverified.length} غير موثّق، لن يُستعمل</span>}
-          </p>
-          <button className="primary" disabled={disabled} onClick={() => onPick(idea)}>
-            اكتب السيناريو
-          </button>
-          <details className="idea-more">
-            <summary>الفكرة بالتفصيل والنصوص</summary>
+    <>
+      <div className="page-head">
+        <h2>{onPick ? 'اختر فكرة' : 'الأفكار المقترحة'}</h2>
+        <p className="muted">
+          ثلاث زوايا للموضوع، لكل منها نصوصها الموثّقة.{onPick && ' اختر واحدة ليكتب بلاغ سيناريوها.'}
+        </p>
+      </div>
+      <div className="ideas">
+        {ideas.map((idea, i) => (
+          <article className="card idea" key={idea.id}>
+            <div className="idea-top">
+              <span className="idea-num">{i + 1}</span>
+              <div className="badges">
+                <span className={`badge level-${idea.content_level}`}>{LEVELS[idea.content_level]}</span>
+                <span className="badge">{idea.duration_seconds} ث</span>
+                {idea.needs_specialist_review && <span className="badge warn">تحتاج مراجعة مختص</span>}
+              </div>
+            </div>
+            <h3 dir="auto">{idea.title}</h3>
+            <blockquote className="hook" dir="auto">
+              {idea.hook}
+            </blockquote>
             <p dir="auto">{idea.concept}</p>
-            <p className="muted" dir="auto">
-              <span className="tag">لماذا تنجح</span> {idea.why_it_works}
-            </p>
-            <p className="muted small" dir="auto">
-              <span className="tag">المدة</span> {idea.duration_reason}
-            </p>
+            <div className="why">
+              <span className="tag">لماذا تنجح</span>
+              <p className="muted small" dir="auto">
+                {idea.why_it_works}
+              </p>
+              <p className="muted small" dir="auto">
+                <span className="tag">المدة</span> {idea.duration_reason}
+              </p>
+            </div>
             {idea.evidence.length > 0 && (
               <div className="block">
-                <h4>النصوص الموثّقة من المصادر</h4>
+                <h4>
+                  النصوص الموثّقة <span className="count">{idea.evidence.length}</span>
+                </h4>
                 {idea.evidence.map((e) => (
                   <EvidenceItem key={e.id} e={e} />
                 ))}
@@ -75,9 +77,14 @@ export function IdeaList({ ideas, disabled, onPick }: Props) {
                 </ul>
               </div>
             )}
-          </details>
-        </article>
-      ))}
-    </div>
+            {onPick && (
+              <button className="primary block-button idea-cta" disabled={disabled} onClick={() => onPick(idea)}>
+                اكتب السيناريو ←
+              </button>
+            )}
+          </article>
+        ))}
+      </div>
+    </>
   )
 }

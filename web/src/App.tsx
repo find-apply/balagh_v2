@@ -1,107 +1,130 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { api, ApiError } from './api'
+import { AdminApp } from './admin/AdminApp'
 import { BriefForm } from './components/BriefForm'
-import { IdeaList } from './components/IdeaList'
-import { ScriptView } from './components/ScriptView'
-import { scriptLabel } from './labels'
-import type { Project, Script, VideoTemplate } from './types'
+import { HistorySidebar } from './components/HistorySidebar'
+import { Landing } from './components/Landing'
+import { Icon } from './components/Icon'
+import { AppShell } from './components/shell/AppShell'
+import { IdeaSkeletons, Progress, Toast } from './components/Progress'
+import { Workspace } from './components/Workspace'
+import { loadHistory, saveHistory, upsertEntry } from './history'
+import type { HistoryEntry } from './history'
+import { go, parseRoute, projectHash } from './route'
+import { TASKS } from './tasks'
+import type { Busy } from './tasks'
+import type { Brief, Project, Script, VideoTemplate } from './types'
 
-const STORAGE_KEY = 'balagh.project'
-const HISTORY_KEY = 'balagh.projects'
+const AUTO_REVIEW_KEY = 'balagh.autoReview'
 
-interface Saved {
-  id: string
-  title: string
-  at: string
-}
-
-// Earlier projects of this browser, newest first. Projects live on the server; only their ids are kept here.
-function loadHistory(): Saved[] {
+function readAutoReview(): boolean {
   try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]')
+    return localStorage.getItem(AUTO_REVIEW_KEY) !== 'off'
   } catch {
-    return []
+    return true
   }
-}
-
-function remember(project: Project) {
-  const title = project.brief.idea || project.ideas[0]?.title || 'مشروع'
-  const rest = loadHistory().filter((p) => p.id !== project.id)
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify([{ id: project.id, title, at: new Date().toISOString() }, ...rest].slice(0, 20)))
-  } catch {
-    // Storage full or blocked: history is a convenience only.
-  }
-}
-
-function Busy({ label }: { label: string }) {
-  const [seconds, setSeconds] = useState(0)
-  useEffect(() => {
-    const timer = setInterval(() => setSeconds((s) => s + 1), 1000)
-    return () => clearInterval(timer)
-  }, [])
-  return (
-    <div className="busy" role="status">
-      <span className="spinner" /> {label} <span className="muted">({seconds} ث، قد يستغرق دقيقة)</span>
-    </div>
-  )
-}
-
-function History({ disabled, onOpen }: { disabled: boolean; onOpen: (id: string) => void }) {
-  const history = loadHistory()
-  if (history.length === 0) return null
-  return (
-    <details className="card history">
-      <summary>مشاريعك السابقة ({history.length})</summary>
-      <ul className="plain">
-        {history.map((p) => (
-          <li key={p.id}>
-            <button className="link" disabled={disabled} onClick={() => onOpen(p.id)} dir="auto">
-              {p.title}
-            </button>{' '}
-            <span className="muted small">{new Date(p.at).toLocaleDateString('ar')}</span>
-          </li>
-        ))}
-      </ul>
-    </details>
-  )
 }
 
 export default function App() {
-  const [project, setProject] = useState<Project | null>(null)
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const [templates, setTemplates] = useState<VideoTemplate[] | null>(null)
-  const [busy, setBusy] = useState<string | null>(null)
+  const [route, setRoute] = useState(parseRoute)
+  const [history, setHistory] = useState<HistoryEntry[]>(loadHistory)
+  const [projects, setProjects] = useState<Record<string, Project>>({})
+  const [busy, setBusy] = useState<Busy | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [referral, setReferral] = useState<string | null>(null)
+  const [autoReview, setAutoReview] = useState(readAutoReview)
+  // A brief copied from an existing project; changing formKey gives the composer a fresh start.
+  const [draft, setDraft] = useState<Brief | null>(null)
+  const [formKey, setFormKey] = useState(0)
+  const [templates, setTemplates] = useState<VideoTemplate[] | null>(null)
 
   useEffect(() => {
     api.templates().then(setTemplates, () => setTemplates(null))
   }, [])
 
   useEffect(() => {
-    // A review link (?project=…&script=…) opens that script directly for the reviewer.
-    const params = new URLSearchParams(location.search)
-    const shared = params.get('project')
-    const saved = shared ?? localStorage.getItem(STORAGE_KEY)
-    if (!saved) return
-    api.getProject(saved).then(
-      (loaded) => {
-        setProject(loaded)
-        remember(loaded)
-        const script = params.get('script')
-        if (script && loaded.scripts[script]) setActiveId(script)
+    const sync = () => {
+      setRoute(parseRoute())
+      setError(null)
+      scrollTo({ top: 0 })
+    }
+    addEventListener('popstate', sync)
+    addEventListener('hashchange', sync)
+    return () => {
+      removeEventListener('popstate', sync)
+      removeEventListener('hashchange', sync)
+    }
+  }, [])
+
+  // Entries show the live title and counts of projects loaded in this session.
+  const entries = useMemo(
+    () => history.map((e) => (projects[e.id] ? upsertEntry([e], projects[e.id])[0] : e)),
+    [history, projects],
+  )
+  useEffect(() => saveHistory(entries), [entries])
+
+  // The server keeps the authoritative history for this browser; the local copy is the offline fallback.
+  // Entries only known locally (from before server history existed) are registered by opening them once.
+  useEffect(() => {
+    api.listProjects().then(
+      (remote) => {
+        const known = new Set(remote.map((r) => r.id))
+        const local = loadHistory().filter((e) => !known.has(e.id))
+        setHistory([...remote, ...local])
+        // Entries this browser kept before server history existed are its own projects: register them as such,
+        // and drop the ones the server no longer has.
+        for (const e of local) {
+          api.openProject(e.id, e.shared).catch((err) => {
+            if (err instanceof ApiError && err.status === 404) setHistory((h) => h.filter((x) => x.id !== e.id))
+          })
+        }
       },
-      () => (shared ? setError('تعذر فتح رابط المراجعة: المشروع غير موجود.') : localStorage.removeItem(STORAGE_KEY)),
+      () => {},
     )
   }, [])
 
-  async function run(label: string, task: () => Promise<void>) {
-    setBusy(label)
+  const openId = route.view === 'project' ? route.id : null
+  const loaded = openId ? projects[openId] : undefined
+
+  useEffect(() => {
+    if (!openId || loaded) return
+    // A project this browser has not seen came from someone's review link; opening records it as shared.
+    const seen = history.some((e) => e.id === openId)
+    ;(seen ? api.getProject(openId) : api.openProject(openId, true)).then(
+      (p) => {
+        setProjects((all) => ({ ...all, [p.id]: p }))
+        setHistory((h) => upsertEntry(h, p, !seen))
+      },
+      (e) => {
+        // Only a 404 means the project is gone; a network error keeps it in history for a retry.
+        if (e instanceof ApiError && e.status === 404) {
+          setHistory((h) => h.filter((x) => x.id !== openId))
+          setError('تعذر فتح المشروع: لم يعد موجودا على الخادم.')
+          go('#/new', true)
+        } else setError(e instanceof Error ? e.message : String(e))
+      },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- history only decides shared on first open
+  }, [openId, loaded])
+
+  function cache(p: Project, shared = false) {
+    setProjects((all) => ({ ...all, [p.id]: p }))
+    setHistory((h) => upsertEntry(h, p, shared))
+  }
+
+  function putScript(pid: string, script: Script) {
+    setProjects((all) => {
+      const p = all[pid]
+      return p ? { ...all, [pid]: { ...p, scripts: { ...p.scripts, [script.id]: script } } } : all
+    })
+  }
+
+  async function job(b: Busy, work: () => Promise<void>) {
+    setBusy(b)
     setError(null)
     setReferral(null)
     try {
-      await task()
+      await work()
     } catch (e) {
       if (e instanceof ApiError && e.referral) setReferral(e.message)
       else setError(e instanceof Error ? e.message : String(e))
@@ -110,140 +133,170 @@ export default function App() {
     }
   }
 
-  const putScript = (script: Script, activate = true) => {
-    setProject((p) => p && { ...p, scripts: { ...p.scripts, [script.id]: script } })
-    if (activate) setActiveId(script.id)
+  async function reviewNow(pid: string, scriptId: string) {
+    await api.review(pid, scriptId)
+    // The review can change who must sign off, so reload the project as the server sees it.
+    cache(await api.getProject(pid))
   }
 
-  const openProject = (id: string) =>
-    run('فتح المشروع', async () => {
-      const loaded = await api.getProject(id)
-      localStorage.setItem(STORAGE_KEY, id)
-      remember(loaded)
-      setProject(loaded)
+  function createProject(brief: Brief) {
+    job({ task: TASKS.ideas, projectId: 'new', kind: 'ideas' }, async () => {
+      const p = await api.createProject(brief)
+      cache(p)
+      setDraft(null)
+      setFormKey((k) => k + 1)
+      if (parseRoute().view === 'new') go(projectHash(p.id), true)
     })
-
-  const reset = () => {
-    localStorage.removeItem(STORAGE_KEY)
-    history.replaceState(null, '', location.pathname)
-    setProject(null)
-    setActiveId(null)
-    setError(null)
-    setReferral(null)
   }
 
-  // Originals first, then localized versions; revisions follow the version they correct.
-  const scripts = project
-    ? Object.values(project.scripts).sort(
-        (a, b) => Number(Boolean(a.localized_from)) - Number(Boolean(b.localized_from)) || a.version - b.version,
-      )
-    : []
-  const active = project && activeId ? project.scripts[activeId] : null
-  const source = active?.localized_from && project ? (project.scripts[active.localized_from] ?? null) : null
-  const pid = project?.id ?? ''
+  /** Writes a new version, opens it, and (when enabled) reviews it straight away so the flow never stops between steps. */
+  function produce(pid: string, kind: 'script' | 'revise' | 'localize', make: () => Promise<Script>) {
+    const back = location.hash
+    const pending = projectHash(pid, 'new')
+    go(pending)
+    const step = autoReview ? 'الخطوة 1 من 2' : undefined
+    job({ task: TASKS[kind], projectId: pid, kind: 'script', step }, async () => {
+      let script: Script
+      try {
+        script = await make()
+      } catch (e) {
+        if (location.hash === pending) go(back, true)
+        throw e
+      }
+      putScript(pid, script)
+      if (location.hash === pending) go(projectHash(pid, script.id), true)
+      if (autoReview) {
+        setBusy({ task: TASKS.review, projectId: pid, kind: 'review', scriptId: script.id, step: 'الخطوة 2 من 2' })
+        await reviewNow(pid, script.id)
+      }
+    })
+  }
+
+  const toggleAutoReview = (on: boolean) => {
+    setAutoReview(on)
+    try {
+      localStorage.setItem(AUTO_REVIEW_KEY, on ? 'on' : 'off')
+    } catch {
+      // The preference then lasts for this session only.
+    }
+  }
+
+  const hide = (id: string) => {
+    setHistory((h) => h.filter((e) => e.id !== id))
+    api.hideProject(id).catch(() => {})
+    if (id === openId) go('#/new')
+  }
+
+  if (route.view === 'admin') return <AdminApp path={route.path} />
+  if (route.view === 'landing') return <Landing onStart={() => go('#/new')} resume={history.length > 0} />
+
+  const project = loaded ?? null
+  const creating = busy?.kind === 'ideas'
 
   return (
-    <div className="app">
-      <header>
-        <div>
-          <h1>بلاغ</h1>
-          <p>مساعد لصناعة محتوى موثّق يعرّف بالإسلام عبر اللغات والثقافات</p>
-        </div>
-        {project && <button onClick={reset}>مشروع جديد</button>}
-      </header>
-      <p className="disclosure">
-        أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة
-        يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
-      </p>
-
-      {busy && <Busy label={busy} />}
-      {error && <div className="notice bad">{error}</div>}
-      {referral && (
-        <div className="notice referral" dir="auto">
-          <strong>هذه مسألة تحتاج إلى مختص</strong>
-          <p>{referral}</p>
-        </div>
-      )}
-
-      {!project && <History disabled={busy !== null} onOpen={openProject} />}
-
-      {!project && (
-        <BriefForm
-          disabled={busy !== null}
-          onSubmit={(brief) =>
-            run('يقترح بلاغ الأفكار ويتحقق من النصوص في المصادر', async () => {
-              const created = await api.createProject(brief)
-              localStorage.setItem(STORAGE_KEY, created.id)
-              remember(created)
-              setProject(created)
-            })
-          }
+    <AppShell
+      menuLabel="السجل"
+      action={
+        <button onClick={() => go('#/new')}>
+          <Icon name="sparkles" size={15} /> جديد
+        </button>
+      }
+      rail={
+        <HistorySidebar
+          entries={entries}
+          activeId={openId}
+          busyId={busy ? busy.projectId : null}
+          composing={route.view === 'new'}
+          onNew={() => go('#/new')}
+          onOpen={(id) => go(projectHash(id))}
+          onHide={hide}
+          onHome={() => go('')}
         />
-      )}
-
-      {project && (
-        <>
-          {scripts.length > 0 && (
-            <nav className="tabs">
-              <button className={active ? 'tab' : 'tab on'} onClick={() => setActiveId(null)}>
-                الأفكار
-              </button>
-              {scripts.map((s) => (
-                <button key={s.id} className={s.id === activeId ? 'tab on' : 'tab'} onClick={() => setActiveId(s.id)}>
-                  <span dir="auto">{s.title}</span>
-                  <small>{scriptLabel(s)}</small>
-                </button>
-              ))}
-            </nav>
+      }
+    >
+        <main className="main-inner">
+          {error && (
+            <div className="notice bad" role="alert">
+              <strong>تعذر إكمال الطلب</strong>
+              <p>{error}</p>
+            </div>
+          )}
+          {referral && route.view === 'new' && (
+            <div className="notice referral" dir="auto">
+              <strong>هذه مسألة تحتاج إلى مختص</strong>
+              <p>{referral}</p>
+            </div>
           )}
 
-          {!active && (
-            <IdeaList
-              ideas={project.ideas}
-              disabled={busy !== null}
-              onPick={(idea) =>
-                run('يكتب بلاغ السيناريو', async () => putScript(await api.createScript(pid, idea.id, null)))
-              }
-            />
+          {route.view === 'new' && (
+            <>
+              {creating && busy && (
+                <div className="gen-flow">
+                  <Progress key={busy.task.title} task={busy.task} />
+                  <IdeaSkeletons />
+                </div>
+              )}
+              {/* Stays mounted while generating so a failed request keeps the brief as the user left it. */}
+              <div hidden={creating}>
+                <BriefForm key={formKey} disabled={busy !== null} initial={draft} onSubmit={createProject} />
+              </div>
+            </>
           )}
 
-          {active && (
-            <ScriptView
-              key={active.id}
-              projectId={pid}
-              script={active}
-              source={source}
+          {route.view === 'project' && !project && !error && (
+            <div className="loading-view">
+              <span className="spinner brand" /> يفتح المشروع…
+            </div>
+          )}
+
+          {project && (
+            <Workspace
+              project={project}
+              scriptId={route.view === 'project' ? route.script : null}
+              busy={busy}
               templates={templates}
-              disabled={busy !== null}
-              onReview={() =>
-                run('ثلاثة مراجعين آليين يفحصون السيناريو', async () => {
-                  await api.review(pid, active.id)
-                  // The review can change who must sign off, so reload the script as the server sees it.
-                  setProject(await api.getProject(pid))
-                })
-              }
-              onRevise={(notes) =>
-                run('يصحح بلاغ السيناريو في نسخة جديدة', async () => putScript(await api.revise(pid, active.id, notes)))
-              }
-              onLocalize={(body) =>
-                run('يوطّن بلاغ السيناريو للجمهور الجديد', async () => putScript(await api.localize(pid, active.id, body)))
-              }
-              onTemplate={(template) =>
-                run(template.story && !active.story ? 'يكتب بلاغ قصة الأطفال' : 'حفظ القالب', async () =>
-                  putScript(await api.chooseTemplate(pid, active.id, template.id), false),
-                )
-              }
-              onStory={(notes) =>
-                run('يكتب بلاغ قصة أخرى', async () => putScript(await api.rewriteStory(pid, active.id, notes), false))
-              }
-              onApprove={(role, name) =>
-                run('اعتماد', async () => putScript(await api.approve(pid, active.id, role, name), false))
-              }
-              shareUrl={`${location.origin}/?project=${pid}&script=${active.id}`}
+              actions={{
+                autoReview,
+                onAutoReview: toggleAutoReview,
+                onReuse: () => {
+                  setDraft(project.brief)
+                  setFormKey((k) => k + 1)
+                  go('#/new')
+                },
+                onPick: (idea) => produce(project.id, 'script', () => api.createScript(project.id, idea.id, null)),
+                onReview: (sid) =>
+                  job({ task: TASKS.review, projectId: project.id, kind: 'review', scriptId: sid }, () => reviewNow(project.id, sid)),
+                onRevise: (sid, notes) => produce(project.id, 'revise', () => api.revise(project.id, sid, notes)),
+                onLocalize: (sid, body) => produce(project.id, 'localize', () => api.localize(project.id, sid, body)),
+                onApprove: (sid, role, name) =>
+                  job({ task: TASKS.approve, projectId: project.id, kind: 'approve' }, async () =>
+                    putScript(project.id, await api.approve(project.id, sid, role, name)),
+                  ),
+                onTemplate: (sid, template) => {
+                  // A children's template chosen for the first time writes the story: a real generation step.
+                  const writes = template.story && !project.scripts[sid]?.story
+                  job(
+                    writes
+                      ? { task: TASKS.story, projectId: project.id, kind: 'story', scriptId: sid }
+                      : { task: TASKS.template, projectId: project.id, kind: 'template' },
+                    async () => putScript(project.id, await api.chooseTemplate(project.id, sid, template.id)),
+                  )
+                },
+                onStory: (sid, notes) =>
+                  job({ task: TASKS.story, projectId: project.id, kind: 'story', scriptId: sid }, async () =>
+                    putScript(project.id, await api.rewriteStory(project.id, sid, notes)),
+                  ),
+              }}
             />
           )}
-        </>
-      )}
-    </div>
+
+          {(busy?.kind === 'approve' || busy?.kind === 'template') && <Toast label={busy.task.title} />}
+
+          <p className="disclosure">
+            أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة
+            يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
+          </p>
+        </main>
+    </AppShell>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
+import type { FormEvent, MouseEvent } from 'react'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
 import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, VideoTemplate } from '../types'
 import { GROUPS } from '../audiences'
@@ -8,20 +8,27 @@ import { StoryView } from './StoryView'
 import { TemplatePicker } from './TemplatePicker'
 import { VideoPanel } from './VideoPanel'
 
+/** What a reader can do to a script. Leaving `actions` out shows the script read-only, as the admin does. */
+export interface ScriptActions {
+  onReview: () => void
+  onRevise: (notes: string | null) => void
+  onLocalize: (body: LocalizeRequest) => void
+  onApprove: (role: ReviewRole, name: string) => void
+  onTemplate: (template: VideoTemplate) => void
+  onStory: (notes: string | null) => void
+}
+
 interface Props {
   projectId: string
   script: Script
   source: Script | null
   templates: VideoTemplate[] | null
   disabled: boolean
-  onReview: () => void
-  onRevise: (notes: string | null) => void
-  onLocalize: (body: LocalizeRequest) => void
-  onTemplate: (template: VideoTemplate) => void
-  onStory: (notes: string | null) => void
-  onApprove: (role: ReviewRole, name: string) => void
+  actions?: ScriptActions
   shareUrl: string
 }
+
+type Handlers = Pick<ScriptActions, 'onReview' | 'onLocalize' | 'onApprove'>
 
 function download(script: Script) {
   const url = URL.createObjectURL(new Blob([toMarkdown(script)], { type: 'text/markdown;charset=utf-8' }))
@@ -30,6 +37,12 @@ function download(script: Script) {
   a.download = `${script.title}.md`
   a.click()
   URL.revokeObjectURL(url)
+}
+
+// In-page links scroll without touching the URL hash, which keeps the app on #studio.
+function jump(e: MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault()
+  document.querySelector(e.currentTarget.getAttribute('href')!)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function Scenes({ script }: { script: Script }) {
@@ -54,11 +67,6 @@ function Scenes({ script }: { script: Script }) {
             <p className="muted small">
               <span className="tag">الصورة</span> {s.visual}
             </p>
-            {s.art.keyword && (
-              <p className="muted small">
-                <span className="tag">رسم القالب</span> {[s.art.emoji, s.art.keyword, s.art.detail].filter(Boolean).join(' · ')}
-              </p>
-            )}
             {s.evidence_ids.length > 0 && (
               <div className="badges">
                 {s.evidence_ids.map((id) => (
@@ -75,7 +83,7 @@ function Scenes({ script }: { script: Script }) {
   )
 }
 
-function LocalizeForm({ script, disabled, onLocalize }: Pick<Props, 'script' | 'disabled' | 'onLocalize'>) {
+function LocalizeForm({ script, disabled, onLocalize }: { script: Script; disabled: boolean; onLocalize: Handlers['onLocalize'] }) {
   const [target, setTarget] = useState<AudienceSpec>({
     audience: GROUPS[4].label,
     language: script.target.language === 'ar' ? 'en' : 'ar',
@@ -104,20 +112,18 @@ function LocalizeForm({ script, disabled, onLocalize }: Pick<Props, 'script' | '
   )
 }
 
-function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'script' | 'disabled' | 'onApprove' | 'shareUrl'>) {
+function Approvals({ script, disabled, onApprove, shareUrl }: { script: Script; disabled: boolean; onApprove?: Handlers['onApprove']; shareUrl: string }) {
   const pending = script.required_approvals.filter((r) => !script.approvals.some((a) => a.role === r.role))
   const [name, setName] = useState('')
   const [role, setRole] = useState<ReviewRole | null>(null)
   const [copied, setCopied] = useState(false)
   const chosen = pending.some((r) => r.role === role) ? role : (pending[0]?.role ?? null)
   const others = pending.some((r) => r.role !== 'creator')
+  const editable = Boolean(onApprove)
 
   return (
-    <section className="card" id="step-approve">
+    <section className="card" id="s-approve">
       <h3>الاعتماد البشري</h3>
-      {!script.review && !script.approved && (
-        <div className="notice warn">لم تُراجَع هذه النسخة آليا بعد. يُستحسن تشغيل المراجعة قبل الاعتماد.</div>
-      )}
       <p className="muted">
         المراجعة على قدر الخطر: يحدد بلاغ من يلزم اعتماده لهذه النسخة، ولا يُفتح التصدير قبل اكتماله.
       </p>
@@ -140,12 +146,12 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
           )
         })}
       </ul>
-      {chosen && (
+      {editable && chosen && (
         <form
           className="row approve"
           onSubmit={(e) => {
             e.preventDefault()
-            onApprove(chosen, name.trim())
+            onApprove?.(chosen, name.trim())
           }}
         >
           <label className="field">
@@ -167,6 +173,7 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
           </button>
         </form>
       )}
+      {editable && (
       <div className="actions">
         {others && (
           <button
@@ -182,54 +189,76 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
           صدّر Markdown
         </button>
       </div>
+      )}
     </section>
   )
 }
 
-/** Where this version stands: the order a creator goes through, with the state of each step. */
-function Steps({ script }: { script: Script }) {
-  const review = script.review
-  const steps: { id: string; label: string; state: 'done' | 'warn' | 'todo'; hint: string }[] = [
-    { id: 'step-script', label: 'السيناريو', state: 'done', hint: `نسخة ${script.version}` },
-    {
-      id: 'step-template',
-      label: 'القالب',
-      state: script.template ? 'done' : 'todo',
-      hint: script.template ? 'مختار' : 'لم يُختر',
-    },
-    {
-      id: 'step-review',
-      label: 'المراجعة',
-      state: !review ? 'todo' : review.blocking ? 'warn' : 'done',
-      hint: !review ? 'لم تُراجَع' : review.blocking ? `${review.blocking} مانعة` : 'لا موانع',
-    },
-    {
-      id: 'step-approve',
-      label: 'الاعتماد',
-      state: script.approved ? 'done' : 'todo',
-      hint: script.approved ? 'معتمد' : `${script.required_approvals.length - script.approvals.length} متبقٍّ`,
-    },
-    { id: 'step-video', label: 'الفيديو', state: 'todo', hint: script.approved && script.template ? 'جاهز للإنشاء' : 'بعد الاعتماد' },
-  ]
-  return (
-    <nav className="steps" aria-label="خطوات العمل">
-      {steps.map((s, i) => (
-        <a key={s.id} href={`#${s.id}`} className={`step ${s.state}`}>
-          <span className="num">{s.state === 'done' ? '✓' : s.state === 'warn' ? '!' : i + 1}</span>
-          <span>
-            {s.label}
-            <small>{s.hint}</small>
-          </span>
+/** The one action that moves this version forward, so the flow never stalls on a long page. */
+function NextStep({ script, disabled, onReview }: { script: Script; disabled: boolean; onReview: Handlers['onReview'] }) {
+  const blocking = script.review?.blocking ?? 0
+  if (!script.review)
+    return (
+      <div className="next">
+        <div>
+          <strong>الخطوة التالية: المراجعة الآلية</strong>
+          <p className="muted small">ثلاثة مراجعين يفحصون السيناريو: علمي، وجمهور، ومعنى.</p>
+        </div>
+        <button className="primary" disabled={disabled} onClick={onReview}>
+          راجع آليا
+        </button>
+      </div>
+    )
+  if (blocking > 0)
+    return (
+      <div className="next bad">
+        <div>
+          <strong>{blocking} ملاحظة مانعة</strong>
+          <p className="small">صحّحها في نسخة جديدة قبل الاعتماد.</p>
+        </div>
+        <a className="button" href="#s-review" onClick={jump}>
+          اعرض الملاحظات
         </a>
-      ))}
-    </nav>
+      </div>
+    )
+  if (!script.approved)
+    return (
+      <div className="next">
+        <div>
+          <strong>الخطوة التالية: الاعتماد البشري</strong>
+          <p className="muted small">لا يُفتح التصدير قبل أن يوقّع كل من تتطلبه هذه النسخة.</p>
+        </div>
+        <a className="button primary" href="#s-approve" onClick={jump}>
+          اذهب إلى الاعتماد
+        </a>
+      </div>
+    )
+  if (!script.template)
+    return (
+      <div className="next ok">
+        <div>
+          <strong>النسخة معتمدة. الخطوة التالية: قالب الفيديو</strong>
+          <p className="small">اختر من المكتبة القالب الذي يُحوَّل به السيناريو إلى فيديو، أو صدّر النص.</p>
+        </div>
+        <a className="button primary" href="#s-template" onClick={jump}>
+          اختر قالبا
+        </a>
+      </div>
+    )
+  return (
+    <div className="next ok">
+      <div>
+        <strong>النسخة معتمدة وجاهزة للفيديو</strong>
+        <p className="small">أنشئ الفيديو بالقالب المختار، أو صدّر النص، أو وطّنه لجمهور آخر.</p>
+      </div>
+      <a className="button primary" href="#s-video" onClick={jump}>
+        أنشئ الفيديو
+      </a>
+    </div>
   )
 }
 
-export function ScriptView({
-  projectId, script, source, templates, disabled, onReview, onRevise, onLocalize, onTemplate, onStory, onApprove, shareUrl,
-}: Props) {
-  const template = templates?.find((t) => t.id === script.template) ?? null
+export function ScriptView({ projectId, script, source, templates, disabled, actions, shareUrl }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
   const [compare, setCompare] = useState(false)
@@ -238,8 +267,7 @@ export function ScriptView({
 
   return (
     <div className="script">
-      <Steps script={script} />
-      <section className="card" id="step-script">
+      <div className="script-head">
         <div className="badges">
           <span className="badge">{LANGUAGES[script.target.language]}</span>
           {script.target.dialect && <span className="badge">{script.target.dialect}</span>}
@@ -248,7 +276,6 @@ export function ScriptView({
           <span className={`badge level-${script.content_level}`}>{LEVELS[script.content_level]}</span>
           <span className="badge">{script.duration_seconds} ث</span>
           <span className="badge">نسخة {script.version}</span>
-          {template && <span className="badge info">قالب: {template.name}</span>}
           {script.localized_from && <span className="badge info">موطَّن</span>}
           {script.approved ? <span className="badge ok">معتمد</span> : <span className="badge warn">غير معتمد</span>}
         </div>
@@ -256,7 +283,21 @@ export function ScriptView({
         <p className="muted" dir="auto">
           الجمهور: {script.target.audience}
         </p>
+        <nav className="jump">
+          <a href="#s-script" onClick={jump}>السيناريو</a>
+          <a href="#s-sources" onClick={jump}>المصادر ({script.references.length})</a>
+          <a href="#s-template" onClick={jump}>القالب</a>
+          <a href="#s-review" onClick={jump}>المراجعة</a>
+          <a href="#s-approve" onClick={jump}>الاعتماد</a>
+          <a href="#s-video" onClick={jump}>الفيديو</a>
+          <a href="#s-posts" onClick={jump}>المنشورات</a>
+        </nav>
+      </div>
 
+      {actions && <NextStep script={script} disabled={disabled} onReview={actions.onReview} />}
+
+      <section className="card" id="s-script">
+        <h3>السيناريو</h3>
         {script.warnings.length > 0 && (
           <div className="notice warn">
             <strong>تنبيهات آلية</strong>
@@ -302,7 +343,7 @@ export function ScriptView({
         </p>
       </section>
 
-      <section className="card">
+      <section className="card" id="s-sources">
         <h3>المصادر</h3>
         {script.references.length === 0 && <p className="muted">هذا السيناريو لا يقتبس نصا شرعيا.</p>}
         {script.references.map((r) => (
@@ -360,13 +401,17 @@ export function ScriptView({
         </section>
       )}
 
-
-      <div id="step-template">
-        <TemplatePicker templates={templates} chosen={script.template} disabled={disabled} onPick={onTemplate} />
-        <StoryView script={script} disabled={disabled} onRewrite={onStory} />
+      <div id="s-template">
+        <TemplatePicker
+          templates={templates}
+          chosen={script.template}
+          disabled={disabled || !actions}
+          onPick={(t) => actions?.onTemplate(t)}
+        />
+        <StoryView script={script} disabled={disabled || !actions} onRewrite={(notes) => actions?.onStory(notes)} />
       </div>
 
-      <section className="card" id="step-review">
+      <section className="card" id="s-review">
         <h3>المراجعة</h3>
         {!review && <p className="muted">لم تُراجَع هذه النسخة بعد.</p>}
         {review && (
@@ -417,18 +462,20 @@ export function ScriptView({
             )}
           </>
         )}
+        {actions && (
+          <>
         <label className="field">
           <span>ملاحظات المراجع البشري (اختياري)</span>
           <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </label>
         <div className="actions">
-          <button disabled={disabled} onClick={onReview}>
+          <button disabled={disabled} onClick={actions!.onReview}>
             {review ? 'أعد المراجعة الآلية' : 'راجع آليا'}
           </button>
           <button
             disabled={disabled || !canRevise}
             onClick={() => {
-              onRevise(notes.trim() || null)
+              actions!.onRevise(notes.trim() || null)
               setNotes('')
             }}
           >
@@ -438,16 +485,24 @@ export function ScriptView({
             وطّن لجمهور آخر
           </button>
         </div>
-        {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={onLocalize} />}
+        {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={actions!.onLocalize} />}
+          </>
+        )}
       </section>
 
-      <Approvals script={script} disabled={disabled} onApprove={onApprove} shareUrl={shareUrl} />
+      <Approvals script={script} disabled={disabled} onApprove={actions?.onApprove} shareUrl={shareUrl} />
 
-      <div id="step-video">
-        <VideoPanel projectId={projectId} script={script} template={template} templates={templates} disabled={disabled} />
+      <div id="s-video">
+        <VideoPanel
+          projectId={projectId}
+          script={script}
+          template={templates?.find((t) => t.id === script.template) ?? null}
+          templates={templates}
+          disabled={disabled || !actions}
+        />
       </div>
 
-      <section className="card">
+      <section className="card" id="s-posts">
         <h3>المنشورات</h3>
         {script.posts.map((p) => (
           <div className="post" key={p.platform}>

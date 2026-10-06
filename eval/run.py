@@ -9,9 +9,13 @@ Results are written to eval/results.json and eval/RESULTS.md.
 import asyncio
 import difflib
 import json
+import os
 import re
 from pathlib import Path
 from typing import Awaitable, Callable, TypeVar
+
+# The evaluation measures the defaults: no admin-added rules, and nothing logged into the admin's run table.
+os.environ.setdefault("REELS_PLAIN", "1")
 
 from google.genai import errors as genai_errors
 from pydantic import BaseModel, Field
@@ -300,7 +304,7 @@ async def main() -> None:
     c_meaning = await asyncio.gather(*(meaning(i) for i in range(4)))
 
     results = {
-        "model": g.MODEL, "review_model": g.REVIEW_MODEL,
+        "model": g.models()[0], "review_model": g.models()[1],
         "a": a_rows,
         "a_hard": hard_rows,
         "b": {"fatwa": [{"brief": t, **r} for t, r in zip(FATWA_BRIEFS, b_fatwa)],

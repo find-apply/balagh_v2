@@ -5,7 +5,10 @@ templates promise. Cached in eval/cache/ like eval/run.py; results in eval/stori
 """
 import asyncio
 import json
+import os
 import re
+
+os.environ.setdefault("REELS_PLAIN", "1")
 
 from app import generator as g
 from app.schemas import BriefIn, ReferenceUsage, Script

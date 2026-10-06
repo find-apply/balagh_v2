@@ -26,6 +26,7 @@
 ```
 GEMINI_API_KEY=...
 MAGNIFIC_API_KEY=...
+ADMIN_TOKEN=...   # قيمة طويلة عشوائية، تفتح /#/admin
 CORS_ORIGINS=https://balagh.findapply.com
 ```
 
