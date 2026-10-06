@@ -5,13 +5,14 @@ import base64
 import hashlib
 import json
 import os
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
 import httpx
-from google.genai import types
+from google.genai import errors as genai_errors, types
 
 from ..generator import client
 
@@ -35,7 +36,10 @@ IMAGE_STYLES = {"story": "vector", "photo": "photo"}
 STORY_STYLE = "Children's picture book illustration, flat soft pastel colours, rounded shapes, friendly, clean. "
 NEGATIVE = "text, letters, words, watermark, logo, scary, realistic photo, deformed hands"
 
-_tts_limit = asyncio.Semaphore(4)
+# The TTS models allow few requests per minute (10 on the free tier), so clips are synthesized two at a time
+# and a quota answer waits as long as the API asks before trying again.
+_tts_limit = asyncio.Semaphore(2)
+RETRY_IN = re.compile(r"retry in (\d+(?:\.\d+)?)s", re.IGNORECASE)
 _image_limit = asyncio.Semaphore(3)
 
 
@@ -89,7 +93,7 @@ async def speak(text: str, who: str = "narr") -> Clip:
 
 async def _tts(text: str, voice: str) -> tuple[bytes, str]:
     last: Optional[Exception] = None
-    for attempt in range(3):
+    for attempt in range(6):
         try:
             response = await client.aio.models.generate_content(
                 model=TTS_MODEL,
@@ -108,9 +112,16 @@ async def _tts(text: str, voice: str) -> tuple[bytes, str]:
             return part.inline_data.data, part.inline_data.mime_type or ""
         except MediaError:
             raise
-        except Exception as e:  # transient API errors: retry with backoff
+        except genai_errors.APIError as e:
             last = e
-            await asyncio.sleep(2 * (attempt + 1))
+            if e.code not in (429, 500, 503):
+                break
+            # A quota answer says how long to wait; otherwise back off a little more each time.
+            m = RETRY_IN.search(str(e.message or ""))
+            await asyncio.sleep(min(90.0, float(m.group(1)) + 1) if m else 5.0 * (attempt + 1))
+        except Exception as e:  # transient transport errors
+            last = e
+            await asyncio.sleep(3.0 * (attempt + 1))
     raise MediaError(f"Speech synthesis failed: {last}")
 
 
