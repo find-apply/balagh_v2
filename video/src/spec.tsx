@@ -58,10 +58,26 @@ export type StoryScene = {
 
 export type StorySpec = {lang: 'ar' | 'en'; title: string; scenes: StoryScene[]};
 
+/** Input of the parents' teaser: shots cut from the story, built by app/video/spec.py. */
+export type TeaserShot = {image: string; duration: number; lines: Line[]};
+export type TeaserSpec = {
+  lang: 'ar' | 'en';
+  title: string;
+  intro: string;
+  lesson: string;
+  shots: TeaserShot[];
+  source: string;
+  cta: string;
+  introSeconds: number;
+  ctaSeconds: number;
+};
+
 export const FPS = 30;
 export const OUTRO_SECONDS = 3.5;
 
 export const totalFrames = (spec: VideoSpec) => Math.max(1, Math.round((spec.duration + OUTRO_SECONDS) * FPS));
+export const teaserFrames = (spec: TeaserSpec) =>
+  Math.max(1, Math.round((spec.introSeconds + spec.ctaSeconds + spec.shots.reduce((a, s) => a + s.duration, 0)) * FPS));
 export const storyFrames = (spec: StorySpec) => Math.max(1, spec.scenes.reduce((a, s) => a + Math.round(s.duration * FPS), 0));
 
 /** Scene audio of a story: each line at its own start, or one clip for a text scene. */

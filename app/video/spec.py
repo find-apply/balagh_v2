@@ -24,11 +24,15 @@ LABELS = {
         "story": "اسْتَمِعْ وَتَعَلَّمْ", "board": "سَبُّورَةُ الدَّرْسِ", "words": "نَفْهَمُ مَعًا", "quiz": "سُؤَالٌ",
         "hadith": "حَدِيثٌ شَرِيفٌ", "quran": "آيَةٌ كَرِيمَةٌ",
         "said_hadith": "قَالَ النَّبِيُّ ﷺ:", "said_quran": "قَالَ اللهُ تَعَالَى:",
+        "teaser_intro": "حَلْقَةٌ جَدِيدَةٌ لِأَطْفَالِكُمْ", "teaser_lesson": "الدَّرْسُ", "teaser_from": "النَّصُّ الشَّرْعِيُّ فِي الْحَلْقَةِ",
+        "teaser_cta": "شَاهِدُوا الْحَلْقَةَ كَامِلَةً مَعَ أَطْفَالِكُمْ",
     },
     Language.en: {
         "story": "Listen and learn", "board": "Lesson board", "words": "Let's understand", "quiz": "Question",
         "hadith": "A hadith", "quran": "A verse",
         "said_hadith": "The Prophet ﷺ said:", "said_quran": "Allah says (translation of the meaning):",
+        "teaser_intro": "A new episode for your children", "teaser_lesson": "The lesson", "teaser_from": "The text in this episode",
+        "teaser_cta": "Watch the full episode with your children",
     },
 }
 
@@ -208,7 +212,42 @@ async def _text_scene(s: StoryScene, ref: Reference | None, spec: dict, labels: 
         spec.update(duration=round(LEAD + d + TAIL, 2), quoteLead=LEAD, quoteEnd=round(LEAD + d, 2))
 
 
+# ---- Parents' teaser: cut from the story, nothing new generated ----
+
+async def build_teaser(script: Script, template: dict, build: Build) -> dict:
+    """20-30 vertical seconds for the parents' feeds: two story shots, the lesson, the text's source and a call
+    to watch the whole episode. Every clip and image is the story's own, so after the episode it costs nothing."""
+    if script.story is None:
+        raise ValueError("This script has no story yet; choose a children's template to write one.")
+    lang = script.target.language
+    labels = LABELS[lang]
+    name = lambda who: catalog.CHARACTERS[who][lang.value]  # noqa: E731
+    story = [s for s in script.story.scenes if s.kind == StorySceneKind.story and s.lines]
+    outro = next((s for s in script.story.scenes if s.kind == StorySceneKind.outro and s.lines), None)
+    picks = story[:2] + ([outro] if outro else story[2:3])
+
+    async def shot(s: StoryScene) -> dict:
+        line = s.lines[0]
+        clip = await media.speak(line.text, line.who)
+        prompt, refs = _cast_prompt(s.image_prompt, s.present, lang)
+        image = build.take(await media.illustrate(prompt, "16:9", "story", refs), "jpg")
+        return {"image": image, "duration": round(LEAD + clip.seconds + TAIL, 2),
+                "lines": [{"who": line.who, "name": name(line.who), "text": line.text,
+                           "audio": build.take(clip, "mp3"), "t0": LEAD, "d": round(clip.seconds, 2)}]}
+
+    shots = [await shot(s) for s in picks]
+    text = next((s for s in script.story.scenes if s.kind == StorySceneKind.text), None)
+    return {
+        "lang": lang.value, "title": script.story.title, "intro": labels["teaser_intro"],
+        "lesson": labels["teaser_lesson"], "shots": shots,
+        "source": f"{labels['teaser_from']}: {text.source}" if text else "",
+        "cta": labels["teaser_cta"], "introSeconds": 3.0, "ctaSeconds": 4.0,
+    }
+
+
 async def build(script: Script, template: dict, b: Build) -> dict:
+    if template["id"] == "teaser":
+        return await build_teaser(script, template, b)
     if template["story"]:
         return await build_story(script, template, b)
     return await build_captions(script, template, b)

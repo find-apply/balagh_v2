@@ -2,7 +2,9 @@ import React from 'react';
 import {Composition} from 'remotion';
 import sample from '../samples/sample.json';
 import storySample from '../samples/story.json';
-import {FPS, StorySpec, VideoSpec, storyFrames, totalFrames} from './spec';
+import {FPS, StorySpec, TeaserSpec, VideoSpec, storyFrames, teaserFrames, totalFrames} from './spec';
+import teaserSample from '../samples/teaser.json';
+import {Teaser} from './templates/Teaser';
 import {Captions} from './templates/Captions';
 import {Chalk} from './templates/Chalk';
 import {Geo} from './templates/Geo';
@@ -13,6 +15,8 @@ const metadata = ({props}: {props: {spec: VideoSpec}}) => ({durationInFrames: to
 const storyMetadata = ({props}: {props: {spec: StorySpec}}) => ({durationInFrames: storyFrames(props.spec)});
 const defaults = {spec: sample as VideoSpec};
 const storyDefaults = {spec: storySample as StorySpec};
+const teaserMetadata = ({props}: {props: {spec: TeaserSpec}}) => ({durationInFrames: teaserFrames(props.spec)});
+const teaserDefaults = {spec: teaserSample as TeaserSpec};
 
 export const Root: React.FC = () => (
   <>
@@ -24,5 +28,7 @@ export const Root: React.FC = () => (
       defaultProps={storyDefaults} calculateMetadata={storyMetadata} />
     <Composition id="Chalk" component={Chalk} fps={FPS} width={1280} height={720} durationInFrames={1}
       defaultProps={storyDefaults} calculateMetadata={storyMetadata} />
+    <Composition id="Teaser" component={Teaser} fps={FPS} width={720} height={1280} durationInFrames={1}
+      defaultProps={teaserDefaults} calculateMetadata={teaserMetadata} />
   </>
 );

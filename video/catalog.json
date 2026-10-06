@@ -39,6 +39,16 @@
       "uses_images": true,
       "story": true,
       "ready": true
+    },
+    {
+      "id": "teaser",
+      "name": "إعلان الحلقة للأهل",
+      "description": "إعلان 20-30 ثانية بالطول من القصة نفسها، للأهل على TikTok وReels: لقطتان من القصة، والدرس، ومصدر النص، ودعوة لمشاهدة الحلقة كاملة. لا يولّد شيئا جديدا بعد الحلقة.",
+      "composition": "Teaser",
+      "aspect": "9:16",
+      "uses_images": true,
+      "story": true,
+      "ready": true
     }
   ],
   "art_kinds": {
