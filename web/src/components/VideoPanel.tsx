@@ -7,13 +7,14 @@ interface Props {
   projectId: string
   script: Script
   template: VideoTemplate | null
+  templates: VideoTemplate[] | null
   disabled: boolean
 }
 
 const ACTIVE = new Set(['queued', 'voicing', 'imaging', 'rendering'])
 
 /** Renders the approved script with its template and follows the job until the MP4 is ready. */
-export function VideoPanel({ projectId, script, template, disabled }: Props) {
+export function VideoPanel({ projectId, script, template, templates, disabled }: Props) {
   const [videos, setVideos] = useState<Video[]>([])
   const [error, setError] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
@@ -63,13 +64,13 @@ export function VideoPanel({ projectId, script, template, disabled }: Props) {
       </button>
       {videos.length > 0 && (
         <ul className="plain videos">
-          {videos.map((v) => (
+          {videos.map((v, i) => (
             <li key={v.id}>
               <div className="badges">
                 <span className={`badge ${v.status === 'done' ? 'ok' : v.status === 'failed' ? 'bad' : 'info'}`}>
                   {VIDEO_STATUS[v.status]}
                 </span>
-                <span className="badge">{v.template}</span>
+                <span className="badge">{templates?.find((t) => t.id === v.template)?.name ?? v.template}</span>
                 {v.duration_seconds != null && <span className="badge">{Math.round(v.duration_seconds)} ث</span>}
                 {v.status === 'done' && (
                   <span className="badge">
@@ -77,19 +78,27 @@ export function VideoPanel({ projectId, script, template, disabled }: Props) {
                   </span>
                 )}
               </div>
+              {ACTIVE.has(v.status) && (
+                <p className="muted small">يستغرق إنشاء الفيديو عادة بين 3 و8 دقائق. يمكنك متابعة العمل في الصفحة.</p>
+              )}
               {v.error && <p className="muted small">{v.error}</p>}
               {v.notes.map((n) => (
                 <p className="muted small" key={n}>
                   {n}
                 </p>
               ))}
+              {v.url && i === 0 && (
+                <video controls preload="metadata" src={BASE + v.url} className="player" />
+              )}
               {v.url && (
-                <>
-                  <video controls preload="metadata" src={BASE + v.url} className="player" />
-                  <a href={BASE + v.url} download>
-                    تنزيل MP4
-                  </a>
-                </>
+                <a href={BASE + v.url} download>
+                  تنزيل MP4
+                </a>
+              )}
+              {v.url && i > 0 && (
+                <a href={BASE + v.url} target="_blank" rel="noreferrer">
+                  {' · '}مشاهدة
+                </a>
               )}
             </li>
           ))}

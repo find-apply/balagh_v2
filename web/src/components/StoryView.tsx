@@ -22,7 +22,7 @@ export function StoryView({ script, disabled, onRewrite }: Props) {
         السيناريو.
       </p>
       <h4 dir="auto">{story.title}</h4>
-      <ol className="scenes" dir={dir}>
+      <ol className="scenes story" dir={dir}>
         {story.scenes.map((s, i) => (
           <li key={i}>
             <div className="time">{STORY_SCENES[s.kind]}</div>
@@ -54,9 +54,10 @@ export function StoryView({ script, disabled, onRewrite }: Props) {
                 </p>
               )}
               {s.image_prompt && (
-                <p className="muted small" dir="ltr">
-                  <span className="tag">صورة</span> {s.image_prompt}
-                </p>
+                <details className="muted small">
+                  <summary>وصف الصورة</summary>
+                  <p dir="ltr">{s.image_prompt}</p>
+                </details>
               )}
             </div>
           </li>

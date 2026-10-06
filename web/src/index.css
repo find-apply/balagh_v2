@@ -580,6 +580,7 @@ td {
   display: block;
   width: 100%;
   max-width: 640px;
+  max-height: 70vh;
   margin: 10px 0;
   border-radius: 8px;
   background: #000;
@@ -596,4 +597,124 @@ td {
 .preview.tall {
   max-height: 260px;
   object-fit: contain;
+}
+
+.steps {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 10px 0;
+  background: var(--bg, #f6f4ee);
+  overflow-x: auto;
+}
+
+.step {
+  flex: 1;
+  min-width: 110px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.step small {
+  display: block;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.step .num {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ece8dc;
+  font-size: 0.85rem;
+}
+
+.step.done .num {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.step.warn .num {
+  background: #e0a21a;
+  color: #fff;
+}
+
+[id^='step-'] {
+  scroll-margin-top: 80px;
+}
+
+.scenes.story .voice {
+  font-size: 1.2rem;
+  line-height: 2;
+}
+
+details.small summary {
+  cursor: pointer;
+}
+
+details.more {
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+details.more > summary {
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+details.more[open] > summary {
+  margin-bottom: 12px;
+}
+
+.history summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.history li {
+  padding: 6px 0;
+}
+
+button.link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--brand);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .step {
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 2px;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .step small {
+    display: none;
+  }
 }

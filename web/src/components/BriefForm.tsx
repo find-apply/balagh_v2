@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { AudienceSpec, Brief, Platform } from '../types'
 import { GROUPS } from '../audiences'
-import { AudienceFields, PlatformPicker } from './AudienceFields'
+import { AudienceFields, More, PlatformPicker } from './AudienceFields'
 import { ChoiceField } from './ChoiceField'
 
 const TOPICS = [
@@ -76,7 +76,7 @@ export function BriefForm({ disabled, onSubmit }: Props) {
         />
       </div>
 
-      <AudienceFields value={audience} onChange={setAudience} />
+      <AudienceFields value={audience} onChange={setAudience} compact />
 
       <div className="field">
         <span>المنصات</span>
@@ -84,18 +84,20 @@ export function BriefForm({ disabled, onSubmit }: Props) {
         {platforms.length === 0 && <small className="error-text">اختر منصة واحدة على الأقل.</small>}
       </div>
 
-      <ChoiceField
-        label="مدة الفيديو"
-        auto="تلقائي"
-        options={DURATIONS}
-        value={duration}
-        onChange={setDuration}
-        type="number"
-        min={5}
-        max={600}
-        customPlaceholder="بالثواني، من 5 إلى 600"
-        hint="في الوضع التلقائي يقترح بلاغ مدة لكل فكرة حسب المنصات."
-      />
+      <More compact label="مدة الفيديو (تلقائية)">
+        <ChoiceField
+          label="مدة الفيديو"
+          auto="تلقائي"
+          options={DURATIONS}
+          value={duration}
+          onChange={setDuration}
+          type="number"
+          min={5}
+          max={600}
+          customPlaceholder="بالثواني، من 5 إلى 600"
+          hint="في الوضع التلقائي يقترح بلاغ مدة لكل فكرة حسب المنصات."
+        />
+      </More>
 
       <button className="primary big" disabled={disabled || platforms.length === 0}>
         {idea.trim() ? 'اقترح 3 أفكار' : 'اقترح عليّ 3 أفكار'}

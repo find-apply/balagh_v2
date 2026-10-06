@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
 import type { AudienceKnowledge, AudienceSpec, Language, Platform } from '../types'
 import { ChoiceField } from './ChoiceField'
@@ -19,9 +20,11 @@ const options = (labels: string[]): Option[] => labels.map((l) => ({ label: l, v
 interface Props {
   value: AudienceSpec
   onChange: (value: AudienceSpec) => void
+  /** Collapse region, knowledge, dialect and tone under "more options" (they all have automatic defaults). */
+  compact?: boolean
 }
 
-export function AudienceFields({ value, onChange }: Props) {
+export function AudienceFields({ value, onChange, compact = false }: Props) {
   // The audience sent to the API is "<group>، <region>"; the two parts are picked separately.
   const [group, setGroup] = useState<string | null>(value.audience || null)
   const [region, setRegion] = useState<string | null>(null)
@@ -41,33 +44,6 @@ export function AudienceFields({ value, onChange }: Props) {
           set({ audience: compose(g, region), ...(preset ? { audience_knowledge: preset.knowledge } : {}) })
         }}
       />
-      <ChoiceField
-        label="البلد أو الثقافة"
-        auto="غير محدد"
-        options={options(REGIONS)}
-        value={region}
-        customPlaceholder="مثال: إندونيسيا، مسلمو فرنسا"
-        onChange={(r) => {
-          setRegion(r)
-          set({ audience: compose(group, r) })
-        }}
-      />
-      <div className="field">
-        <span>معرفة الجمهور بالإسلام</span>
-        <div className="chips">
-          {Object.entries(KNOWLEDGE).map(([k, v]) => (
-            <button
-              type="button"
-              key={k}
-              className={value.audience_knowledge === k ? 'chip on' : 'chip'}
-              onClick={() => set({ audience_knowledge: k as AudienceKnowledge })}
-            >
-              {v}
-            </button>
-          ))}
-        </div>
-        <small className="muted">تُضبط تلقائيا حسب الجمهور، ويمكنك تغييرها.</small>
-      </div>
       <div className="field">
         <span>اللغة</span>
         <div className="chips">
@@ -83,24 +59,64 @@ export function AudienceFields({ value, onChange }: Props) {
           ))}
         </div>
       </div>
-      <ChoiceField
-        key={value.language}
-        label="اللهجة"
-        auto="تلقائي"
-        options={options(DIALECTS[value.language])}
-        value={value.dialect}
-        customPlaceholder="اكتب اللهجة أو مستوى اللغة"
-        onChange={(dialect) => set({ dialect })}
-      />
-      <ChoiceField
-        label="الأسلوب"
-        auto="تلقائي"
-        options={options(TONES)}
-        value={value.tone}
-        customPlaceholder="مثال: ساخر بلطف، أكاديمي"
-        onChange={(tone) => set({ tone })}
-      />
+      <More compact={compact} label="خيارات الجمهور: البلد، المعرفة بالإسلام، اللهجة، الأسلوب (كلها تلقائية)">
+        <ChoiceField
+          label="البلد أو الثقافة"
+          auto="غير محدد"
+          options={options(REGIONS)}
+          value={region}
+          customPlaceholder="مثال: إندونيسيا، مسلمو فرنسا"
+          onChange={(r) => {
+            setRegion(r)
+            set({ audience: compose(group, r) })
+          }}
+        />
+        <div className="field">
+          <span>معرفة الجمهور بالإسلام</span>
+          <div className="chips">
+            {Object.entries(KNOWLEDGE).map(([k, v]) => (
+              <button
+                type="button"
+                key={k}
+                className={value.audience_knowledge === k ? 'chip on' : 'chip'}
+                onClick={() => set({ audience_knowledge: k as AudienceKnowledge })}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+          <small className="muted">تُضبط تلقائيا حسب الجمهور، ويمكنك تغييرها.</small>
+        </div>
+        <ChoiceField
+          key={value.language}
+          label="اللهجة"
+          auto="تلقائي"
+          options={options(DIALECTS[value.language])}
+          value={value.dialect}
+          customPlaceholder="اكتب اللهجة أو مستوى اللغة"
+          onChange={(dialect) => set({ dialect })}
+        />
+        <ChoiceField
+          label="الأسلوب"
+          auto="تلقائي"
+          options={options(TONES)}
+          value={value.tone}
+          customPlaceholder="مثال: ساخر بلطف، أكاديمي"
+          onChange={(tone) => set({ tone })}
+        />
+      </More>
     </>
+  )
+}
+
+/** Wraps optional fields in a closed "more options" section, or renders them as they are. */
+export function More({ compact, label, children }: { compact: boolean; label: string; children: ReactNode }) {
+  if (!compact) return <>{children}</>
+  return (
+    <details className="more">
+      <summary>{label}</summary>
+      {children}
+    </details>
   )
 }
 

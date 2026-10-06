@@ -113,8 +113,11 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
   const others = pending.some((r) => r.role !== 'creator')
 
   return (
-    <section className="card">
+    <section className="card" id="step-approve">
       <h3>الاعتماد البشري</h3>
+      {!script.review && !script.approved && (
+        <div className="notice warn">لم تُراجَع هذه النسخة آليا بعد. يُستحسن تشغيل المراجعة قبل الاعتماد.</div>
+      )}
       <p className="muted">
         المراجعة على قدر الخطر: يحدد بلاغ من يلزم اعتماده لهذه النسخة، ولا يُفتح التصدير قبل اكتماله.
       </p>
@@ -183,6 +186,46 @@ function Approvals({ script, disabled, onApprove, shareUrl }: Pick<Props, 'scrip
   )
 }
 
+/** Where this version stands: the order a creator goes through, with the state of each step. */
+function Steps({ script }: { script: Script }) {
+  const review = script.review
+  const steps: { id: string; label: string; state: 'done' | 'warn' | 'todo'; hint: string }[] = [
+    { id: 'step-script', label: 'السيناريو', state: 'done', hint: `نسخة ${script.version}` },
+    {
+      id: 'step-template',
+      label: 'القالب',
+      state: script.template ? 'done' : 'todo',
+      hint: script.template ? 'مختار' : 'لم يُختر',
+    },
+    {
+      id: 'step-review',
+      label: 'المراجعة',
+      state: !review ? 'todo' : review.blocking ? 'warn' : 'done',
+      hint: !review ? 'لم تُراجَع' : review.blocking ? `${review.blocking} مانعة` : 'لا موانع',
+    },
+    {
+      id: 'step-approve',
+      label: 'الاعتماد',
+      state: script.approved ? 'done' : 'todo',
+      hint: script.approved ? 'معتمد' : `${script.required_approvals.length - script.approvals.length} متبقٍّ`,
+    },
+    { id: 'step-video', label: 'الفيديو', state: 'todo', hint: script.approved && script.template ? 'جاهز للإنشاء' : 'بعد الاعتماد' },
+  ]
+  return (
+    <nav className="steps" aria-label="خطوات العمل">
+      {steps.map((s, i) => (
+        <a key={s.id} href={`#${s.id}`} className={`step ${s.state}`}>
+          <span className="num">{s.state === 'done' ? '✓' : s.state === 'warn' ? '!' : i + 1}</span>
+          <span>
+            {s.label}
+            <small>{s.hint}</small>
+          </span>
+        </a>
+      ))}
+    </nav>
+  )
+}
+
 export function ScriptView({
   projectId, script, source, templates, disabled, onReview, onRevise, onLocalize, onTemplate, onStory, onApprove, shareUrl,
 }: Props) {
@@ -195,7 +238,8 @@ export function ScriptView({
 
   return (
     <div className="script">
-      <section className="card">
+      <Steps script={script} />
+      <section className="card" id="step-script">
         <div className="badges">
           <span className="badge">{LANGUAGES[script.target.language]}</span>
           {script.target.dialect && <span className="badge">{script.target.dialect}</span>}
@@ -316,7 +360,13 @@ export function ScriptView({
         </section>
       )}
 
-      <section className="card">
+
+      <div id="step-template">
+        <TemplatePicker templates={templates} chosen={script.template} disabled={disabled} onPick={onTemplate} />
+        <StoryView script={script} disabled={disabled} onRewrite={onStory} />
+      </div>
+
+      <section className="card" id="step-review">
         <h3>المراجعة</h3>
         {!review && <p className="muted">لم تُراجَع هذه النسخة بعد.</p>}
         {review && (
@@ -391,13 +441,11 @@ export function ScriptView({
         {showLocalize && <LocalizeForm script={script} disabled={disabled} onLocalize={onLocalize} />}
       </section>
 
-      <StoryView script={script} disabled={disabled} onRewrite={onStory} />
-
       <Approvals script={script} disabled={disabled} onApprove={onApprove} shareUrl={shareUrl} />
 
-      <TemplatePicker templates={templates} chosen={script.template} disabled={disabled} onPick={onTemplate} />
-
-      <VideoPanel projectId={projectId} script={script} template={template} disabled={disabled} />
+      <div id="step-video">
+        <VideoPanel projectId={projectId} script={script} template={template} templates={templates} disabled={disabled} />
+      </div>
 
       <section className="card">
         <h3>المنشورات</h3>

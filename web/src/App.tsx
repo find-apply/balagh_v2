@@ -7,6 +7,32 @@ import { scriptLabel } from './labels'
 import type { Project, Script, VideoTemplate } from './types'
 
 const STORAGE_KEY = 'balagh.project'
+const HISTORY_KEY = 'balagh.projects'
+
+interface Saved {
+  id: string
+  title: string
+  at: string
+}
+
+// Earlier projects of this browser, newest first. Projects live on the server; only their ids are kept here.
+function loadHistory(): Saved[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]')
+  } catch {
+    return []
+  }
+}
+
+function remember(project: Project) {
+  const title = project.brief.idea || project.ideas[0]?.title || 'مشروع'
+  const rest = loadHistory().filter((p) => p.id !== project.id)
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify([{ id: project.id, title, at: new Date().toISOString() }, ...rest].slice(0, 20)))
+  } catch {
+    // Storage full or blocked: history is a convenience only.
+  }
+}
 
 function Busy({ label }: { label: string }) {
   const [seconds, setSeconds] = useState(0)
@@ -18,6 +44,26 @@ function Busy({ label }: { label: string }) {
     <div className="busy" role="status">
       <span className="spinner" /> {label} <span className="muted">({seconds} ث، قد يستغرق دقيقة)</span>
     </div>
+  )
+}
+
+function History({ disabled, onOpen }: { disabled: boolean; onOpen: (id: string) => void }) {
+  const history = loadHistory()
+  if (history.length === 0) return null
+  return (
+    <details className="card history">
+      <summary>مشاريعك السابقة ({history.length})</summary>
+      <ul className="plain">
+        {history.map((p) => (
+          <li key={p.id}>
+            <button className="link" disabled={disabled} onClick={() => onOpen(p.id)} dir="auto">
+              {p.title}
+            </button>{' '}
+            <span className="muted small">{new Date(p.at).toLocaleDateString('ar')}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
   )
 }
 
@@ -42,6 +88,7 @@ export default function App() {
     api.getProject(saved).then(
       (loaded) => {
         setProject(loaded)
+        remember(loaded)
         const script = params.get('script')
         if (script && loaded.scripts[script]) setActiveId(script)
       },
@@ -67,6 +114,14 @@ export default function App() {
     setProject((p) => p && { ...p, scripts: { ...p.scripts, [script.id]: script } })
     if (activate) setActiveId(script.id)
   }
+
+  const openProject = (id: string) =>
+    run('فتح المشروع', async () => {
+      const loaded = await api.getProject(id)
+      localStorage.setItem(STORAGE_KEY, id)
+      remember(loaded)
+      setProject(loaded)
+    })
 
   const reset = () => {
     localStorage.removeItem(STORAGE_KEY)
@@ -110,6 +165,8 @@ export default function App() {
         </div>
       )}
 
+      {!project && <History disabled={busy !== null} onOpen={openProject} />}
+
       {!project && (
         <BriefForm
           disabled={busy !== null}
@@ -117,6 +174,7 @@ export default function App() {
             run('يقترح بلاغ الأفكار ويتحقق من النصوص في المصادر', async () => {
               const created = await api.createProject(brief)
               localStorage.setItem(STORAGE_KEY, created.id)
+              remember(created)
               setProject(created)
             })
           }

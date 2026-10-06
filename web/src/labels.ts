@@ -46,8 +46,8 @@ export const VIDEO_STATUS = {
 export const CLAIMS = { preserved: 'محفوظ', altered: 'تغيّر', dropped: 'محذوف', added: 'مضاف' }
 
 export function scriptLabel(s: Script): string {
-  const kind = s.localized_from ? 'موطَّن' : 'أصلي'
-  return `${LANGUAGES[s.target.language]} · ${kind} · ن${s.version}`
+  const kind = s.localized_from ? 'نسخة موطّنة' : 'النسخة الأصلية'
+  return `${LANGUAGES[s.target.language]} · ${kind}${s.version > 1 ? ` · التصحيح ${s.version - 1}` : ''}`
 }
 
 export function toMarkdown(s: Script): string {
