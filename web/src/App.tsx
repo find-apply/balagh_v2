@@ -4,6 +4,7 @@ import { AdminApp } from './admin/AdminApp'
 import { BriefForm } from './components/BriefForm'
 import { HistorySidebar } from './components/HistorySidebar'
 import { Landing } from './components/Landing'
+import { Showcase } from './components/Showcase'
 import { Icon } from './components/Icon'
 import { AppShell } from './components/shell/AppShell'
 import { IdeaSkeletons, Progress, Toast } from './components/Progress'
@@ -188,6 +189,7 @@ export default function App() {
   }
 
   if (route.view === 'admin') return <AdminApp path={route.path} />
+  if (route.view === 'examples') return <Showcase onStart={() => go('#/new')} />
   if (route.view === 'landing') return <Landing onStart={() => go('#/new')} resume={history.length > 0} />
 
   const project = loaded ?? null

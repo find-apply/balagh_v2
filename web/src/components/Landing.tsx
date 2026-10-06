@@ -81,6 +81,7 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
             <a href="#how">كيف يعمل</a>
             <a href="#trust">الضمانات</a>
             <a href="#results">النتائج</a>
+            <a href="#/examples">أمثلة</a>
             <a href={`${BASE}/docs`} target="_blank" rel="noreferrer">
               API
             </a>
@@ -189,7 +190,8 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
             ))}
           </div>
           <p className="muted small">
-            العينة صغيرة والتشغيل واحد، ولم يراجع مختص شرعي المخرجات بعد. ما يضيفه بلاغ هو الضمان والتتبع.
+            العينة صغيرة والتشغيل واحد، ولم يراجع مختص شرعي المخرجات بعد. ما يضيفه بلاغ هو الضمان والتتبع.{' '}
+            <a href="#/examples">شاهد مثالين حقيقيين من الطلب إلى الفيديو ←</a>
           </p>
         </div>
       </section>
