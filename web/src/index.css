@@ -1538,9 +1538,18 @@ button.link {
   margin-bottom: -1px;
 }
 
-.jump a:hover {
+.jump a:hover,
+.jump a.on {
   color: var(--brand);
   border-bottom-color: var(--brand);
+}
+
+.jump a.on {
+  font-weight: 700;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .next {

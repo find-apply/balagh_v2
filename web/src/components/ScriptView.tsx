@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { FormEvent, MouseEvent } from 'react'
+import type { FormEvent, MouseEvent, ReactNode } from 'react'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
 import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, VideoTemplate } from '../types'
 import { GROUPS } from '../audiences'
@@ -39,10 +39,30 @@ function download(script: Script) {
   URL.revokeObjectURL(url)
 }
 
-// In-page links scroll without touching the URL hash, which keeps the app on #studio.
-function jump(e: MouseEvent<HTMLAnchorElement>) {
-  e.preventDefault()
-  document.querySelector(e.currentTarget.getAttribute('href')!)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+/** The script page shows one part at a time; after the ideas, one long page was too much to scroll. */
+type Tab = 'script' | 'template' | 'review' | 'approve' | 'video' | 'posts'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'script', label: 'السيناريو والمصادر' },
+  { id: 'template', label: 'القالب والقصة' },
+  { id: 'review', label: 'المراجعة' },
+  { id: 'approve', label: 'الاعتماد' },
+  { id: 'video', label: 'الفيديو' },
+  { id: 'posts', label: 'المنشورات' },
+]
+
+/** A tab link inside the page: switches the part shown and scrolls back to the top of the script. */
+function TabLink({ to, go, className, children }: { to: Tab; go: (t: Tab) => void; className?: string; children: ReactNode }) {
+  const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    go(to)
+    document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  return (
+    <a className={className} href={`#s-${to}`} onClick={onClick}>
+      {children}
+    </a>
+  )
 }
 
 function Scenes({ script }: { script: Script }) {
@@ -195,7 +215,7 @@ function Approvals({ script, disabled, onApprove, shareUrl }: { script: Script; 
 }
 
 /** The one action that moves this version forward, so the flow never stalls on a long page. */
-function NextStep({ script, disabled, onReview }: { script: Script; disabled: boolean; onReview: Handlers['onReview'] }) {
+function NextStep({ script, disabled, onReview, go }: { script: Script; disabled: boolean; onReview: Handlers['onReview']; go: (t: Tab) => void }) {
   const blocking = script.review?.blocking ?? 0
   if (!script.review)
     return (
@@ -216,9 +236,9 @@ function NextStep({ script, disabled, onReview }: { script: Script; disabled: bo
           <strong>{blocking} ملاحظة مانعة</strong>
           <p className="small">صحّحها في نسخة جديدة قبل الاعتماد.</p>
         </div>
-        <a className="button" href="#s-review" onClick={jump}>
+        <TabLink to="review" go={go} className="button">
           اعرض الملاحظات
-        </a>
+        </TabLink>
       </div>
     )
   if (!script.approved)
@@ -228,9 +248,9 @@ function NextStep({ script, disabled, onReview }: { script: Script; disabled: bo
           <strong>الخطوة التالية: الاعتماد البشري</strong>
           <p className="muted small">لا يُفتح التصدير قبل أن يوقّع كل من تتطلبه هذه النسخة.</p>
         </div>
-        <a className="button primary" href="#s-approve" onClick={jump}>
+        <TabLink to="approve" go={go} className="button primary">
           اذهب إلى الاعتماد
-        </a>
+        </TabLink>
       </div>
     )
   if (!script.template)
@@ -240,9 +260,9 @@ function NextStep({ script, disabled, onReview }: { script: Script; disabled: bo
           <strong>النسخة معتمدة. الخطوة التالية: قالب الفيديو</strong>
           <p className="small">اختر من المكتبة القالب الذي يُحوَّل به السيناريو إلى فيديو، أو صدّر النص.</p>
         </div>
-        <a className="button primary" href="#s-template" onClick={jump}>
+        <TabLink to="template" go={go} className="button primary">
           اختر قالبا
-        </a>
+        </TabLink>
       </div>
     )
   return (
@@ -251,9 +271,9 @@ function NextStep({ script, disabled, onReview }: { script: Script; disabled: bo
         <strong>النسخة معتمدة وجاهزة للفيديو</strong>
         <p className="small">أنشئ الفيديو بالقالب المختار، أو صدّر النص، أو وطّنه لجمهور آخر.</p>
       </div>
-      <a className="button primary" href="#s-video" onClick={jump}>
+      <TabLink to="video" go={go} className="button primary">
         أنشئ الفيديو
-      </a>
+      </TabLink>
     </div>
   )
 }
@@ -262,11 +282,12 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
   const [compare, setCompare] = useState(false)
+  const [tab, setTab] = useState<Tab>('script')
   const review = script.review
   const canRevise = Boolean(notes.trim()) || (review?.blocking ?? 0) > 0
 
   return (
-    <div className="script">
+    <div className="script" id="script-top">
       <div className="script-head">
         <div className="badges">
           <span className="badge">{LANGUAGES[script.target.language]}</span>
@@ -283,19 +304,19 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
         <p className="muted" dir="auto">
           الجمهور: {script.target.audience}
         </p>
-        <nav className="jump">
-          <a href="#s-script" onClick={jump}>السيناريو</a>
-          <a href="#s-sources" onClick={jump}>المصادر ({script.references.length})</a>
-          <a href="#s-template" onClick={jump}>القالب</a>
-          <a href="#s-review" onClick={jump}>المراجعة</a>
-          <a href="#s-approve" onClick={jump}>الاعتماد</a>
-          <a href="#s-video" onClick={jump}>الفيديو</a>
-          <a href="#s-posts" onClick={jump}>المنشورات</a>
+        <nav className="jump" aria-label="أجزاء السيناريو">
+          {TABS.map((t) => (
+            <TabLink key={t.id} to={t.id} go={setTab} className={tab === t.id ? 'on' : undefined}>
+              {t.label}
+              {t.id === 'script' && ` (${script.references.length})`}
+            </TabLink>
+          ))}
         </nav>
       </div>
 
-      {actions && <NextStep script={script} disabled={disabled} onReview={actions.onReview} />}
+      {actions && <NextStep script={script} disabled={disabled} onReview={actions.onReview} go={setTab} />}
 
+      <div hidden={tab !== 'script'}>
       <section className="card" id="s-script">
         <h3>السيناريو</h3>
         {script.warnings.length > 0 && (
@@ -424,8 +445,9 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
           )}
         </section>
       )}
+      </div>
 
-      <div id="s-template">
+      <div id="s-template" hidden={tab !== 'template'}>
         <TemplatePicker
           templates={templates}
           chosen={script.template}
@@ -435,6 +457,7 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
         <StoryView script={script} disabled={disabled || !actions} onRewrite={(notes) => actions?.onStory(notes)} />
       </div>
 
+      <div hidden={tab !== 'review'}>
       <section className="card" id="s-review">
         <h3>المراجعة</h3>
         {!review && <p className="muted">لم تُراجَع هذه النسخة بعد.</p>}
@@ -513,10 +536,13 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
           </>
         )}
       </section>
+      </div>
 
-      <Approvals script={script} disabled={disabled} onApprove={actions?.onApprove} shareUrl={shareUrl} />
+      <div hidden={tab !== 'approve'}>
+        <Approvals script={script} disabled={disabled} onApprove={actions?.onApprove} shareUrl={shareUrl} />
+      </div>
 
-      <div id="s-video">
+      <div id="s-video" hidden={tab !== 'video'}>
         <VideoPanel
           projectId={projectId}
           script={script}
@@ -526,6 +552,7 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
         />
       </div>
 
+      <div hidden={tab !== 'posts'}>
       <section className="card" id="s-posts">
         <h3>المنشورات</h3>
         {script.posts.map((p) => (
@@ -538,6 +565,7 @@ export function ScriptView({ projectId, script, source, templates, disabled, act
           </div>
         ))}
       </section>
+      </div>
     </div>
   )
 }
