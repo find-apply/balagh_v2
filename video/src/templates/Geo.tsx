@@ -132,14 +132,14 @@ const Caption: React.FC<{cues: any[]; en: boolean}> = ({cues, en}) => {
   let acc = 0;
   return (
     <div style={{position: 'absolute', left: 44, right: 44, top: 830, minHeight: 250, background: 'linear-gradient(rgba(4,10,20,.78), rgba(4,10,20,.55))', border: `1.5px solid ${GOLD}`, borderRadius: 18, padding: '24px 26px', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `translateY(${(1 - pop) * 18}px)`, opacity: pop}}>
-      <div style={{direction: en ? 'ltr' : 'rtl', textAlign: 'center', fontFamily: en ? inter : amiri, fontWeight: 700, fontSize: en ? (c.emph ? 44 : 38) : (c.emph ? 58 : 52), lineHeight: 1.55, color: '#fff'}}>
+      <div style={{direction: en ? 'ltr' : 'rtl', textAlign: 'center', fontFamily: en ? inter : amiri, fontWeight: 700, fontSize: en ? (c.emph ? 44 : 38) : (c.emph ? (words.length > 10 ? 46 : 58) : 52), lineHeight: 1.55, color: '#fff'}}>
         {words.map((x: string, i: number) => {
           const s0 = acc / total, e0 = (acc + w[i]) / total; acc += w[i];
           const on = spoken >= s0 && spoken < e0 + 0.02;
           return <span key={i} style={{display: 'inline-block', margin: '0 7px', color: on || (c.emph && spoken > e0) ? GOLD : '#fff', borderBottom: on ? `3px solid ${GOLD}` : '3px solid transparent'}}>{x}</span>;
         })}
       </div>
-      {c.sub && <div style={{position: 'absolute', bottom: -34, fontFamily: cairo, fontSize: 26, color: GOLD2}}>{c.sub}</div>}
+      {c.sub && <div style={{position: 'absolute', top: 'calc(100% + 10px)', left: 0, right: 0, textAlign: 'center', fontFamily: cairo, fontSize: 24, lineHeight: 1.3, color: GOLD2}}>{c.sub}</div>}
     </div>
   );
 };
