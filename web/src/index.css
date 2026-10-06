@@ -3105,3 +3105,7 @@ details.small summary {
 .reels:has(.reel.wide) .reels-arrow {
   top: 120px;
 }
+
+.show-stats {
+  margin: 8px 0 20px;
+}

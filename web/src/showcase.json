@@ -1,6 +1,814 @@
 {
  "examples": [
   {
+   "id": "darija",
+   "title": "بالدارجة الجزائرية لعامة الناس: الصدق في البيع والشراء",
+   "project": "57c5349aec674d3183ac9bcff76eee26",
+   "script": "2eb2c429",
+   "brief": {
+    "idea": "الصدق في البيع والشراء",
+    "audience": "عامة الناس، الجزائر",
+    "language": "ar",
+    "knowledge": "familiar",
+    "tone": "خفيف وقريب",
+    "platforms": [
+     "tiktok",
+     "facebook_reels"
+    ],
+    "duration": 30
+   },
+   "ideas": [
+    {
+     "title": "القفازة ولا البركة؟",
+     "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+     "evidence": [
+      "صحيح البخاري، حديث رقم 2110",
+      "صحيح البخاري، حديث رقم 2082"
+     ]
+    },
+    {
+     "title": "قصة صبرة الطعام",
+     "hook": "تخيل لوكان رسول الله ﷺ يجي يفيريفي السلعة ديالك في المارشي.. واش راح يلقى؟",
+     "evidence": [
+      "صحيح مسلم، حديث رقم 102",
+      "صحيح مسلم، حديث رقم 101"
+     ]
+    },
+    {
+     "title": "بيع حلال في واد كنيس",
+     "hook": "رايح تبيع تليفونك ولا الميكرو ديالك في واد كنيس؟ أرواح نعطيلك 3 خطوات باش دراهمك يكونو حلال.",
+     "evidence": [
+      "سورة النساء، الآية 29"
+     ]
+    }
+   ],
+   "chosen": 1,
+   "first": {
+    "id": "2eb2c429",
+    "title": "القفازة ولا البركة؟",
+    "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+      "screen": "حاسب روحك قافز؟"
+     },
+     {
+      "t": "6-13",
+      "voiceover": "ضربت ضربتك ودخلت دراهم؟ بصح علابالك بلي هاد التخمام هو لي يطير البركة؟ الغشة عمرها ما كانت شطارة.",
+      "screen": "الغشة ماشي شطارة"
+     },
+     {
+      "t": "13-23",
+      "voiceover": "النبي ﷺ قالنا على البيع والشراء: «فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا».",
+      "screen": "فإن صدقا وبينا بورك لهما"
+     },
+     {
+      "t": "23-30",
+      "voiceover": "الصدق يجيب البركة، بيع بالنية وقول الصراحة وربي يخلف. ابعت الفيديو لصاحبك لي راه باغي يبيع.",
+      "screen": "بيع بالنية وربي يخلف"
+     }
+    ],
+    "references": [
+     {
+      "source": "صحيح البخاري، حديث رقم 2110",
+      "usage": "quoted",
+      "text": "فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا",
+      "sharh": null,
+      "tafsir": []
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "ابعت الفيديو لصاحبك لي راه باغي يبيع."
+   },
+   "final": {
+    "id": "2eb2c429",
+    "title": "القفازة ولا البركة؟",
+    "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
+      "screen": "حاسب روحك قافز؟"
+     },
+     {
+      "t": "6-13",
+      "voiceover": "ضربت ضربتك ودخلت دراهم؟ بصح علابالك بلي هاد التخمام هو لي يطير البركة؟ الغشة عمرها ما كانت شطارة.",
+      "screen": "الغشة ماشي شطارة"
+     },
+     {
+      "t": "13-23",
+      "voiceover": "النبي ﷺ قالنا على البيع والشراء: «فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا».",
+      "screen": "فإن صدقا وبينا بورك لهما"
+     },
+     {
+      "t": "23-30",
+      "voiceover": "الصدق يجيب البركة، بيع بالنية وقول الصراحة وربي يخلف. ابعت الفيديو لصاحبك لي راه باغي يبيع.",
+      "screen": "بيع بالنية وربي يخلف"
+     }
+    ],
+    "references": [
+     {
+      "source": "صحيح البخاري، حديث رقم 2110",
+      "usage": "quoted",
+      "text": "فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا",
+      "sharh": null,
+      "tafsir": []
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "ابعت الفيديو لصاحبك لي راه باغي يبيع."
+   },
+   "story": null,
+   "videos": [
+    {
+     "template": "الزخرفة الهندسية",
+     "id": "geo",
+     "url": "/media/videos/a4102bd55a12.mp4",
+     "seconds": 41.49,
+     "images": 0,
+     "clips": 3,
+     "notes": [],
+     "aspect": "9:16",
+     "example": "بالدارجة الجزائرية لعامة الناس: الصدق في البيع والشراء"
+    }
+   ],
+   "timeline": [
+    "طلب: الصدق في البيع والشراء، عامة الناس في الجزائر، الدارجة الجزائرية، أسلوب خفيف وقريب، TikTok وFacebook، 30 ث",
+    "الأفكار بالدارجة فعلا: «الطوموبيل»، «واد كنيس»، «الديفو»؛ لكل فكرة حديثان من الصحيحين",
+    "السيناريو بالدارجة، والحديث نفسه بالفصحى حرفيا من صحيح البخاري (2110) لا يُترجم ولا يُدرّج",
+    "المراجعة بلا ملاحظات، اعتماد، ريلز بالزخرفة الهندسية. الحديث معروض بصمت حتى يوضع تسجيل قارئ"
+   ]
+  },
+  {
+   "id": "english",
+   "title": "بالإنجليزية لشباب يتعرفون على الإسلام: Why does God allow hardship?",
+   "project": "6daf2c87dc3d425d9c137890445c924d",
+   "script": "3c5adc9e",
+   "brief": {
+    "idea": "Why does God allow hardship? Hope for anyone going through a hard time",
+    "audience": "Young people in the UK exploring Islam",
+    "language": "en",
+    "knowledge": "new",
+    "tone": null,
+    "platforms": [
+     "instagram_reels",
+     "tiktok"
+    ],
+    "duration": 30
+   },
+   "ideas": [
+    {
+     "title": "The Spiritual Workout",
+     "hook": "Why would a loving God let you struggle? Think of it like going to the gym.",
+     "evidence": [
+      "صحيح البخاري، حديث رقم 7466",
+      "صحيح البخاري، حديث رقم 5644"
+     ]
+    },
+    {
+     "title": "The Missing Pixel",
+     "hook": "Have you ever missed a train, felt completely ruined, and then realized it saved you from a disaster?",
+     "evidence": [
+      "سورة البقرة، الآية 216"
+     ]
+    },
+    {
+     "title": "The Greatest Were Tested",
+     "hook": "If being a good person meant life would be easy, then the Prophets would have had zero problems.",
+     "evidence": []
+    }
+   ],
+   "chosen": 2,
+   "first": {
+    "id": "3c5adc9e",
+    "title": "The Missing Pixel",
+    "hook": "Ever felt completely ruined after missing an opportunity?",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-4",
+      "voiceover": "Ever felt completely ruined after missing an opportunity?",
+      "screen": "Ever felt ruined?"
+     },
+     {
+      "t": "4-9",
+      "voiceover": "We only see one pixel. The Creator sees the entire picture.",
+      "screen": "The Creator sees the entire picture."
+     },
+     {
+      "t": "9-26",
+      "voiceover": "The Quran reminds us: «Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.»",
+      "screen": "But perhaps you hate a thing and it is good for you..."
+     },
+     {
+      "t": "26-30",
+      "voiceover": "That painful loss could actually be your ultimate protection.",
+      "screen": "Your ultimate protection."
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة البقرة، الآية 216",
+      "usage": "quoted",
+      "text": "Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.",
+      "sharh": null,
+      "tafsir": [
+       "فرض الله عليكم -أيها المؤمنون- قتال الكفار، والقتال مكروه لكم من جهة الطبع; لمشقته وكثرة مخاطره، وقد تكرهون شيئًا وهو في حقيقته خير لكم، وقد تحبون شيئًا لما فيه من الراحة أو اللذة العاجلة، وهو شر لكم. والله تعالى يعلم ما هو خير لكم، وأنتم لا تعلمون ذلك. فبادروا إلى الجهاد في سبيله."
+      ]
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "Reflect on a past hardship that turned out to be a hidden blessing, and trust the bigger picture."
+   },
+   "final": {
+    "id": "3c5adc9e",
+    "title": "The Missing Pixel",
+    "hook": "Ever felt completely ruined after missing an opportunity?",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-4",
+      "voiceover": "Ever felt completely ruined after missing an opportunity?",
+      "screen": "Ever felt ruined?"
+     },
+     {
+      "t": "4-9",
+      "voiceover": "We only see one pixel. The Creator sees the entire picture.",
+      "screen": "The Creator sees the entire picture."
+     },
+     {
+      "t": "9-26",
+      "voiceover": "The Quran reminds us: «Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.»",
+      "screen": "But perhaps you hate a thing and it is good for you..."
+     },
+     {
+      "t": "26-30",
+      "voiceover": "That painful loss could actually be your ultimate protection.",
+      "screen": "Your ultimate protection."
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة البقرة، الآية 216",
+      "usage": "quoted",
+      "text": "Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.",
+      "sharh": null,
+      "tafsir": [
+       "فرض الله عليكم -أيها المؤمنون- قتال الكفار، والقتال مكروه لكم من جهة الطبع; لمشقته وكثرة مخاطره، وقد تكرهون شيئًا وهو في حقيقته خير لكم، وقد تحبون شيئًا لما فيه من الراحة أو اللذة العاجلة، وهو شر لكم. والله تعالى يعلم ما هو خير لكم، وأنتم لا تعلمون ذلك. فبادروا إلى الجهاد في سبيله."
+      ]
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "Reflect on a past hardship that turned out to be a hidden blessing, and trust the bigger picture."
+   },
+   "story": null,
+   "videos": [
+    {
+     "template": "الترجمة المتحركة",
+     "id": "captions",
+     "url": "/media/videos/e5f5bde9e559.mp4",
+     "seconds": 49.28,
+     "images": 0,
+     "clips": 4,
+     "notes": [],
+     "aspect": "9:16",
+     "example": "بالإنجليزية لشباب يتعرفون على الإسلام: Why does God allow hardship?"
+    }
+   ],
+   "timeline": [
+    "طلب بالإنجليزية: شباب في بريطانيا يتعرفون على الإسلام، معرفة = جديد، Reels وTikTok، 30 ث",
+    "ثلاث أفكار؛ الثالثة طلبت حديث «أشد الناس بلاء الأنبياء» فلم يوجد في الصحيحين فعُلِّم غير موثّق ولم يُستعمل",
+    "الفكرة الثانية: آية البقرة 216 بترجمة Saheeh International المعتمدة، لا ترجمة النموذج",
+    "السيناريو يبدأ من سؤال يطرحه هذا الجمهور («Ever felt ruined after missing an opportunity?») ويقدّم المصطلح بعد المعنى",
+    "المراجعة بلا ملاحظات، اعتماد، ريلز بالترجمة المتحركة بالرسوم الجديدة (عاصفة، آية، قفل)"
+   ]
+  },
+  {
+   "id": "reels",
+   "title": "للكبار على Reels وTikTok: إن مع العسر يسرا",
+   "project": "4ba1bab04b3e41baba2382e51a332815",
+   "script": "25cf5193",
+   "brief": {
+    "idea": "إن مع العسر يسرا: رسالة أمل لمن يمر بضيق",
+    "audience": "شباب مسلمون (18-30)",
+    "language": "ar",
+    "knowledge": "familiar",
+    "tone": "هادئ وتأملي",
+    "platforms": [
+     "instagram_reels",
+     "tiktok"
+    ],
+    "duration": 30
+   },
+   "ideas": [
+    {
+     "title": "السر اللغوي في سورة الشرح",
+     "hook": "هل تساءلت يوما لماذا جاءت كلمة العسر معرفة بأل، بينما جاءت يسرا نكرة؟",
+     "evidence": [
+      "سورة الشرح، الآية 5-6"
+     ]
+    },
+    {
+     "title": "عبادة انتظار الفرج",
+     "hook": "كلنا نمر بأيام نشعر فيها بضيق شديد، لكن هل فكرت كيف تتصرف في لحظات الانتظار نفسها قبل أن يأتي اليسر؟",
+     "evidence": []
+    },
+    {
+     "title": "المواساة الربانية للنبي",
+     "hook": "تخيل أن تكون محاربا من أقرب الناس إليك، والهموم تحيط بك. هكذا كان حال النبي قبل أن تنزل هذه الآيات.",
+     "evidence": []
+    }
+   ],
+   "chosen": 1,
+   "first": {
+    "id": "e19d80d2",
+    "title": "السر اللغوي في سورة الشرح",
+    "hook": "هل تساءلت يوما لماذا جاءت كلمة العسر معرفة بأل، بينما جاءت يسرا نكرة؟",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "لماذا جاءت كلمة العسر معرفة بـ (أل)، بينما جاءت كلمة (يسرا) نكرة؟",
+      "screen": "العسر المعرفة.. ويسرا النكرة"
+     },
+     {
+      "t": "6-15",
+      "voiceover": "تأمل هذا الوعد الإلهي: «فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا»",
+      "screen": "الوعد الإلهي"
+     },
+     {
+      "t": "15-23",
+      "voiceover": "في اللغة، تكرار الكلمة المعرفة يعني أنها شيء واحد، أما النكرة فتفيد التعدد والاتساع.",
+      "screen": "عسر واحد.. يسر متعدد"
+     },
+     {
+      "t": "23-30",
+      "voiceover": "لذلك، مهما اشتد بك الضيق، تذكر أن مع هذا الضيق فرجا واسعا من الله. فاطمئن.",
+      "screen": "مع الضيق فرجا"
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة الشرح، الآية 5-6",
+      "usage": "quoted",
+      "text": "فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا ۝ إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا",
+      "sharh": null,
+      "tafsir": [
+       "فلا يَثْنِكَ أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا.",
+       "فلا يثنك أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا."
+      ]
+     }
+    ],
+    "review": [
+     {
+      "severity": "blocking",
+      "reviewer": "scholarly",
+      "scene": 3,
+      "issue": "تفسير الآية بأن تكرار المعرفة يعني أنها شيء واحد وأن النكرة تفيد التعدد والاتساع هو شرح يتجاوز نص التفسير المعتمد المرفق (تفسير الميسر)، حيث لم يرد فيه هذا التوجيه اللغوي وإنما اقتصر على بيان أن مع الضيق فرجاً.",
+      "fix": "الالتزام بما ورد في التفسير المرفق من الدلالة على أن مع الضيق فرجاً وتيسيراً، وحذف الشرح اللغوي غير المذكور في التفسير، وتعديل مقدمة المقطع وعنوانه تبعاً لذلك."
+     }
+    ],
+    "claims": [],
+    "unverified": [],
+    "approved": false,
+    "cta": "شارك هذا المقطع لمن يحتاج إلى رسالة طمأنينة اليوم."
+   },
+   "final": {
+    "id": "25cf5193",
+    "title": "وعد إلهي بالطمأنينة",
+    "hook": "هل تشعر أحيانا أن الصعوبات تحيط بك، وأن الضيق يشتد عليك؟",
+    "version": 2,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "هل تشعر أحيانا أن الصعوبات تحيط بك، وأن الضيق يشتد عليك؟",
+      "screen": "هل يشتد عليك الضيق؟"
+     },
+     {
+      "t": "6-15",
+      "voiceover": "تأمل هذا الوعد الإلهي العظيم: «فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا»",
+      "screen": "الوعد الإلهي"
+     },
+     {
+      "t": "15-23",
+      "voiceover": "هذا وعد من الله بألا تدع الأذى أو الصعوبات توقفك، لأن مع هذا الضيق فرجا وتيسيرا.",
+      "screen": "مع الضيق فرجا"
+     },
+     {
+      "t": "23-30",
+      "voiceover": "ومهما اشتدت الأزمات، فإن الله يؤكد لك أن الفرج قادم لا محالة. فاطمئن.",
+      "screen": "الفرج قادم.. فاطمئن"
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة الشرح، الآية 5-6",
+      "usage": "quoted",
+      "text": "فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا ۝ إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا",
+      "sharh": null,
+      "tafsir": [
+       "فلا يَثْنِكَ أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا.",
+       "فلا يثنك أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا."
+      ]
+     }
+    ],
+    "review": [],
+    "claims": [],
+    "unverified": [],
+    "approved": true,
+    "cta": "شارك هذا المقطع لمن يحتاج إلى رسالة طمأنينة اليوم."
+   },
+   "story": null,
+   "videos": [
+    {
+     "template": "الترجمة المتحركة",
+     "id": "captions",
+     "url": "/media/videos/9ac6575732d1.mp4",
+     "seconds": 36.82,
+     "images": 1,
+     "clips": 3,
+     "notes": [],
+     "aspect": "9:16",
+     "example": "للكبار على Reels وTikTok: إن مع العسر يسرا"
+    },
+    {
+     "template": "الزخرفة الهندسية",
+     "id": "geo",
+     "url": "/media/videos/029249f9073a.mp4",
+     "seconds": 36.82,
+     "images": 0,
+     "clips": 0,
+     "notes": [],
+     "aspect": "9:16",
+     "example": "للكبار على Reels وTikTok: إن مع العسر يسرا"
+    }
+   ],
+   "timeline": [
+    "طلب: إن مع العسر يسرا، شباب 18-30، أسلوب هادئ وتأملي، Reels وTikTok، 30 ث",
+    "الفكرة الأولى: آيتا الشرح 5-6 موثّقتان مع تفسير الميسر",
+    "المراجعة الآلية أمسكت ملاحظة مانعة: شرح لغوي للآية (تكرار المعرفة والنكرة) يتجاوز التفسير المعتمد",
+    "تصحيح في نسخة جديدة، مراجعة ثانية بلا ملاحظات، اعتماد",
+    "فيديوهان عموديان: الترجمة المتحركة والزخرفة الهندسية، بتلاوة حقيقية للآية"
+   ]
+  },
+  {
+   "id": "adults",
+   "title": "للكبار: لماذا يبتلي الله الناس؟ ثم توطينه للإنجليزية",
+   "project": "b9a85c8e81ed429882428d892a80fdca",
+   "script": "bf0032b5",
+   "brief": {
+    "idea": "لماذا يبتلي الله الناس؟ الصبر عند الشدة",
+    "audience": "شباب مسلمون (18-30)",
+    "language": "ar",
+    "knowledge": "familiar",
+    "tone": null,
+    "platforms": [
+     "youtube_shorts",
+     "tiktok"
+    ],
+    "duration": 45
+   },
+   "ideas": [
+    {
+     "title": "الابتلاء وتكفير السيئات",
+     "hook": "هل فكرت يوما أن المشكلة المزعجة التي تمر بها الآن، هي في الحقيقة عملية تنظيف لصحيفتك؟",
+     "evidence": [
+      "صحيح البخاري، حديث رقم 5641",
+      "صحيح البخاري، حديث رقم 5642"
+     ]
+    },
+    {
+     "title": "قاعدة الصدمة الأولى",
+     "hook": "يظهر صانع المحتوى وهو يمسك هاتفه بصدمة وكأنه تلقى خبرا سيئا، ثم يقول: ردة فعلك في أول ثانية، هي التي تحدد كل شيء.",
+     "evidence": [
+      "صحيح البخاري، حديث رقم 1283",
+      "صحيح البخاري، حديث رقم 1302"
+     ]
+    },
+    {
+     "title": "أحباء الله والابتلاء",
+     "hook": "لو كان الابتلاء دليلا على كره الله للعبد، فكيف تفسر أن أحب خلق الله إليه عانى أكثر منا جميعا؟",
+     "evidence": [
+      "سورة البقرة، الآية 155-156"
+     ]
+    }
+   ],
+   "chosen": 3,
+   "first": {
+    "id": "45c4507a",
+    "title": "أحباء الله والابتلاء",
+    "hook": "لو كان الابتلاء دليلاً على غضب الله، فكيف تفسر أن أحب خلق الله إليه عانى أكثر منا جميعاً؟",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "لو كان الابتلاء دليلاً على غضب الله، فكيف تفسر أن أحب خلق الله إليه عانى أكثر منا جميعاً؟",
+      "screen": "هل الابتلاء غضب؟"
+     },
+     {
+      "t": "6-15",
+      "voiceover": "النبي ﷺ فقد ستة من أبنائه في حياته.. طُرد، جاع، وتكبد المشاق في سبيل الدعوة وتبليغ التوحيد.",
+      "screen": "عانى في سبيل الدعوة"
+     },
+     {
+      "t": "15-22",
+      "voiceover": "مقام النبوة لم يمنع عنه الألم، ليعلمنا أن الابتلاء ليس عقوبة، بل هو طريق اصطفاء ورفع للدرجات.",
+      "screen": "طريق اصطفاء"
+     },
+     {
+      "t": "22-33",
+      "voiceover": "الله يختبرنا بأنواع من الفقد، لكنه وعد الصابرين ببشارة عظيمة: «وَلَنَبۡلُوَنَّكُم بِشَيۡءٖ مِّنَ ٱلۡخَوۡفِ وَٱلۡجُوعِ وَنَقۡصٖ مِّنَ ٱلۡأَمۡوَٰلِ وَٱلۡأَنفُسِ وَٱلثَّمَرَٰتِۗ وَبَشِّرِ ٱلصَّٰبِرِينَ»",
+      "screen": "وبشر الصابرين"
+     },
+     {
+      "t": "33-45",
+      "voiceover": "هؤلاء الصابرون يوقنون أنهم لله وإليه راجعون، فيجازيهم أحسن الجزاء. فمهما كان بلاؤك اليوم.. اصبر واطمئن.",
+      "screen": "مهما كان بلاؤك.. اصبر واطمئن"
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة البقرة، الآية 155-156",
+      "usage": "quoted",
+      "text": "وَلَنَبۡلُوَنَّكُم بِشَيۡءٖ مِّنَ ٱلۡخَوۡفِ وَٱلۡجُوعِ وَنَقۡصٖ مِّنَ ٱلۡأَمۡوَٰلِ وَٱلۡأَنفُسِ وَٱلثَّمَرَٰتِۗ وَبَشِّرِ ٱلصَّٰبِرِينَ ۝ ٱلَّذِينَ إِذَآ أَصَٰبَتۡهُم مُّصِيبَةٞ قَالُوٓاْ إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ",
+      "sharh": null,
+      "tafsir": [
+       "ولنختبرنكم بشيء يسير من الخوف، ومن الجوع، وبنقص من الأموال بتعسر الحصول عليها، أو ذهابها، ومن الأنفس: بالموت أو الشهادة في سبيل الله، وبنقص من ثمرات النخيل والأعناب والحبوب، بقلَّة ناتجها أو فسادها. وبشِّر -أيها النبي- الصابرين على هذا وأمثاله بما يفرحهم ويَسُرُّهم من حسن العاقبة في الدنيا والآخرة.",
+       "من صفة هؤلاء الصابرين أنهم إذا أصابهم شيء يكرهونه قالوا: إنَّا عبيد مملوكون لله، مدبَّرون بأمره وتصريفه، يفعل بنا ما يشاء، وإنا إليه راجعون بالموت، ثم بالبعث للحساب والجزاء."
+      ]
+     }
+    ],
+    "review": [
+     {
+      "severity": "blocking",
+      "reviewer": "scholarly",
+      "scene": 5,
+      "issue": "تمت صياغة معنى الآية 156 من سورة البقرة وألفاظها («إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ») خارج علامتي التنصيص في عبارة «يوقنون أنهم لله وإليه راجعون»، والأصل ألا يُذكر كلام القرآن أو معناه إلا مقتبساً بنصه الحرفي داخل «».",
+      "fix": "إيراد الآية الكريمة بنصها داخل علامتي التنصيص «ٱلَّذِينَ إِذَآ أَصَٰبَتۡهُم مُّصِيبَةٞ قَالُوٓاْ إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ» أو الاقتصار على عبارة التفسير المعتمدة دون مضاهاة اللفظ القرآني."
+     },
+     {
+      "severity": "suggestion",
+      "reviewer": "scholarly",
+      "scene": 0,
+      "issue": "حُدد مستوى المحتوى بـ (A)، بينما يناقش المقطع الحكمة من الابتلاء ويعالج مفهوماً خاطئاً شائعاً (كون الابتلاء دليلاً على غضب الله)، وهو ما يوافق المستوى (B) المعني بالشرح والتعليل ومناقشة المفاهيم والتساؤلات.",
+      "fix": "تعديل مستوى المحتوى (content_level) ليصبح (B) بدلاً من (A)."
+     }
+    ],
+    "claims": [],
+    "unverified": [],
+    "approved": false,
+    "cta": "شارك هذا المقطع لمن يحتاج إلى رسالة طمأنينة اليوم."
+   },
+   "final": {
+    "id": "80b1216c",
+    "title": "Why Does God Allow Suffering?",
+    "hook": "If God loves us, why do we suffer? It’s a common question when exploring faith.",
+    "version": 1,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "If God loves us, why do we suffer? It’s a common question when exploring faith.",
+      "screen": "If God loves us, why do we suffer?"
+     },
+     {
+      "t": "6-16",
+      "voiceover": "In Islam, hardship isn't a punishment. Just look at Prophet Muhammad. Even as God’s chosen messenger, he faced extreme poverty, rejection, and buried six of his children.",
+      "screen": "Hardship isn't a punishment"
+     },
+     {
+      "t": "16-22",
+      "voiceover": "His life shows that struggles are actually tests meant to elevate us. The Quran tells us directly:",
+      "screen": "Tests meant to elevate us"
+     },
+     {
+      "t": "22-40",
+      "voiceover": "«And We will surely test you with something of fear and hunger and a loss of wealth and lives and fruits, but give good tidings to the patient, Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"»",
+      "screen": "Give good tidings to the patient"
+     },
+     {
+      "t": "40-45",
+      "voiceover": "When facing loss, true patience brings you closer to God. You're never struggling alone.",
+      "screen": "You're never struggling alone"
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة البقرة، الآية 155-156",
+      "usage": "quoted",
+      "text": "And We will surely test you with something of fear and hunger and a loss of wealth and lives and fruits, but give good tidings to the patient, Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"",
+      "sharh": null,
+      "tafsir": [
+       "ولنختبرنكم بشيء يسير من الخوف، ومن الجوع، وبنقص من الأموال بتعسر الحصول عليها، أو ذهابها، ومن الأنفس: بالموت أو الشهادة في سبيل الله، وبنقص من ثمرات النخيل والأعناب والحبوب، بقلَّة ناتجها أو فسادها. وبشِّر -أيها النبي- الصابرين على هذا وأمثاله بما يفرحهم ويَسُرُّهم من حسن العاقبة في الدنيا والآخرة.",
+       "من صفة هؤلاء الصابرين أنهم إذا أصابهم شيء يكرهونه قالوا: إنَّا عبيد مملوكون لله، مدبَّرون بأمره وتصريفه، يفعل بنا ما يشاء، وإنا إليه راجعون بالموت، ثم بالبعث للحساب والجزاء."
+      ]
+     }
+    ],
+    "review": [
+     {
+      "severity": "blocking",
+      "reviewer": "scholarly",
+      "scene": 0,
+      "issue": "حُدد مستوى المحتوى بـ (A)، في حين أن موضوع المقطع يناقش حكمة الابتلاء والمعاناة ويدفع إشكالاً فكرياً شائعاً («Why Does God Allow Suffering?»)، وتناول حكم التشريع وتفسير المفاهيم والإجابة عن الأسئلة الشائعة يندرج ضمن المستوى (B).",
+      "fix": "تعديل حقل content_level من \"A\" إلى \"B\"."
+     },
+     {
+      "severity": "blocking",
+      "reviewer": "meaning",
+      "scene": 0,
+      "issue": "ادعاء تغيّر معناه: النبي ﷺ هو أحب خلق الله إلى الله.. وُصف في النص المترجم بأنه رسول الله المختار (God's chosen messenger) دون التنصيص على كونه أحب خلق الله إليه.",
+      "fix": "أعد الادعاء إلى معناه في النص الأصلي."
+     },
+     {
+      "severity": "blocking",
+      "reviewer": "meaning",
+      "scene": 0,
+      "issue": "ادعاء تغيّر معناه: تحمل النبي ﷺ للابتلاءات (فقد ستة من أبنائه، الجوع، الطرد) كان في سبيل الدعوة وتبليغ التوحيد.. ذكر النص المترجم ما أصابه من فقد وجوع ورفض، لكنه أغفل ذكر غاية ذلك وهي سبيل الدعوة وتبليغ التوحيد.",
+      "fix": "أعد الادعاء إلى معناه في النص الأصلي."
+     },
+     {
+      "severity": "blocking",
+      "reviewer": "meaning",
+      "scene": 0,
+      "issue": "ادعاء أضيف وليس في الأصل: الصبر الحقيقي عند الفقد يقرب العبد إلى الله، والإنسان لا يواجه معاناته بمفرده.. أضاف النص المترجم أن الصبر يقرب إلى الله وأن العبد لا يكابد وحده، وهو معنى لم يذكره النص الأصلي.",
+      "fix": "احذف الادعاء المضاف."
+     },
+     {
+      "severity": "blocking",
+      "reviewer": "scholarly",
+      "scene": 2,
+      "issue": "الجزم بنفي كون المشقة أو المصائب عقوبة بإطلاق («hardship isn't a punishment») غير دقيق شرعاً؛ فالمصائب في الإسلام قد تكون عقوبة وتذكيراً بالذنوب (كما في قوله تعالى: {وَمَا أَصَابَكُم مِّن مُّصِيبَةٍ فَبِمَا كَسَبَتْ أَيْدِيكُمْ})، وقد تكون كفارة للسيئات أو رفعاً للدرجات، ولا يصح نفي ذلك على الإطلاق.",
+      "fix": "تعديل العبارة لتفيد نفي الحصر واللزوم، كأن يُقال: «In Islam, hardship isn't necessarily a punishment» أو «hardship isn't always a punishment»."
+     },
+     {
+      "severity": "suggestion",
+      "reviewer": "meaning",
+      "scene": 0,
+      "issue": "ادعاء في الأصل لم يرد في النسخة الموطّنة: الله يجازي الصابرين أحسن الجزاء.. حُذف وعد مجازاة الله للصابرين بأحسن الجزاء من التعليق الصوتي في النص المترجم.",
+      "fix": "أعده إن كان من مقصود الفيديو."
+     }
+    ],
+    "claims": [
+     {
+      "status": "altered",
+      "claim": "النبي ﷺ هو أحب خلق الله إلى الله.",
+      "note": "وُصف في النص المترجم بأنه رسول الله المختار (God's chosen messenger) دون التنصيص على كونه أحب خلق الله إليه."
+     },
+     {
+      "status": "altered",
+      "claim": "تحمل النبي ﷺ للابتلاءات (فقد ستة من أبنائه، الجوع، الطرد) كان في سبيل الدعوة وتبليغ التوحيد.",
+      "note": "ذكر النص المترجم ما أصابه من فقد وجوع ورفض، لكنه أغفل ذكر غاية ذلك وهي سبيل الدعوة وتبليغ التوحيد."
+     },
+     {
+      "status": "preserved",
+      "claim": "الابتلاء ليس عقوبة أو دليلاً على غضب الله، بل هو تمحيص ورفع للدرجات.",
+      "note": ""
+     },
+     {
+      "status": "preserved",
+      "claim": "ابتلاء الله لعباده بالخوف والجوع ونقص الأموال والأنفس والثمرات، وبشارة الصابرين: «وَلَنَبۡلُوَنَّكُم بِشَيۡءٖ مِّنَ ٱلۡخَوۡفِ وَٱلۡجُوعِ وَنَقۡصٖ مِّنَ ٱلۡأَمۡوَٰلِ وَٱلۡأَنفُسِ وَٱلثَّمَرَٰتِۗ وَبَشِّرِ ٱلصَّٰبِرِينَ».",
+      "note": ""
+     },
+     {
+      "status": "preserved",
+      "claim": "الصابرون يوقنون بأنهم لله وإليه راجعون عند المصيبة.",
+      "note": ""
+     },
+     {
+      "status": "dropped",
+      "claim": "الله يجازي الصابرين أحسن الجزاء.",
+      "note": "حُذف وعد مجازاة الله للصابرين بأحسن الجزاء من التعليق الصوتي في النص المترجم."
+     },
+     {
+      "status": "added",
+      "claim": "الصبر الحقيقي عند الفقد يقرب العبد إلى الله، والإنسان لا يواجه معاناته بمفرده.",
+      "note": "أضاف النص المترجم أن الصبر يقرب إلى الله وأن العبد لا يكابد وحده، وهو معنى لم يذكره النص الأصلي."
+     }
+    ],
+    "unverified": [],
+    "approved": false,
+    "cta": "Share this with someone who needs a reminder of hope today."
+   },
+   "story": null,
+   "videos": [],
+   "timeline": [
+    "طلب: لماذا يبتلي الله الناس؟ شباب مسلمون 18-30، عربية، Shorts وTikTok، 45 ث",
+    "الفكرة الثالثة: آيتا البقرة 155-156 موثّقتان، مع تفسير الميسر",
+    "السيناريو العربي، ثم توطينه لشباب بريطانيين يتعرفون على الإسلام (ترجمة معتمدة للآية)",
+    "المراجعة الأولى للنسخة الإنجليزية: نص سلس، لكن مراجع المعنى وجد ادعاءين تغيّرا وواحدا حُذف وواحدا أُضيف، والمراجع العلمي أمسك جزما شرعيا خاطئا",
+    "أربع جولات تصحيح ومراجعة: صارت 4 من 5 ادعاءات محفوظة، والمتبقي خلاف حقيقي بين الأمانة للأصل («الابتلاء ليس عقوبة») والدقة الشرعية («ليس دائما عقوبة»)، وموضعه الصحيح هو الأصل العربي",
+    "النسخة تنتظر توقيع مراجع شرعي ومراجع لغوي بالاسم؛ لا يُصيَّر فيديو موطّن قبل ذلك. هذا هو التصميم."
+   ],
+   "latest": {
+    "id": "bf0032b5",
+    "title": "Why Does God Allow Suffering?",
+    "hook": "If God loves us, why do we suffer? It’s a common question when exploring faith.",
+    "version": 5,
+    "scenes": [
+     {
+      "t": "0-6",
+      "voiceover": "If God loves us, why do we suffer? It’s a common question when exploring faith.",
+      "screen": "If God loves us, why do we suffer?"
+     },
+     {
+      "t": "6-16",
+      "voiceover": "In Islam, hardship isn't always a punishment. Look at Prophet Muhammad. As God’s most beloved creation, he endured poverty and rejection for spreading the message of Tawhid, the Oneness of God, and bore the heartbreak of losing six of his children.",
+      "screen": "Hardship isn't always a punishment"
+     },
+     {
+      "t": "16-22",
+      "voiceover": "His life shows that struggles are actually tests meant to elevate us. The Quran tells us directly:",
+      "screen": "Tests meant to elevate us"
+     },
+     {
+      "t": "22-40",
+      "voiceover": "«And We will surely test you with something of fear and hunger and a loss of wealth and lives and fruits, but give good tidings to the patient, Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"»",
+      "screen": "Give good tidings to the patient"
+     },
+     {
+      "t": "40-45",
+      "voiceover": "For this true patience, God promises believers the best reward.",
+      "screen": "The best reward"
+     }
+    ],
+    "references": [
+     {
+      "source": "سورة البقرة، الآية 155-156",
+      "usage": "quoted",
+      "text": "And We will surely test you with something of fear and hunger and a loss of wealth and lives and fruits, but give good tidings to the patient, Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"",
+      "sharh": null,
+      "tafsir": [
+       "ولنختبرنكم بشيء يسير من الخوف، ومن الجوع، وبنقص من الأموال بتعسر الحصول عليها، أو ذهابها، ومن الأنفس: بالموت أو الشهادة في سبيل الله، وبنقص من ثمرات النخيل والأعناب والحبوب، بقلَّة ناتجها أو فسادها. وبشِّر -أيها النبي- الصابرين على هذا وأمثاله بما يفرحهم ويَسُرُّهم من حسن العاقبة في الدنيا والآخرة.",
+       "من صفة هؤلاء الصابرين أنهم إذا أصابهم شيء يكرهونه قالوا: إنَّا عبيد مملوكون لله، مدبَّرون بأمره وتصريفه، يفعل بنا ما يشاء، وإنا إليه راجعون بالموت، ثم بالبعث للحساب والجزاء."
+      ]
+     }
+    ],
+    "review": [
+     {
+      "severity": "blocking",
+      "reviewer": "meaning",
+      "scene": 0,
+      "issue": "ادعاء تغيّر معناه: الابتلاء ليس عقوبة بل هو طريق اصطفاء ورفع للدرجات. في النص الأصلي نفي جازم لكون الابتلاء عقوبة، بينما في النص المترجم قُيّد بأنه «ليس دائماً عقوبة» (isn't always a punishment).",
+      "fix": "أعد الادعاء إلى معناه في النص الأصلي."
+     },
+     {
+      "severity": "suggestion",
+      "reviewer": "scholarly",
+      "scene": 0,
+      "issue": "تم تصنيف المحتوى بمستوى (A)، في حين أن النص يناقش مسألة فكرية وتساؤلاً شائعاً حول الحكمة من الابتلاء والمعاناة، وهو ما يناسب المستوى (B) الخاص بالشرح والتعليل وتوضيح المفاهيم.",
+      "fix": "تعديل مستوى المحتوى (content_level) ليصبح (B) بدلاً من (A)."
+     }
+    ],
+    "claims": [
+     {
+      "status": "preserved",
+      "claim": "النبي محمد ﷺ هو أحب خلق الله إليه",
+      "note": ""
+     },
+     {
+      "status": "preserved",
+      "claim": "النبي ﷺ تكبد مشاق الجوع والطرد وفقد ستة من أبنائه في سبيل تبليغ التوحيد والدعوة",
+      "note": ""
+     },
+     {
+      "status": "altered",
+      "claim": "الابتلاء ليس عقوبة بل هو طريق اصطفاء ورفع للدرجات",
+      "note": "في النص الأصلي نفي جازم لكون الابتلاء عقوبة، بينما في النص المترجم قُيّد بأنه «ليس دائماً عقوبة» (isn't always a punishment)."
+     },
+     {
+      "status": "preserved",
+      "claim": "ابتلاء الناس بالخوف والجوع ونقص الأموال والأنفس والثمرات واقع، وبشارة الله للصابرين",
+      "note": ""
+     },
+     {
+      "status": "preserved",
+      "claim": "الصابرون يوقنون بأنهم لله وإليه راجعون والله يجزيهم أحسن الجزاء",
+      "note": ""
+     }
+    ],
+    "unverified": [
+     "Prophet Muhammad is the most beloved creation to God.",
+     "Prophet Muhammad endured poverty and rejection for spreading the message of Tawhid, and bore the heartbreak of losing six of his children."
+    ],
+    "approved": false,
+    "cta": "Share this with someone who needs a reminder of hope today."
+   }
+  },
+  {
    "id": "kids",
    "title": "حلقة أطفال: صندوق المشاركة السحري",
    "project": "9cd0adb25aa042a1824cf21fc6d7c4ea",
@@ -344,719 +1152,6 @@
     "تصحيح في نسخة جديدة، ومراجعة ثانية بلا ملاحظات، واعتماد صانع المحتوى",
     "ثلاثة فيديوهات: القصة المصورة والسبورة وإعلان الأهل"
    ]
-  },
-  {
-   "id": "adults",
-   "title": "للكبار: لماذا يبتلي الله الناس؟ ثم توطينه للإنجليزية",
-   "project": "b9a85c8e81ed429882428d892a80fdca",
-   "script": "80b1216c",
-   "brief": {
-    "idea": "لماذا يبتلي الله الناس؟ الصبر عند الشدة",
-    "audience": "شباب مسلمون (18-30)",
-    "language": "ar",
-    "knowledge": "familiar",
-    "tone": null,
-    "platforms": [
-     "youtube_shorts",
-     "tiktok"
-    ],
-    "duration": 45
-   },
-   "ideas": [
-    {
-     "title": "الابتلاء وتكفير السيئات",
-     "hook": "هل فكرت يوما أن المشكلة المزعجة التي تمر بها الآن، هي في الحقيقة عملية تنظيف لصحيفتك؟",
-     "evidence": [
-      "صحيح البخاري، حديث رقم 5641",
-      "صحيح البخاري، حديث رقم 5642"
-     ]
-    },
-    {
-     "title": "قاعدة الصدمة الأولى",
-     "hook": "يظهر صانع المحتوى وهو يمسك هاتفه بصدمة وكأنه تلقى خبرا سيئا، ثم يقول: ردة فعلك في أول ثانية، هي التي تحدد كل شيء.",
-     "evidence": [
-      "صحيح البخاري، حديث رقم 1283",
-      "صحيح البخاري، حديث رقم 1302"
-     ]
-    },
-    {
-     "title": "أحباء الله والابتلاء",
-     "hook": "لو كان الابتلاء دليلا على كره الله للعبد، فكيف تفسر أن أحب خلق الله إليه عانى أكثر منا جميعا؟",
-     "evidence": [
-      "سورة البقرة، الآية 155-156"
-     ]
-    }
-   ],
-   "chosen": 3,
-   "first": {
-    "id": "45c4507a",
-    "title": "أحباء الله والابتلاء",
-    "hook": "لو كان الابتلاء دليلاً على غضب الله، فكيف تفسر أن أحب خلق الله إليه عانى أكثر منا جميعاً؟",
-    "version": 1,
-    "scenes": [
-     {
-      "t": "0-6",
-      "voiceover": "لو كان الابتلاء دليلاً على غضب الله، فكيف تفسر أن أحب خلق الله إليه عانى أكثر منا جميعاً؟",
-      "screen": "هل الابتلاء غضب؟"
-     },
-     {
-      "t": "6-15",
-      "voiceover": "النبي ﷺ فقد ستة من أبنائه في حياته.. طُرد، جاع، وتكبد المشاق في سبيل الدعوة وتبليغ التوحيد.",
-      "screen": "عانى في سبيل الدعوة"
-     },
-     {
-      "t": "15-22",
-      "voiceover": "مقام النبوة لم يمنع عنه الألم، ليعلمنا أن الابتلاء ليس عقوبة، بل هو طريق اصطفاء ورفع للدرجات.",
-      "screen": "طريق اصطفاء"
-     },
-     {
-      "t": "22-33",
-      "voiceover": "الله يختبرنا بأنواع من الفقد، لكنه وعد الصابرين ببشارة عظيمة: «وَلَنَبۡلُوَنَّكُم بِشَيۡءٖ مِّنَ ٱلۡخَوۡفِ وَٱلۡجُوعِ وَنَقۡصٖ مِّنَ ٱلۡأَمۡوَٰلِ وَٱلۡأَنفُسِ وَٱلثَّمَرَٰتِۗ وَبَشِّرِ ٱلصَّٰبِرِينَ»",
-      "screen": "وبشر الصابرين"
-     },
-     {
-      "t": "33-45",
-      "voiceover": "هؤلاء الصابرون يوقنون أنهم لله وإليه راجعون، فيجازيهم أحسن الجزاء. فمهما كان بلاؤك اليوم.. اصبر واطمئن.",
-      "screen": "مهما كان بلاؤك.. اصبر واطمئن"
-     }
-    ],
-    "references": [
-     {
-      "source": "سورة البقرة، الآية 155-156",
-      "usage": "quoted",
-      "text": "وَلَنَبۡلُوَنَّكُم بِشَيۡءٖ مِّنَ ٱلۡخَوۡفِ وَٱلۡجُوعِ وَنَقۡصٖ مِّنَ ٱلۡأَمۡوَٰلِ وَٱلۡأَنفُسِ وَٱلثَّمَرَٰتِۗ وَبَشِّرِ ٱلصَّٰبِرِينَ ۝ ٱلَّذِينَ إِذَآ أَصَٰبَتۡهُم مُّصِيبَةٞ قَالُوٓاْ إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ",
-      "sharh": null,
-      "tafsir": [
-       "ولنختبرنكم بشيء يسير من الخوف، ومن الجوع، وبنقص من الأموال بتعسر الحصول عليها، أو ذهابها، ومن الأنفس: بالموت أو الشهادة في سبيل الله، وبنقص من ثمرات النخيل والأعناب والحبوب، بقلَّة ناتجها أو فسادها. وبشِّر -أيها النبي- الصابرين على هذا وأمثاله بما يفرحهم ويَسُرُّهم من حسن العاقبة في الدنيا والآخرة.",
-       "من صفة هؤلاء الصابرين أنهم إذا أصابهم شيء يكرهونه قالوا: إنَّا عبيد مملوكون لله، مدبَّرون بأمره وتصريفه، يفعل بنا ما يشاء، وإنا إليه راجعون بالموت، ثم بالبعث للحساب والجزاء."
-      ]
-     }
-    ],
-    "review": [
-     {
-      "severity": "blocking",
-      "reviewer": "scholarly",
-      "scene": 5,
-      "issue": "تمت صياغة معنى الآية 156 من سورة البقرة وألفاظها («إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ») خارج علامتي التنصيص في عبارة «يوقنون أنهم لله وإليه راجعون»، والأصل ألا يُذكر كلام القرآن أو معناه إلا مقتبساً بنصه الحرفي داخل «».",
-      "fix": "إيراد الآية الكريمة بنصها داخل علامتي التنصيص «ٱلَّذِينَ إِذَآ أَصَٰبَتۡهُم مُّصِيبَةٞ قَالُوٓاْ إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ» أو الاقتصار على عبارة التفسير المعتمدة دون مضاهاة اللفظ القرآني."
-     },
-     {
-      "severity": "suggestion",
-      "reviewer": "scholarly",
-      "scene": 0,
-      "issue": "حُدد مستوى المحتوى بـ (A)، بينما يناقش المقطع الحكمة من الابتلاء ويعالج مفهوماً خاطئاً شائعاً (كون الابتلاء دليلاً على غضب الله)، وهو ما يوافق المستوى (B) المعني بالشرح والتعليل ومناقشة المفاهيم والتساؤلات.",
-      "fix": "تعديل مستوى المحتوى (content_level) ليصبح (B) بدلاً من (A)."
-     }
-    ],
-    "claims": [],
-    "unverified": [],
-    "approved": false,
-    "cta": "شارك هذا المقطع لمن يحتاج إلى رسالة طمأنينة اليوم."
-   },
-   "final": {
-    "id": "80b1216c",
-    "title": "Why Does God Allow Suffering?",
-    "hook": "If God loves us, why do we suffer? It’s a common question when exploring faith.",
-    "version": 1,
-    "scenes": [
-     {
-      "t": "0-6",
-      "voiceover": "If God loves us, why do we suffer? It’s a common question when exploring faith.",
-      "screen": "If God loves us, why do we suffer?"
-     },
-     {
-      "t": "6-16",
-      "voiceover": "In Islam, hardship isn't a punishment. Just look at Prophet Muhammad. Even as God’s chosen messenger, he faced extreme poverty, rejection, and buried six of his children.",
-      "screen": "Hardship isn't a punishment"
-     },
-     {
-      "t": "16-22",
-      "voiceover": "His life shows that struggles are actually tests meant to elevate us. The Quran tells us directly:",
-      "screen": "Tests meant to elevate us"
-     },
-     {
-      "t": "22-40",
-      "voiceover": "«And We will surely test you with something of fear and hunger and a loss of wealth and lives and fruits, but give good tidings to the patient, Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"»",
-      "screen": "Give good tidings to the patient"
-     },
-     {
-      "t": "40-45",
-      "voiceover": "When facing loss, true patience brings you closer to God. You're never struggling alone.",
-      "screen": "You're never struggling alone"
-     }
-    ],
-    "references": [
-     {
-      "source": "سورة البقرة، الآية 155-156",
-      "usage": "quoted",
-      "text": "And We will surely test you with something of fear and hunger and a loss of wealth and lives and fruits, but give good tidings to the patient, Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"",
-      "sharh": null,
-      "tafsir": [
-       "ولنختبرنكم بشيء يسير من الخوف، ومن الجوع، وبنقص من الأموال بتعسر الحصول عليها، أو ذهابها، ومن الأنفس: بالموت أو الشهادة في سبيل الله، وبنقص من ثمرات النخيل والأعناب والحبوب، بقلَّة ناتجها أو فسادها. وبشِّر -أيها النبي- الصابرين على هذا وأمثاله بما يفرحهم ويَسُرُّهم من حسن العاقبة في الدنيا والآخرة.",
-       "من صفة هؤلاء الصابرين أنهم إذا أصابهم شيء يكرهونه قالوا: إنَّا عبيد مملوكون لله، مدبَّرون بأمره وتصريفه، يفعل بنا ما يشاء، وإنا إليه راجعون بالموت، ثم بالبعث للحساب والجزاء."
-      ]
-     }
-    ],
-    "review": [
-     {
-      "severity": "blocking",
-      "reviewer": "scholarly",
-      "scene": 0,
-      "issue": "حُدد مستوى المحتوى بـ (A)، في حين أن موضوع المقطع يناقش حكمة الابتلاء والمعاناة ويدفع إشكالاً فكرياً شائعاً («Why Does God Allow Suffering?»)، وتناول حكم التشريع وتفسير المفاهيم والإجابة عن الأسئلة الشائعة يندرج ضمن المستوى (B).",
-      "fix": "تعديل حقل content_level من \"A\" إلى \"B\"."
-     },
-     {
-      "severity": "blocking",
-      "reviewer": "meaning",
-      "scene": 0,
-      "issue": "ادعاء تغيّر معناه: النبي ﷺ هو أحب خلق الله إلى الله.. وُصف في النص المترجم بأنه رسول الله المختار (God's chosen messenger) دون التنصيص على كونه أحب خلق الله إليه.",
-      "fix": "أعد الادعاء إلى معناه في النص الأصلي."
-     },
-     {
-      "severity": "blocking",
-      "reviewer": "meaning",
-      "scene": 0,
-      "issue": "ادعاء تغيّر معناه: تحمل النبي ﷺ للابتلاءات (فقد ستة من أبنائه، الجوع، الطرد) كان في سبيل الدعوة وتبليغ التوحيد.. ذكر النص المترجم ما أصابه من فقد وجوع ورفض، لكنه أغفل ذكر غاية ذلك وهي سبيل الدعوة وتبليغ التوحيد.",
-      "fix": "أعد الادعاء إلى معناه في النص الأصلي."
-     },
-     {
-      "severity": "blocking",
-      "reviewer": "meaning",
-      "scene": 0,
-      "issue": "ادعاء أضيف وليس في الأصل: الصبر الحقيقي عند الفقد يقرب العبد إلى الله، والإنسان لا يواجه معاناته بمفرده.. أضاف النص المترجم أن الصبر يقرب إلى الله وأن العبد لا يكابد وحده، وهو معنى لم يذكره النص الأصلي.",
-      "fix": "احذف الادعاء المضاف."
-     },
-     {
-      "severity": "blocking",
-      "reviewer": "scholarly",
-      "scene": 2,
-      "issue": "الجزم بنفي كون المشقة أو المصائب عقوبة بإطلاق («hardship isn't a punishment») غير دقيق شرعاً؛ فالمصائب في الإسلام قد تكون عقوبة وتذكيراً بالذنوب (كما في قوله تعالى: {وَمَا أَصَابَكُم مِّن مُّصِيبَةٍ فَبِمَا كَسَبَتْ أَيْدِيكُمْ})، وقد تكون كفارة للسيئات أو رفعاً للدرجات، ولا يصح نفي ذلك على الإطلاق.",
-      "fix": "تعديل العبارة لتفيد نفي الحصر واللزوم، كأن يُقال: «In Islam, hardship isn't necessarily a punishment» أو «hardship isn't always a punishment»."
-     },
-     {
-      "severity": "suggestion",
-      "reviewer": "meaning",
-      "scene": 0,
-      "issue": "ادعاء في الأصل لم يرد في النسخة الموطّنة: الله يجازي الصابرين أحسن الجزاء.. حُذف وعد مجازاة الله للصابرين بأحسن الجزاء من التعليق الصوتي في النص المترجم.",
-      "fix": "أعده إن كان من مقصود الفيديو."
-     }
-    ],
-    "claims": [
-     {
-      "status": "altered",
-      "claim": "النبي ﷺ هو أحب خلق الله إلى الله.",
-      "note": "وُصف في النص المترجم بأنه رسول الله المختار (God's chosen messenger) دون التنصيص على كونه أحب خلق الله إليه."
-     },
-     {
-      "status": "altered",
-      "claim": "تحمل النبي ﷺ للابتلاءات (فقد ستة من أبنائه، الجوع، الطرد) كان في سبيل الدعوة وتبليغ التوحيد.",
-      "note": "ذكر النص المترجم ما أصابه من فقد وجوع ورفض، لكنه أغفل ذكر غاية ذلك وهي سبيل الدعوة وتبليغ التوحيد."
-     },
-     {
-      "status": "preserved",
-      "claim": "الابتلاء ليس عقوبة أو دليلاً على غضب الله، بل هو تمحيص ورفع للدرجات.",
-      "note": ""
-     },
-     {
-      "status": "preserved",
-      "claim": "ابتلاء الله لعباده بالخوف والجوع ونقص الأموال والأنفس والثمرات، وبشارة الصابرين: «وَلَنَبۡلُوَنَّكُم بِشَيۡءٖ مِّنَ ٱلۡخَوۡفِ وَٱلۡجُوعِ وَنَقۡصٖ مِّنَ ٱلۡأَمۡوَٰلِ وَٱلۡأَنفُسِ وَٱلثَّمَرَٰتِۗ وَبَشِّرِ ٱلصَّٰبِرِينَ».",
-      "note": ""
-     },
-     {
-      "status": "preserved",
-      "claim": "الصابرون يوقنون بأنهم لله وإليه راجعون عند المصيبة.",
-      "note": ""
-     },
-     {
-      "status": "dropped",
-      "claim": "الله يجازي الصابرين أحسن الجزاء.",
-      "note": "حُذف وعد مجازاة الله للصابرين بأحسن الجزاء من التعليق الصوتي في النص المترجم."
-     },
-     {
-      "status": "added",
-      "claim": "الصبر الحقيقي عند الفقد يقرب العبد إلى الله، والإنسان لا يواجه معاناته بمفرده.",
-      "note": "أضاف النص المترجم أن الصبر يقرب إلى الله وأن العبد لا يكابد وحده، وهو معنى لم يذكره النص الأصلي."
-     }
-    ],
-    "unverified": [],
-    "approved": false,
-    "cta": "Share this with someone who needs a reminder of hope today."
-   },
-   "story": null,
-   "videos": [],
-   "timeline": [
-    "طلب: لماذا يبتلي الله الناس؟ شباب مسلمون 18-30، عربية، Shorts وTikTok، 45 ث",
-    "الفكرة الثالثة: آيتا البقرة 155-156 موثّقتان، مع تفسير الميسر",
-    "السيناريو العربي، ثم توطينه لشباب بريطانيين يتعرفون على الإسلام (ترجمة معتمدة للآية)",
-    "المراجعة: النص الإنجليزي سلس، لكن مراجع المعنى وجد ادعاءين تغيّرا وواحدا حُذف وواحدا أُضيف، والمراجع العلمي أمسك جزما شرعيا خاطئا",
-    "قاموس المصطلحات أظهر سقوط التوحيد والنبوة والدعوة من النسخة الموطّنة"
-   ]
-  },
-  {
-   "id": "reels",
-   "title": "للكبار على Reels وTikTok: إن مع العسر يسرا",
-   "project": "4ba1bab04b3e41baba2382e51a332815",
-   "script": "25cf5193",
-   "brief": {
-    "idea": "إن مع العسر يسرا: رسالة أمل لمن يمر بضيق",
-    "audience": "شباب مسلمون (18-30)",
-    "language": "ar",
-    "knowledge": "familiar",
-    "tone": "هادئ وتأملي",
-    "platforms": [
-     "instagram_reels",
-     "tiktok"
-    ],
-    "duration": 30
-   },
-   "ideas": [
-    {
-     "title": "السر اللغوي في سورة الشرح",
-     "hook": "هل تساءلت يوما لماذا جاءت كلمة العسر معرفة بأل، بينما جاءت يسرا نكرة؟",
-     "evidence": [
-      "سورة الشرح، الآية 5-6"
-     ]
-    },
-    {
-     "title": "عبادة انتظار الفرج",
-     "hook": "كلنا نمر بأيام نشعر فيها بضيق شديد، لكن هل فكرت كيف تتصرف في لحظات الانتظار نفسها قبل أن يأتي اليسر؟",
-     "evidence": []
-    },
-    {
-     "title": "المواساة الربانية للنبي",
-     "hook": "تخيل أن تكون محاربا من أقرب الناس إليك، والهموم تحيط بك. هكذا كان حال النبي قبل أن تنزل هذه الآيات.",
-     "evidence": []
-    }
-   ],
-   "chosen": 1,
-   "first": {
-    "id": "e19d80d2",
-    "title": "السر اللغوي في سورة الشرح",
-    "hook": "هل تساءلت يوما لماذا جاءت كلمة العسر معرفة بأل، بينما جاءت يسرا نكرة؟",
-    "version": 1,
-    "scenes": [
-     {
-      "t": "0-6",
-      "voiceover": "لماذا جاءت كلمة العسر معرفة بـ (أل)، بينما جاءت كلمة (يسرا) نكرة؟",
-      "screen": "العسر المعرفة.. ويسرا النكرة"
-     },
-     {
-      "t": "6-15",
-      "voiceover": "تأمل هذا الوعد الإلهي: «فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا»",
-      "screen": "الوعد الإلهي"
-     },
-     {
-      "t": "15-23",
-      "voiceover": "في اللغة، تكرار الكلمة المعرفة يعني أنها شيء واحد، أما النكرة فتفيد التعدد والاتساع.",
-      "screen": "عسر واحد.. يسر متعدد"
-     },
-     {
-      "t": "23-30",
-      "voiceover": "لذلك، مهما اشتد بك الضيق، تذكر أن مع هذا الضيق فرجا واسعا من الله. فاطمئن.",
-      "screen": "مع الضيق فرجا"
-     }
-    ],
-    "references": [
-     {
-      "source": "سورة الشرح، الآية 5-6",
-      "usage": "quoted",
-      "text": "فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا ۝ إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا",
-      "sharh": null,
-      "tafsir": [
-       "فلا يَثْنِكَ أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا.",
-       "فلا يثنك أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا."
-      ]
-     }
-    ],
-    "review": [
-     {
-      "severity": "blocking",
-      "reviewer": "scholarly",
-      "scene": 3,
-      "issue": "تفسير الآية بأن تكرار المعرفة يعني أنها شيء واحد وأن النكرة تفيد التعدد والاتساع هو شرح يتجاوز نص التفسير المعتمد المرفق (تفسير الميسر)، حيث لم يرد فيه هذا التوجيه اللغوي وإنما اقتصر على بيان أن مع الضيق فرجاً.",
-      "fix": "الالتزام بما ورد في التفسير المرفق من الدلالة على أن مع الضيق فرجاً وتيسيراً، وحذف الشرح اللغوي غير المذكور في التفسير، وتعديل مقدمة المقطع وعنوانه تبعاً لذلك."
-     }
-    ],
-    "claims": [],
-    "unverified": [],
-    "approved": false,
-    "cta": "شارك هذا المقطع لمن يحتاج إلى رسالة طمأنينة اليوم."
-   },
-   "final": {
-    "id": "25cf5193",
-    "title": "وعد إلهي بالطمأنينة",
-    "hook": "هل تشعر أحيانا أن الصعوبات تحيط بك، وأن الضيق يشتد عليك؟",
-    "version": 2,
-    "scenes": [
-     {
-      "t": "0-6",
-      "voiceover": "هل تشعر أحيانا أن الصعوبات تحيط بك، وأن الضيق يشتد عليك؟",
-      "screen": "هل يشتد عليك الضيق؟"
-     },
-     {
-      "t": "6-15",
-      "voiceover": "تأمل هذا الوعد الإلهي العظيم: «فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا»",
-      "screen": "الوعد الإلهي"
-     },
-     {
-      "t": "15-23",
-      "voiceover": "هذا وعد من الله بألا تدع الأذى أو الصعوبات توقفك، لأن مع هذا الضيق فرجا وتيسيرا.",
-      "screen": "مع الضيق فرجا"
-     },
-     {
-      "t": "23-30",
-      "voiceover": "ومهما اشتدت الأزمات، فإن الله يؤكد لك أن الفرج قادم لا محالة. فاطمئن.",
-      "screen": "الفرج قادم.. فاطمئن"
-     }
-    ],
-    "references": [
-     {
-      "source": "سورة الشرح، الآية 5-6",
-      "usage": "quoted",
-      "text": "فَإِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرًا ۝ إِنَّ مَعَ ٱلۡعُسۡرِ يُسۡرٗا",
-      "sharh": null,
-      "tafsir": [
-       "فلا يَثْنِكَ أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا.",
-       "فلا يثنك أذى أعدائك عن نشر الرسالة؛ فإن مع الضيق فرجًا، إن مع الضيق فرجًا."
-      ]
-     }
-    ],
-    "review": [],
-    "claims": [],
-    "unverified": [],
-    "approved": true,
-    "cta": "شارك هذا المقطع لمن يحتاج إلى رسالة طمأنينة اليوم."
-   },
-   "story": null,
-   "videos": [
-    {
-     "template": "الترجمة المتحركة",
-     "id": "captions",
-     "url": "/media/videos/9ac6575732d1.mp4",
-     "seconds": 36.82,
-     "images": 1,
-     "clips": 3,
-     "notes": [],
-     "aspect": "9:16",
-     "example": "للكبار على Reels وTikTok: إن مع العسر يسرا"
-    },
-    {
-     "template": "الزخرفة الهندسية",
-     "id": "geo",
-     "url": "/media/videos/029249f9073a.mp4",
-     "seconds": 36.82,
-     "images": 0,
-     "clips": 0,
-     "notes": [],
-     "aspect": "9:16",
-     "example": "للكبار على Reels وTikTok: إن مع العسر يسرا"
-    }
-   ],
-   "timeline": [
-    "طلب: إن مع العسر يسرا، شباب 18-30، أسلوب هادئ وتأملي، Reels وTikTok، 30 ث",
-    "الفكرة الأولى: آيتا الشرح 5-6 موثّقتان مع تفسير الميسر",
-    "المراجعة الآلية أمسكت ملاحظة مانعة: شرح لغوي للآية (تكرار المعرفة والنكرة) يتجاوز التفسير المعتمد",
-    "تصحيح في نسخة جديدة، مراجعة ثانية بلا ملاحظات، اعتماد",
-    "فيديوهان عموديان: الترجمة المتحركة والزخرفة الهندسية، بتلاوة حقيقية للآية"
-   ]
-  },
-  {
-   "id": "english",
-   "title": "بالإنجليزية لشباب يتعرفون على الإسلام: Why does God allow hardship?",
-   "project": "6daf2c87dc3d425d9c137890445c924d",
-   "script": "3c5adc9e",
-   "brief": {
-    "idea": "Why does God allow hardship? Hope for anyone going through a hard time",
-    "audience": "Young people in the UK exploring Islam",
-    "language": "en",
-    "knowledge": "new",
-    "tone": null,
-    "platforms": [
-     "instagram_reels",
-     "tiktok"
-    ],
-    "duration": 30
-   },
-   "ideas": [
-    {
-     "title": "The Spiritual Workout",
-     "hook": "Why would a loving God let you struggle? Think of it like going to the gym.",
-     "evidence": [
-      "صحيح البخاري، حديث رقم 7466",
-      "صحيح البخاري، حديث رقم 5644"
-     ]
-    },
-    {
-     "title": "The Missing Pixel",
-     "hook": "Have you ever missed a train, felt completely ruined, and then realized it saved you from a disaster?",
-     "evidence": [
-      "سورة البقرة، الآية 216"
-     ]
-    },
-    {
-     "title": "The Greatest Were Tested",
-     "hook": "If being a good person meant life would be easy, then the Prophets would have had zero problems.",
-     "evidence": []
-    }
-   ],
-   "chosen": 2,
-   "first": {
-    "id": "3c5adc9e",
-    "title": "The Missing Pixel",
-    "hook": "Ever felt completely ruined after missing an opportunity?",
-    "version": 1,
-    "scenes": [
-     {
-      "t": "0-4",
-      "voiceover": "Ever felt completely ruined after missing an opportunity?",
-      "screen": "Ever felt ruined?"
-     },
-     {
-      "t": "4-9",
-      "voiceover": "We only see one pixel. The Creator sees the entire picture.",
-      "screen": "The Creator sees the entire picture."
-     },
-     {
-      "t": "9-26",
-      "voiceover": "The Quran reminds us: «Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.»",
-      "screen": "But perhaps you hate a thing and it is good for you..."
-     },
-     {
-      "t": "26-30",
-      "voiceover": "That painful loss could actually be your ultimate protection.",
-      "screen": "Your ultimate protection."
-     }
-    ],
-    "references": [
-     {
-      "source": "سورة البقرة، الآية 216",
-      "usage": "quoted",
-      "text": "Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.",
-      "sharh": null,
-      "tafsir": [
-       "فرض الله عليكم -أيها المؤمنون- قتال الكفار، والقتال مكروه لكم من جهة الطبع; لمشقته وكثرة مخاطره، وقد تكرهون شيئًا وهو في حقيقته خير لكم، وقد تحبون شيئًا لما فيه من الراحة أو اللذة العاجلة، وهو شر لكم. والله تعالى يعلم ما هو خير لكم، وأنتم لا تعلمون ذلك. فبادروا إلى الجهاد في سبيله."
-      ]
-     }
-    ],
-    "review": [],
-    "claims": [],
-    "unverified": [],
-    "approved": true,
-    "cta": "Reflect on a past hardship that turned out to be a hidden blessing, and trust the bigger picture."
-   },
-   "final": {
-    "id": "3c5adc9e",
-    "title": "The Missing Pixel",
-    "hook": "Ever felt completely ruined after missing an opportunity?",
-    "version": 1,
-    "scenes": [
-     {
-      "t": "0-4",
-      "voiceover": "Ever felt completely ruined after missing an opportunity?",
-      "screen": "Ever felt ruined?"
-     },
-     {
-      "t": "4-9",
-      "voiceover": "We only see one pixel. The Creator sees the entire picture.",
-      "screen": "The Creator sees the entire picture."
-     },
-     {
-      "t": "9-26",
-      "voiceover": "The Quran reminds us: «Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.»",
-      "screen": "But perhaps you hate a thing and it is good for you..."
-     },
-     {
-      "t": "26-30",
-      "voiceover": "That painful loss could actually be your ultimate protection.",
-      "screen": "Your ultimate protection."
-     }
-    ],
-    "references": [
-     {
-      "source": "سورة البقرة، الآية 216",
-      "usage": "quoted",
-      "text": "Battle has been enjoined upon you while it is hateful to you. But perhaps you hate a thing and it is good for you; and perhaps you love a thing and it is bad for you. And Allāh knows, while you know not.",
-      "sharh": null,
-      "tafsir": [
-       "فرض الله عليكم -أيها المؤمنون- قتال الكفار، والقتال مكروه لكم من جهة الطبع; لمشقته وكثرة مخاطره، وقد تكرهون شيئًا وهو في حقيقته خير لكم، وقد تحبون شيئًا لما فيه من الراحة أو اللذة العاجلة، وهو شر لكم. والله تعالى يعلم ما هو خير لكم، وأنتم لا تعلمون ذلك. فبادروا إلى الجهاد في سبيله."
-      ]
-     }
-    ],
-    "review": [],
-    "claims": [],
-    "unverified": [],
-    "approved": true,
-    "cta": "Reflect on a past hardship that turned out to be a hidden blessing, and trust the bigger picture."
-   },
-   "story": null,
-   "videos": [
-    {
-     "template": "الترجمة المتحركة",
-     "id": "captions",
-     "url": "/media/videos/e5f5bde9e559.mp4",
-     "seconds": 49.28,
-     "images": 0,
-     "clips": 4,
-     "notes": [],
-     "aspect": "9:16",
-     "example": "بالإنجليزية لمن يتعرف على الإسلام"
-    }
-   ],
-   "timeline": [
-    "طلب بالإنجليزية: شباب في بريطانيا يتعرفون على الإسلام، معرفة = جديد، Reels وTikTok، 30 ث",
-    "ثلاث أفكار؛ الثالثة طلبت حديث «أشد الناس بلاء الأنبياء» فلم يوجد في الصحيحين فعُلِّم غير موثّق ولم يُستعمل",
-    "الفكرة الثانية: آية البقرة 216 بترجمة Saheeh International المعتمدة، لا ترجمة النموذج",
-    "السيناريو يبدأ من سؤال يطرحه هذا الجمهور («Ever felt ruined after missing an opportunity?») ويقدّم المصطلح بعد المعنى",
-    "المراجعة بلا ملاحظات، اعتماد، ريلز بالترجمة المتحركة بالرسوم الجديدة (عاصفة، آية، قفل)"
-   ]
-  },
-  {
-   "id": "darija",
-   "title": "بالدارجة الجزائرية لعامة الناس: الصدق في البيع والشراء",
-   "project": "57c5349aec674d3183ac9bcff76eee26",
-   "script": "2eb2c429",
-   "brief": {
-    "idea": "الصدق في البيع والشراء",
-    "audience": "عامة الناس، الجزائر",
-    "language": "ar",
-    "knowledge": "familiar",
-    "tone": "خفيف وقريب",
-    "platforms": [
-     "tiktok",
-     "facebook_reels"
-    ],
-    "duration": 30
-   },
-   "ideas": [
-    {
-     "title": "القفازة ولا البركة؟",
-     "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
-     "evidence": [
-      "صحيح البخاري، حديث رقم 2110",
-      "صحيح البخاري، حديث رقم 2082"
-     ]
-    },
-    {
-     "title": "قصة صبرة الطعام",
-     "hook": "تخيل لوكان رسول الله ﷺ يجي يفيريفي السلعة ديالك في المارشي.. واش راح يلقى؟",
-     "evidence": [
-      "صحيح مسلم، حديث رقم 102",
-      "صحيح مسلم، حديث رقم 101"
-     ]
-    },
-    {
-     "title": "بيع حلال في واد كنيس",
-     "hook": "رايح تبيع تليفونك ولا الميكرو ديالك في واد كنيس؟ أرواح نعطيلك 3 خطوات باش دراهمك يكونو حلال.",
-     "evidence": [
-      "سورة النساء، الآية 29"
-     ]
-    }
-   ],
-   "chosen": 1,
-   "first": {
-    "id": "2eb2c429",
-    "title": "القفازة ولا البركة؟",
-    "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
-    "version": 1,
-    "scenes": [
-     {
-      "t": "0-6",
-      "voiceover": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
-      "screen": "حاسب روحك قافز؟"
-     },
-     {
-      "t": "6-13",
-      "voiceover": "ضربت ضربتك ودخلت دراهم؟ بصح علابالك بلي هاد التخمام هو لي يطير البركة؟ الغشة عمرها ما كانت شطارة.",
-      "screen": "الغشة ماشي شطارة"
-     },
-     {
-      "t": "13-23",
-      "voiceover": "النبي ﷺ قالنا على البيع والشراء: «فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا».",
-      "screen": "فإن صدقا وبينا بورك لهما"
-     },
-     {
-      "t": "23-30",
-      "voiceover": "الصدق يجيب البركة، بيع بالنية وقول الصراحة وربي يخلف. ابعت الفيديو لصاحبك لي راه باغي يبيع.",
-      "screen": "بيع بالنية وربي يخلف"
-     }
-    ],
-    "references": [
-     {
-      "source": "صحيح البخاري، حديث رقم 2110",
-      "usage": "quoted",
-      "text": "فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا",
-      "sharh": null,
-      "tafsir": []
-     }
-    ],
-    "review": [],
-    "claims": [],
-    "unverified": [],
-    "approved": true,
-    "cta": "ابعت الفيديو لصاحبك لي راه باغي يبيع."
-   },
-   "final": {
-    "id": "2eb2c429",
-    "title": "القفازة ولا البركة؟",
-    "hook": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
-    "version": 1,
-    "scenes": [
-     {
-      "t": "0-6",
-      "voiceover": "حاسب روحك قافز كي بعت الطوموبيل وما هدرتش للشاري على الديفو لي فيها؟",
-      "screen": "حاسب روحك قافز؟"
-     },
-     {
-      "t": "6-13",
-      "voiceover": "ضربت ضربتك ودخلت دراهم؟ بصح علابالك بلي هاد التخمام هو لي يطير البركة؟ الغشة عمرها ما كانت شطارة.",
-      "screen": "الغشة ماشي شطارة"
-     },
-     {
-      "t": "13-23",
-      "voiceover": "النبي ﷺ قالنا على البيع والشراء: «فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا».",
-      "screen": "فإن صدقا وبينا بورك لهما"
-     },
-     {
-      "t": "23-30",
-      "voiceover": "الصدق يجيب البركة، بيع بالنية وقول الصراحة وربي يخلف. ابعت الفيديو لصاحبك لي راه باغي يبيع.",
-      "screen": "بيع بالنية وربي يخلف"
-     }
-    ],
-    "references": [
-     {
-      "source": "صحيح البخاري، حديث رقم 2110",
-      "usage": "quoted",
-      "text": "فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا",
-      "sharh": null,
-      "tafsir": []
-     }
-    ],
-    "review": [],
-    "claims": [],
-    "unverified": [],
-    "approved": true,
-    "cta": "ابعت الفيديو لصاحبك لي راه باغي يبيع."
-   },
-   "story": null,
-   "videos": [
-    {
-     "template": "الزخرفة الهندسية",
-     "id": "geo",
-     "url": "/media/videos/a4102bd55a12.mp4",
-     "seconds": 41.49,
-     "images": 0,
-     "clips": 3,
-     "notes": [],
-     "aspect": "9:16",
-     "example": "بالدارجة الجزائرية: الصدق في البيع"
-    }
-   ],
-   "timeline": [
-    "طلب: الصدق في البيع والشراء، عامة الناس في الجزائر، الدارجة الجزائرية، أسلوب خفيف وقريب، TikTok وFacebook، 30 ث",
-    "الأفكار بالدارجة فعلا: «الطوموبيل»، «واد كنيس»، «الديفو»؛ لكل فكرة حديثان من الصحيحين",
-    "السيناريو بالدارجة، والحديث نفسه بالفصحى حرفيا من صحيح البخاري (2110) لا يُترجم ولا يُدرّج",
-    "المراجعة بلا ملاحظات، اعتماد، ريلز بالزخرفة الهندسية. الحديث معروض بصمت حتى يوضع تسجيل قارئ"
-   ]
   }
  ],
  "guards": [
@@ -1071,6 +1166,28 @@
    "input": "فكرة طلبت حديث «أشد الناس بلاء الأنبياء ثم الأمثل فالأمثل» (مشروع الإنجليزية)",
    "outcome": "unverified",
    "text": "لم يوجد في صحيحي البخاري ومسلم، فعُلِّم «غير موثّق» ولم يدخل قائمة الأدلة، وكُتبت الفكرة بما وُجد. الحديث صحيح عند غيرهما (الترمذي)، لكن بلاغ لا يستعمل ما لا يستطيع التحقق منه."
+  }
+ ],
+ "stats": [
+  {
+   "value": "5",
+   "label": "مشاريع حقيقية على هذا الموقع"
+  },
+  {
+   "value": "7",
+   "label": "فيديوهات، بلا مونتاج"
+  },
+  {
+   "value": "3",
+   "label": "لغات: فصحى، دارجة جزائرية، إنجليزية"
+  },
+  {
+   "value": "12",
+   "label": "ملاحظة مانعة أمسكها المراجعون الآليون قبل البشر"
+  },
+  {
+   "value": "0",
+   "label": "نص شرعي كتبه النموذج"
   }
  ]
 }

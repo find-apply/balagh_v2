@@ -44,6 +44,8 @@ interface Example {
   first: ShowScript
   final: ShowScript
   story: ShowStory | null
+  /** The newest version after several correction rounds, when the story of the example continues past `final`. */
+  latest?: ShowScript
   videos: { template: string; id: string; url: string; seconds: number; images: number; clips: number; notes: string[]; aspect: string; example: string }[]
   timeline: string[]
 }
@@ -55,7 +57,7 @@ interface Guard {
   text: string
 }
 
-const data = raw as { examples: Example[]; guards: Guard[] }
+const data = raw as { examples: Example[]; guards: Guard[]; stats: { value: string; label: string }[] }
 
 function Brief({ b }: { b: Example['brief'] }) {
   return (
@@ -260,7 +262,9 @@ function ReelStrip({ videos }: { videos: Example['videos'] }) {
 export function Showcase({ onStart }: { onStart: () => void }) {
   // Reels (9:16) in one strip, episodes (16:9) in another: each group swipes on its own.
   const all = data.examples.flatMap((e) => e.videos)
-  const reels = all.filter((v) => v.aspect === '9:16')
+  const order = data.examples.map((e) => e.title)
+  const byExample = (a: Example['videos'][number], b: Example['videos'][number]) => order.indexOf(a.example) - order.indexOf(b.example)
+  const reels = all.filter((v) => v.aspect === '9:16').sort(byExample)
   const episodes = all.filter((v) => v.aspect !== '9:16')
   return (
     <div className="landing showcase">
@@ -297,6 +301,14 @@ export function Showcase({ onStart }: { onStart: () => void }) {
           <p className="muted small">
             اسحب أو استعمل الأسهم. الصوت مولَّد للحوار والشرح؛ الآية بتلاوة قارئ، والحديث يُعرض بصمت حتى يوضع تسجيل قارئ.
           </p>
+          <div className="stats show-stats">
+            {data.stats.map((r) => (
+              <div className="stat" key={r.label}>
+                <strong>{r.value}</strong>
+                <span>{r.label}</span>
+              </div>
+            ))}
+          </div>
           <h3 className="strip-title">ريلز عمودية (9:16) · TikTok وReels وShorts</h3>
           <ReelStrip videos={reels} />
           <h3 className="strip-title">حلقات أفقية (16:9) · YouTube</h3>
@@ -366,6 +378,16 @@ export function Showcase({ onStart }: { onStart: () => void }) {
                   <Script s={ex.final} label={ex.id === 'adults' ? 'Localized' : 'بعد التصحيح'} />
                   <h4>ما وجده المراجعون فيها</h4>
                   <Review s={ex.final} />
+                </>
+              )}
+              {ex.latest && (
+                <>
+                  <h4>بعد أربع جولات تصحيح: النسخة {ex.latest.version}</h4>
+                  <Script s={ex.latest} label="Localized, revised" />
+                  <Review s={ex.latest} />
+                  <p className="notice warn">
+                    تنتظر توقيع مراجع شرعي ومراجع لغوي بالاسم. الفيديو الموطّن لا يُصيَّر قبل ذلك: هذا هو التصميم لا نقصا فيه.
+                  </p>
                 </>
               )}
             </div>
