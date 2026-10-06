@@ -15,13 +15,11 @@ export function StoryView({ script, disabled, onRewrite }: Props) {
   if (!story) return null
   const dir = script.target.language === 'en' ? 'ltr' : 'rtl'
   return (
-    <section className="card">
-      <h3>قصة الأطفال</h3>
-      <p className="muted">
-        حوار مولَّد من السيناريو لقالب الأطفال، بشخصيات ثابتة. النص الشرعي فيه مُدرج من المصدر لا من النموذج. يُعتمد مع
-        السيناريو.
-      </p>
-      <h4 dir="auto">{story.title}</h4>
+    <details className="card">
+      <summary>
+        <h3>قصة الأطفال: {story.title}</h3>
+        <span className="muted small">{story.scenes.length} مشاهد · حوار مولَّد بشخصيات ثابتة، والنص الشرعي فيه من المصدر لا من النموذج؛ يُعتمد مع السيناريو</span>
+      </summary>
       <ol className="scenes story" dir={dir}>
         {story.scenes.map((s, i) => (
           <li key={i}>
@@ -77,6 +75,6 @@ export function StoryView({ script, disabled, onRewrite }: Props) {
           اكتب قصة أخرى
         </button>
       </div>
-    </section>
+    </details>
   )
 }

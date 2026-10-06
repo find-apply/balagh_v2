@@ -11,13 +11,12 @@ export function TemplatePicker({ templates, chosen, disabled, onPick }: Props) {
   return (
     <section className="card">
       <h3>قالب الفيديو</h3>
-      <p className="muted">
-        اختر من المكتبة القالب الذي يُحوَّل به هذا السيناريو إلى فيديو. اختيار قالب أطفال لأول مرة يكتب قصة حوار من
-        السيناريو، وهي نص جديد يلزم اعتماده.
+      <p className="muted small">
+        القالب الذي يُحوَّل به هذا السيناريو إلى فيديو. قالب أطفال يكتب أول مرة قصة حوار من السيناريو، وهي نص جديد يلزم اعتماده.
       </p>
       {!templates && <p className="muted">تعذر تحميل مكتبة القوالب. تأكد أن الخادم يعمل ثم أعد تحميل الصفحة.</p>}
       {templates && (
-        <div className="ideas">
+        <div className="templates">
           {templates.map((t) => (
             <article className={t.id === chosen ? 'card idea chosen' : 'card idea'} key={t.id}>
               <img

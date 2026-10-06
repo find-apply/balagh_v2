@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { FormEvent, MouseEvent, ReactNode } from 'react'
+import type { FormEvent } from 'react'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
 import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, Video, VideoTemplate } from '../types'
 import { api, BASE } from '../api'
@@ -46,19 +46,6 @@ function download(script: Script) {
 /** The script page shows one part at a time, chosen from the workspace's stepper; after the ideas, one long
  * page was too much to scroll. The posts live with the video they accompany. */
 export type Tab = 'script' | 'template' | 'review' | 'approve' | 'video'
-
-/** A link inside the page to another part: the workspace switches the part and scrolls back to the top. */
-function TabLink({ to, go, className, children }: { to: Tab; go: (t: Tab) => void; className?: string; children: ReactNode }) {
-  const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    go(to)
-  }
-  return (
-    <a className={className} href={`#s-${to}`} onClick={onClick}>
-      {children}
-    </a>
-  )
-}
 
 export function Scenes({ script }: { script: Script }) {
   return (
@@ -277,85 +264,6 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
   )
 }
 
-/** The one action that moves this version forward, so the flow never stalls on a long page. */
-function NextStep({ script, disabled, onReview, go }: { script: Script; disabled: boolean; onReview: Handlers['onReview']; go: (t: Tab) => void }) {
-  const blocking = script.review?.blocking ?? 0
-  if (!script.review)
-    return (
-      <div className="next">
-        <div>
-          <strong>الخطوة التالية: المراجعة الآلية</strong>
-          <p className="muted small">ثلاثة مراجعين يفحصون السيناريو: علمي، وجمهور، ومعنى.</p>
-        </div>
-        <button className="primary" disabled={disabled} onClick={onReview}>
-          راجع آليا
-        </button>
-      </div>
-    )
-  if (blocking > 0)
-    return (
-      <div className="next bad">
-        <div>
-          <strong>{blocking} ملاحظة مانعة</strong>
-          <p className="small">صحّحها في نسخة جديدة قبل الاعتماد.</p>
-        </div>
-        <TabLink to="review" go={go} className="button">
-          اعرض الملاحظات
-        </TabLink>
-      </div>
-    )
-  if (!script.approved && !script.template)
-    return (
-      <div className="next">
-        <div>
-          <strong>الخطوة التالية: قالب الفيديو وفيديو المعاينة</strong>
-          <p className="muted small">اختر قالبا وأنشئ معاينة بعلامة مائية يشاهدها المراجع قبل أن يوقّع.</p>
-        </div>
-        <TabLink to="template" go={go} className="button primary">
-          اختر قالبا
-        </TabLink>
-      </div>
-    )
-  if (!script.approved)
-    return (
-      <div className="next">
-        <div>
-          <strong>الخطوة التالية: المعاينة ثم الاعتماد البشري</strong>
-          <p className="muted small">أنشئ معاينة بعلامة مائية، ثم يوقّع كل من تتطلبه هذه النسخة بعد مشاهدتها.</p>
-        </div>
-        <TabLink to="video" go={go} className="button">
-          فيديو المعاينة
-        </TabLink>
-        <TabLink to="approve" go={go} className="button primary">
-          الاعتماد
-        </TabLink>
-      </div>
-    )
-  if (!script.template)
-    return (
-      <div className="next ok">
-        <div>
-          <strong>النسخة معتمدة. الخطوة التالية: قالب الفيديو</strong>
-          <p className="small">اختر من المكتبة القالب الذي يُحوَّل به السيناريو إلى فيديو، أو صدّر النص.</p>
-        </div>
-        <TabLink to="template" go={go} className="button primary">
-          اختر قالبا
-        </TabLink>
-      </div>
-    )
-  return (
-    <div className="next ok">
-      <div>
-        <strong>النسخة معتمدة: الفيديو النهائي بلا علامة مائية</strong>
-        <p className="small">أنشئ الفيديو النهائي بالقالب المختار، أو صدّر النص، أو وطّنه لجمهور آخر.</p>
-      </div>
-      <TabLink to="video" go={go} className="button primary">
-        الفيديو النهائي
-      </TabLink>
-    </div>
-  )
-}
-
 export function ScriptView({ projectId, script, source, templates, disabled, tab, onTab, actions }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
@@ -382,8 +290,6 @@ export function ScriptView({ projectId, script, source, templates, disabled, tab
           {script.target.audience} · {meta.join(' · ')}
         </p>
       </div>
-
-      {actions && <NextStep script={script} disabled={disabled} onReview={actions.onReview} go={setTab} />}
 
       <div hidden={tab !== 'script'}>
       <section className="card" id="s-script">

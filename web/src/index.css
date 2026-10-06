@@ -1237,10 +1237,14 @@ button.link {
 }
 
 .workspace > .stepper {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
   padding: 14px 18px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.04));
   margin-bottom: 18px;
   overflow-x: auto;
 }
@@ -1848,9 +1852,9 @@ td {
   .workspace > .stepper {
     overflow-x: auto;
     scrollbar-width: none;
-    position: sticky;
     top: 50px;
-    z-index: 10;
+    border-radius: 0;
+    margin: 0 -16px;
   }
 
   .workspace > .stepper::-webkit-scrollbar {
@@ -3325,3 +3329,110 @@ details.card[open] > summary {
   margin-top: 8px;
 }
 
+
+/* The bar at the bottom of the screen: previous step, what comes next, and the one button that does it.
+ * It sits last in the workspace and sticks to the bottom edge while the part above scrolls. */
+.flowbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--brand-soft);
+  border: 1px solid rgba(12, 90, 74, 0.18);
+  border-bottom: 0;
+  backdrop-filter: blur(8px);
+}
+
+.flowbar.bad {
+  background: var(--bad-bg);
+  border-color: rgba(156, 43, 31, 0.2);
+}
+
+.flowbar.ok {
+  background: var(--ok-bg);
+  border-color: rgba(23, 96, 63, 0.2);
+}
+
+.flowbar-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flowbar-text strong {
+  font-size: 0.95rem;
+}
+
+.flowbar .ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+.flowbar .ghost:disabled {
+  opacity: 0.4;
+}
+
+.flowbar .primary {
+  white-space: nowrap;
+}
+
+.templates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.templates .idea {
+  padding: 12px;
+}
+
+.templates .preview,
+.templates .preview.tall {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  object-position: top;
+  aspect-ratio: auto;
+  margin-bottom: 8px;
+}
+
+.templates h4 {
+  margin: 6px 0 2px;
+  font-size: 1rem;
+}
+
+.templates p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+
+.templates .badges {
+  gap: 4px;
+}
+
+.templates .primary {
+  margin-top: auto;
+}
+
+@media (max-width: 760px) {
+  .flowbar {
+    margin: 16px -16px 0;
+    border-radius: 0;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .flowbar-text .muted {
+    display: none;
+  }
+}

@@ -4,6 +4,7 @@ import { IdeaList } from './IdeaList'
 import { Progress, ScriptSkeleton } from './Progress'
 import { Icon } from './Icon'
 import { ScriptView } from './ScriptView'
+import { nextStep } from '../flow'
 import type { Tab } from './ScriptView'
 import { projectTitle } from '../history'
 import { KNOWLEDGE, LANGUAGES, PLATFORMS, scriptLabel } from '../labels'
@@ -216,6 +217,29 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
           </select>
         </label>
       )}
+
+      {active && actions && (() => {
+        const next = nextStep(active)
+        const prev = Number(selected) - 1
+        const run = () => {
+          if (next.action.kind === 'review') return actions.onReview(active.id)
+          openTab(next.action.kind === 'findings' ? 'review' : next.action.kind)
+        }
+        return (
+          <div className={`flowbar ${next.tone}`}>
+            <button type="button" className="ghost" disabled={prev < 1} onClick={() => selectStep(prev)}>
+              → السابق
+            </button>
+            <div className="flowbar-text">
+              <strong>{next.title}</strong>
+              <span className="muted small">{next.hint}</span>
+            </div>
+            <button type="button" className="primary" disabled={busy !== null} onClick={run}>
+              {next.action.label} ←
+            </button>
+          </div>
+        )
+      })()}
 
       {active && (
         <>
