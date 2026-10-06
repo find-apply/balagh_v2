@@ -3541,3 +3541,40 @@ details.card[open] > summary {
 .source-line {
   margin: 6px 0 0;
 }
+
+.vchecks {
+  margin: 10px 0;
+}
+
+.frames {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.frames img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #0b1412;
+}
+
+.checks li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 4px 0;
+  font-size: 0.9rem;
+}
+
+.checks.compact li {
+  font-size: 0.82rem;
+  padding: 2px 0;
+}
+
+.bad-text {
+  color: var(--bad);
+  margin: 4px 0 0;
+}

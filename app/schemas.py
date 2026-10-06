@@ -554,6 +554,13 @@ class VideoStatus(str, Enum):
     failed = "failed"
 
 
+class VideoCheck(BaseModel):
+    """One automatic check on a finished video: loudness, unintended silence, black frames, length."""
+    name: str = Field(examples=["loudness", "silence", "black", "length"])
+    ok: bool
+    detail: str
+
+
 class Video(BaseModel):
     id: str
     project_id: str
@@ -569,6 +576,9 @@ class Video(BaseModel):
     notes: list[str] = Field(default_factory=list, description="What the render could not do as intended, e.g. a hadith shown without a recording.")
     created_at: datetime
     render_seconds: Optional[float] = Field(default=None, description="Wall time of the job once it ended, minus any wait for a free render slot.")
+    checks: list[VideoCheck] = Field(default_factory=list, description="Automatic quality checks run on the finished file.")
+    loudness_lufs: Optional[float] = Field(default=None, description="Integrated loudness of the final file.")
+    frames: list[str] = Field(default_factory=list, description="Paths of a few stills under the API, for a glance.")
 
 
 Script.model_rebuild()

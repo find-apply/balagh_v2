@@ -125,6 +125,11 @@ export interface Video {
   new_clips: number
   notes: string[]
   created_at: string
+  /** Automatic checks on the finished file: loudness, unintended silence, black frames, length. */
+  checks: { name: string; ok: boolean; detail: string }[]
+  loudness_lufs: number | null
+  /** A few stills under the API, for a glance without playing. */
+  frames: string[]
 }
 
 export interface SceneArt {

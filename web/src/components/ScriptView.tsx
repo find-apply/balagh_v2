@@ -9,6 +9,7 @@ import { AudienceFields } from './AudienceFields'
 import { StoryView } from './StoryView'
 import { TemplatePicker } from './TemplatePicker'
 import { VideoPanel } from './VideoPanel'
+import { VideoChecks } from './VideoChecks'
 
 /** What a reader can do to a script. Leaving `actions` out shows the script read-only, as the admin does. */
 export interface ScriptActions {
@@ -144,7 +145,8 @@ function PreviewForReview({ projectId, script, onGo }: { projectId: string; scri
         <span className={video.preview ? 'badge warn' : 'badge ok'}>{video.preview ? 'فيديو المعاينة · بعلامة مائية' : 'الفيديو النهائي'}</span>
         <span className="badge">{Math.round(video.duration_seconds ?? 0)} ث</span>
       </div>
-      <video controls preload="metadata" src={BASE + video.url} className="player" />
+      <video controls preload="metadata" src={BASE + video.url} className="player" poster={video.frames[0] ? BASE + video.frames[0] : undefined} />
+      <VideoChecks video={video} compact />
     </div>
   )
 }

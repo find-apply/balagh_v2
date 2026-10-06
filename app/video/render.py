@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from .. import store
 from ..schemas import Script, Video, VideoStatus
-from . import catalog, media, spec
+from . import catalog, media, qa, spec
 
 VIDEOS = media.MEDIA / "videos"
 JOBS = media.MEDIA / "jobs"
@@ -55,6 +55,10 @@ async def _run(video: Video, script: Script) -> None:
         async with _render_lock:
             waited = (datetime.now(timezone.utc) - queued).total_seconds()
             await _render(template["composition"], job / "props.json", job, out)
+        # Quality checks on the file: the sound level is corrected, the rest is reported next to the video.
+        video.checks, video.loudness_lufs, stills = await qa.run(
+            out, video.template, props, qa.spec_duration(video.template, props), VIDEOS, video.id)
+        video.frames = [f"/media/videos/{name}" for name in stills]
         video.duration_seconds = round(media.seconds_of(out), 2)
         video.url = f"/media/videos/{video.id}.mp4"
         video.status = VideoStatus.done

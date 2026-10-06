@@ -3,6 +3,7 @@ import type { FormEvent, ReactNode } from 'react'
 import { api, ApiError, BASE } from '../api'
 import { Logo } from './Landing'
 import { Scenes } from './ScriptView'
+import { VideoChecks } from './VideoChecks'
 import { StoryView } from './StoryView'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, REVIEWERS, ROLES } from '../labels'
 import type { Project, ReviewRole, Script, Video } from '../types'
@@ -104,7 +105,8 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
               <span className={video.preview ? 'badge warn' : 'badge ok'}>{video.preview ? 'معاينة بعلامة مائية' : 'فيديو نهائي'}</span>
               <span className="badge">{Math.round(video.duration_seconds ?? 0)} ث</span>
             </div>
-            <video controls preload="metadata" src={BASE + video.url} className="player rv-player" />
+            <video controls preload="metadata" src={BASE + video.url} className="player rv-player" poster={video.frames[0] ? BASE + video.frames[0] : undefined} />
+            <VideoChecks video={video} />
           </>
         )}
       </section>
