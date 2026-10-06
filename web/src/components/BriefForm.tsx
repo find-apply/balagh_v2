@@ -29,10 +29,10 @@ const LAST_KEY = 'balagh.lastBrief'
 /** A complete brief a first-time visitor can run as is, to see the whole flow before writing their own. */
 const EXAMPLE: Brief = {
   idea: 'الصدق في البيع: لماذا يرزق الله التاجر الصادق؟',
-  audience: GROUPS[1].label,
+  audience: GROUPS[0].label,
   language: 'ar',
-  dialect: 'الدارجة الجزائرية',
-  audience_knowledge: GROUPS[1].knowledge,
+  dialect: null,
+  audience_knowledge: GROUPS[0].knowledge,
   tone: null,
   platforms: ['tiktok'],
   duration_seconds: 45,
