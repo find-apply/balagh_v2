@@ -26,7 +26,9 @@ Prophet ﷺ says about it. Its lines must not say the text itself.
 3. one `text` scene: set evidence_id to the id of one quoted reference from the list. No lines; the system shows \
 the exact text.
 4. one `words` scene: Nour explains the text in one or two simple lines, and 2 cards each taking one word from \
-the quoted text with its meaning.
+the quoted text with its meaning. When the reference carries `<tafsir>` or `<sharh>` (an approved commentary), \
+Nour's explanation and the card meanings say what that commentary says, in a child's words: nothing beyond it, \
+nothing against it, and never its words presented as the verse or hadith.
 5. 1 or 2 `story` scenes: the children apply the lesson and it ends well.
 6. one `quiz` scene: Nour asks the question in her line, Maryam or Salim answer with the right choice in a second \
 line, a third line may say why. Exactly 2 choices, the right one first.
@@ -57,7 +59,12 @@ def _references_block(script: Script) -> str:
     quoted = [r for r in script.references if r.usage == ReferenceUsage.quoted]
     if not quoted:
         return "<references>none</references>"
-    items = "\n".join(f'<item id="{r.evidence_id}" kind="{r.kind.value}" source="{r.source}">{r.text}</item>' for r in quoted)
+    def item(r) -> str:
+        tafsir = "".join(f'\n<tafsir source="{t.source}">{t.text}</tafsir>' for t in r.tafsir)
+        sharh = f'\n<sharh source="{r.sharh.source}">{r.sharh.text}</sharh>' if r.sharh else ""
+        return f'<item id="{r.evidence_id}" kind="{r.kind.value}" source="{r.source}">{r.text}{tafsir}{sharh}</item>'
+
+    items = "\n".join(item(r) for r in quoted)
     return f"<references>\n{items}\n</references>"
 
 

@@ -128,6 +128,18 @@ export interface Scene {
   evidence_ids: string[]
 }
 
+export interface Tafsir {
+  text: string
+  source: string
+}
+
+export interface Sharh {
+  text: string
+  grade: string
+  attribution: string
+  source: string
+}
+
 export interface Reference {
   evidence_id: string
   kind: 'quran' | 'hadith'
@@ -136,6 +148,8 @@ export interface Reference {
   arabic: string
   source: string
   translation_source: string | null
+  tafsir: Tafsir[]
+  sharh: Sharh | null
 }
 
 export interface PlatformPost {

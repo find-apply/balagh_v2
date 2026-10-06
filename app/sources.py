@@ -1,6 +1,7 @@
 """Verified religious sources, loaded from local data files.
 
-Quran: King Fahd Complex Hafs text (via quran.com). Hadith: Sahih al-Bukhari and Sahih Muslim.
+Quran: King Fahd Complex Hafs text (via quran.com), with Tafsir al-Muyassar.
+Hadith: Sahih al-Bukhari and Sahih Muslim, with explanations from the Hadith Encyclopedia.
 Nothing the model writes is treated as a quote unless it is found here.
 """
 import json
@@ -10,12 +11,14 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
-from .schemas import Evidence, EvidenceKind, Language, TermCheck, TermStatus
+from .schemas import Evidence, EvidenceKind, Language, Sharh, Tafsir, TermCheck, TermStatus
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
 _quran = json.loads((DATA / "quran.json").read_text(encoding="utf-8"))
 _hadith = json.loads((DATA / "hadith.json").read_text(encoding="utf-8"))
+_tafsir = json.loads((DATA / "tafsir.json").read_text(encoding="utf-8"))
+_sharh = json.loads((DATA / "hadith_sharh.json").read_text(encoding="utf-8"))
 
 # The mushaf's hizb and sajdah marks sit in the verse text; they are page furniture, not words of the verse.
 _quran["verses"] = {k: re.sub(r"\s*[۞۩]\s*", " ", v).strip() for k, v in _quran["verses"].items()}
@@ -106,7 +109,36 @@ def get_verses(surah: int, ayah_start: int, ayah_end: int) -> Optional[Evidence]
         translation_en=" ".join(_quran["en"][k] for k in keys),
         translation_source=f"{QURAN_EN_SOURCE}, {surah}:{ayat}",
         quran_key=f"{surah}:{ayah_start}-{ayah_end}",
+        tafsir=get_tafsir(surah, ayah_start, ayah_end),
     )
+
+
+def get_sharh(collection: str, number: int) -> Optional[Sharh]:
+    """The approved explanation of a hadith, when the encyclopedia's wording matched ours closely
+    enough to be sure it is the same hadith. Unmatched hadiths simply have none."""
+    i = _sharh["index"].get(f"{collection}:{number}")
+    if i is None:
+        return None
+    e = _sharh["entries"][i]
+    return Sharh(text=e["explanation"], grade=e["grade"], attribution=e["attribution"],
+                 source=f"{_sharh['name']} ({_sharh['publisher']})، مدخل {e['id']}")
+
+
+def get_tafsir(surah: int, ayah_start: int, ayah_end: int) -> list[Tafsir]:
+    """The approved commentary covering a verse range. One entry may comment on several verses,
+    so its own range is named in the source: the explanation must not be read as being about one verse."""
+    out: list[Tafsir] = []
+    seen: set[int] = set()
+    for ayah in range(ayah_start, ayah_end + 1):
+        i = _tafsir["index"].get(f"{surah}:{ayah}")
+        if i is None or i in seen:
+            continue
+        seen.add(i)
+        e = _tafsir["entries"][i]
+        name = _quran["surahs"][surah - 1]["name"]
+        ayat = str(e["first"]) if e["last"] == e["first"] else f"{e['first']}-{e['last']}"
+        out.append(Tafsir(text=e["text"], source=f"{_tafsir['name']}، سورة {name}، الآية {ayat}"))
+    return out
 
 
 def verse_parts(quran_key: str, lang: Language) -> dict[int, str]:
@@ -146,6 +178,7 @@ def search_hadith(query: str, limit: int = 2) -> list[Evidence]:
             hadith_key=f"{h['c']}:{_hadith_number(h)}" if h.get("a") is not None else f"{h['c']}:seq{h['n']}",
             translation_en=h.get("e"),
             translation_source=f"{HADITH_EN_SOURCE[h['c']]}, no. {_hadith_number(h)}" if h.get("e") else None,
+            sharh=get_sharh(h["c"], h["n"]),
         ))
     return found
 

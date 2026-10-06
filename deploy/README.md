@@ -13,11 +13,15 @@
 | HTTPS | شهادة Let's Encrypt، وطلبات HTTP تُحوَّل إلى HTTPS |
 | البيانات | SQLite في `data/balagh.db`. قرص الخادم دائم، فالمشاريع تبقى بعد إعادة التشغيل |
 | المهلة | 5 دقائق لطلبات الـ API في nginx، لأن التوليد قد يستغرق دقيقة |
+| حدّ الطلبات | 20 طلب توليد في الدقيقة لكل زائر، و240 للواجهة، و10 اتصالات متزامنة. الزونات في `/etc/nginx/conf.d/balagh-ratelimit.conf` |
 
 الملفات المستعملة موجودة في هذا المجلد:
 
 - `balagh-api.service`: يُنسخ إلى `/etc/systemd/system/`.
 - `nginx.conf`: يُنسخ إلى `/etc/nginx/sites-available/balagh.findapply.com` ويُربط في `sites-enabled`.
+- `ratelimit.conf`: يُنسخ إلى `/etc/nginx/conf.d/balagh-ratelimit.conf`، لأن زونات الحدّ تُعرَّف في كتلة `http` قبل أن يستعملها الموقع.
+
+> ملف `nginx.conf` هنا بلا HTTPS: شهادة Let's Encrypt أضافها certbot إلى النسخة الحيّة. فلا يُنسخ هذا الملف فوق الحيّة بعد إصدار الشهادة، بل تُعدَّل الحيّة موضعيا.
 
 ## الإعدادات على الخادم
 

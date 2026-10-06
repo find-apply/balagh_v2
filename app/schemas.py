@@ -109,6 +109,20 @@ class EvidenceKind(str, Enum):
     hadith = "hadith"
 
 
+class Tafsir(BaseModel):
+    """An approved commentary on a verse range. Grounds the explanation; never quoted as scripture."""
+    text: str
+    source: str = Field(description="The tafsir's name and the verses this entry comments on.")
+
+
+class Sharh(BaseModel):
+    """An approved explanation of a hadith. Grounds the explanation; never quoted as the hadith."""
+    text: str
+    grade: str = Field(description="The grading the encyclopedia gives this hadith.")
+    attribution: str = Field(description="Who narrated it, as the encyclopedia states.")
+    source: str = Field(description="The encyclopedia and its entry, for the reviewer to check.")
+
+
 class Evidence(BaseModel):
     """A text found in the verified sources. Only these may be quoted or attributed."""
     id: str
@@ -119,6 +133,8 @@ class Evidence(BaseModel):
     translation_source: Optional[str] = None
     quran_key: Optional[str] = Field(default=None, description="Quran only: surah:first-last ayah, e.g. 112:1-4.")
     hadith_key: Optional[str] = Field(default=None, description="Hadith only: collection:number, e.g. bukhari:13.")
+    tafsir: list[Tafsir] = Field(default_factory=list, description="Quran only: approved commentary on these verses.")
+    sharh: Optional[Sharh] = Field(default=None, description="Hadith only: approved explanation, when one was matched.")
 
 
 class PlatformPost(BaseModel):
@@ -285,6 +301,8 @@ class Reference(BaseModel):
     translation_source: Optional[str] = Field(default=None, description="Set when `text` comes from an approved translation.")
     quran_key: Optional[str] = None
     hadith_key: Optional[str] = None
+    tafsir: list[Tafsir] = Field(default_factory=list, description="The approved commentary the explanation had to follow. For the reviewer to check against.")
+    sharh: Optional[Sharh] = Field(default=None, description="Hadith only: the approved explanation the script had to follow.")
 
 
 class TermStatus(str, Enum):

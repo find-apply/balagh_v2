@@ -15,3 +15,5 @@ eval/cache/
 # Rendered videos, generated audio and images
 media/
 video/out/
+data/hadith_sharh.partial.json
+data/hadith_sharh.progress
