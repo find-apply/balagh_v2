@@ -3132,3 +3132,19 @@ details.small summary {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.versions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -8px 0 16px;
+}
+
+.versions select {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+.tab {
+  flex: 0 0 auto;
+}

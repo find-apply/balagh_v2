@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import { IdeaList } from './IdeaList'
 import { Progress, ScriptSkeleton } from './Progress'
@@ -61,6 +61,25 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
   const scripts = Object.values(project.scripts).sort(
     (a, b) => Number(Boolean(a.localized_from)) - Number(Boolean(b.localized_from)) || a.version - b.version,
   )
+  // One tab per line of work (an original, or a localization), showing its newest version; a line's older
+  // versions open from a list under the tabs. Nine near-identical tabs were unreadable.
+  const superseded = new Set(scripts.map((s) => s.revised_from).filter(Boolean))
+  const heads = scripts.filter((s) => !superseded.has(s.id))
+  const lineOf = (s: (typeof scripts)[number]) => {
+    const chain = [s]
+    let cur = s
+    while (cur.revised_from && project.scripts[cur.revised_from]) {
+      cur = project.scripts[cur.revised_from]
+      chain.push(cur)
+    }
+    return chain
+  }
+  const activeHead = active ? heads.find((h) => lineOf(h).some((v) => v.id === active.id)) ?? active : null
+  const activeLine = activeHead ? lineOf(activeHead) : []
+  const tabsRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    tabsRef.current?.querySelector('.tab.on')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }, [scriptId])
   // Whether the open version already has a finished video: the last step is done then.
   const [videoOf, setVideoOf] = useState<string | null>(null)
   useEffect(() => {
@@ -104,21 +123,26 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
 
       <Stepper current={step} />
 
-      <nav className="tabs" aria-label="نسخ المشروع">
+      <nav className="tabs" aria-label="نسخ المشروع" ref={tabsRef}>
         <button className={!scriptId ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id))}>
           <span>الأفكار</span>
           <small>{project.ideas.length} أفكار</small>
         </button>
-        {scripts.map((s) => (
-          <button key={s.id} className={`tab${s.id === scriptId ? ' on' : ''}${s.approved ? ' approved' : ''}`} onClick={() => go(hashFor(project.id, s.id))}>
-            <span dir="auto">{s.title}</span>
-            <small>
-              <i className={s.approved ? 'state ok' : s.review ? 'state warn' : 'state'} />
-              {s.approved ? 'معتمدة · ' : ''}
-              {scriptLabel(s)}
-            </small>
-          </button>
-        ))}
+        {heads.map((s) => {
+          const line = lineOf(s)
+          const shown = activeHead?.id === s.id && active ? active : s
+          return (
+            <button key={s.id} className={`tab${activeHead?.id === s.id ? ' on' : ''}${shown.approved ? ' approved' : ''}`} onClick={() => go(hashFor(project.id, s.id))}>
+              <span dir="auto">{s.title}</span>
+              <small>
+                <i className={shown.approved ? 'state ok' : shown.review ? 'state warn' : 'state'} />
+                {shown.approved ? 'معتمدة · ' : ''}
+                {scriptLabel(shown)}
+                {line.length > 1 && ` · ${line.length} نسخ`}
+              </small>
+            </button>
+          )
+        })}
         {writing && (
           <button className={pending ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id, 'new'))}>
             <span>
@@ -138,6 +162,21 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
 
       {(!scriptId || (pending && !writing) || (scriptId && !pending && !active)) && (
         <IdeaList ideas={project.ideas} disabled={busy !== null} onPick={actions?.onPick} />
+      )}
+
+      {active && activeLine.length > 1 && (
+        <label className="versions">
+          <span className="muted small">نسخ هذا الخط:</span>
+          <select value={active.id} onChange={(e) => go(hashFor(project.id, e.target.value))}>
+            {activeLine.map((v) => (
+              <option key={v.id} value={v.id}>
+                النسخة {v.version}
+                {v.approved ? ' · معتمدة' : v.review?.blocking ? ` · ${v.review.blocking} مانعة` : v.review ? ' · مراجَعة' : ''}
+                {v.id === activeHead?.id ? ' · الأحدث' : ''}
+              </option>
+            ))}
+          </select>
+        </label>
       )}
 
       {active && (

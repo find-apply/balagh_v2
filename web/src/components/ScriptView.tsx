@@ -159,7 +159,7 @@ function Approvals({ script, disabled, onApprove, shareUrl }: { script: Script; 
               <p className="muted small">{r.reason}</p>
               {done && (
                 <p className="small">
-                  {done.name} · {new Date(done.at).toLocaleString('ar')}
+                  {done.name} · <span dir="ltr">{new Date(done.at).toLocaleString('ar-DZ', { dateStyle: 'medium', timeStyle: 'short' })}</span>
                 </p>
               )}
             </li>
