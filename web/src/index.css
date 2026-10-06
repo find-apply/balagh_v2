@@ -3480,3 +3480,26 @@ details.card[open] > summary {
   font-size: 0.9rem;
   margin-bottom: 10px;
 }
+
+.quote {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quote > p:first-child {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.quote footer {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.quote .notice {
+  margin: 0;
+  padding: 8px 12px;
+}

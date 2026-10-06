@@ -121,6 +121,9 @@ evidence id on that scene.
 evidence list is empty or lacks what the idea hoped for, build the script without it rather than filling the gap \
 from memory.
 - Keep the generated explanation clearly separate from the quoted text: introduce a quote as a quote.
+- Do not widen what a text promises or threatens. A hadith about the blessing of one sale is not a promise \
+about all of a person's provision; a verse about one situation is not a rule for every situation. Say what \
+the text says, at its own scope, and no more.
 - A hadith item may carry `<sharh>`: an approved explanation of that hadith. Explain the hadith as the \
 `<sharh>` explains it, in your own simple words for this audience; do not go beyond it and do not contradict \
 it. It is prose written about the hadith, not the hadith itself: never quote it and never attribute its words \
@@ -480,9 +483,20 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
             )
 
     translated = lang == Language.en
+
+    def label(e: Evidence, i: str) -> str:
+        # A quoted run that is shorter than the hadith says so next to the source, so the viewer never takes
+        # the sentence on screen for the whole hadith (a reviewer's note).
+        if e.kind != EvidenceKind.hadith or i not in inserts:
+            return e.source
+        whole = sources.normalize(_evidence_text(e, lang))
+        if sources.normalize(inserts[i]) == whole:
+            return e.source
+        return f"{e.source} (part of the hadith)" if translated else f"{e.source}، جزء من الحديث"
+
     references = [
         Reference(
-            evidence_id=i, kind=e.kind, source=e.source, arabic=e.text,
+            evidence_id=i, kind=e.kind, source=label(e, i), arabic=e.text,
             usage=ReferenceUsage.quoted if i in quoted else ReferenceUsage.paraphrased,
             text=inserts.get(i, _evidence_text(e, lang)),
             translation_source=e.translation_source if translated else None,

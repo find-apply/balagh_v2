@@ -57,7 +57,12 @@ interface Guard {
   text: string
 }
 
-const data = raw as { examples: Example[]; guards: Guard[]; stats: { value: string; label: string }[] }
+interface Feedback {
+  note: string
+  items: { name: string; role: string; text: string; done?: string }[]
+}
+
+const data = raw as { examples: Example[]; guards: Guard[]; stats: { value: string; label: string }[]; feedback: Feedback }
 
 function Brief({ b }: { b: Example['brief'] }) {
   return (
@@ -421,6 +426,25 @@ export function Showcase({ onStart }: { onStart: () => void }) {
                   <p>{g.text}</p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="feedback">
+        <div className="section-inner">
+          <span className="eyebrow">آراء أولية</span>
+          <h2>ما قاله طلاب علم بعد المشاهدة</h2>
+          <p className="muted">{data.feedback.note}</p>
+          <div className="show-grid">
+            {data.feedback.items.map((f) => (
+              <blockquote className="card quote" key={f.name}>
+                <p dir="auto">«{f.text}»</p>
+                <footer>
+                  <strong>{f.name}</strong> · {f.role}
+                </footer>
+                {f.done && <p className="notice ok small">{f.done}</p>}
+              </blockquote>
             ))}
           </div>
         </div>
