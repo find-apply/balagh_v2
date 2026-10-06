@@ -71,6 +71,13 @@ export interface Tafsir {
   source: string
 }
 
+export interface Sharh {
+  text: string
+  grade: string
+  attribution: string
+  source: string
+}
+
 export interface Reference {
   evidence_id: string
   kind: 'quran' | 'hadith'
@@ -80,6 +87,7 @@ export interface Reference {
   source: string
   translation_source: string | null
   tafsir: Tafsir[]
+  sharh: Sharh | null
 }
 
 export interface PlatformPost {

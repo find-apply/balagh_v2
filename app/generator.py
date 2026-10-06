@@ -119,6 +119,10 @@ evidence id on that scene.
 evidence list is empty or lacks what the idea hoped for, build the script without it rather than filling the gap \
 from memory.
 - Keep the generated explanation clearly separate from the quoted text: introduce a quote as a quote.
+- A hadith item may carry `<sharh>`: an approved explanation of that hadith. Explain the hadith as the \
+`<sharh>` explains it, in your own simple words for this audience; do not go beyond it and do not contradict \
+it. It is prose written about the hadith, not the hadith itself: never quote it and never attribute its words \
+to the Prophet. Where a hadith has no `<sharh>`, keep the explanation to what its words plainly say.
 - A Quran item may carry `<tafsir>`: an approved commentary on those verses. When you explain what a verse \
 means, say what the commentary says, in your own simple words for this audience. Do not go beyond it, and do \
 not contradict it. The commentary is Arabic prose written about the verses, not the verses themselves: never \
@@ -197,9 +201,10 @@ You are the scholarly reviewer. Look for:
 - Rewards, punishments or promises exaggerated beyond what the evidence says.
 - A scholar quoted or named.
 - The Quran's words or meaning given outside a «» quote: the Quran may only be quoted verbatim, never paraphrased.
-- An explanation of a verse that goes beyond, or contradicts, the `<tafsir>` commentary given with it. Where a \
-verse has commentary, the script's explanation of it must be traceable to that commentary.
-- Words of the commentary presented as the verse itself, or attributed to Allah.
+- An explanation of a verse that goes beyond, or contradicts, the `<tafsir>` commentary given with it, or an \
+explanation of a hadith that goes beyond or contradicts its `<sharh>`. Where a text has commentary, the \
+script's explanation of it must be traceable to that commentary.
+- Words of a commentary presented as the verse or the hadith itself, or attributed to Allah or the Prophet.
 - A content level that looks wrong for what the script actually says.
 
 Religious errors and misattributions are blocking.
@@ -278,7 +283,9 @@ def _evidence_block(evidence: list[Evidence], lang: Language) -> str:
             text = _evidence_text(e, lang)
         # The commentary is in Arabic whatever the script's language: it grounds the meaning, it is not quoted.
         tafsir = "".join(f'\n<tafsir source="{t.source}">{t.text}</tafsir>' for t in e.tafsir)
-        return f"{text}{tafsir}"
+        sharh = (f'\n<sharh grade="{e.sharh.grade}" narrated="{e.sharh.attribution}" source="{e.sharh.source}">'
+                 f'{e.sharh.text}</sharh>') if e.sharh else ""
+        return f"{text}{tafsir}{sharh}"
 
     items = "\n".join(f'<item id="{e.id}" kind="{e.kind.value}" source="{e.source}">{body(e)}</item>' for e in evidence)
     return f"<evidence>\n{items}\n</evidence>"
@@ -415,6 +422,7 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
             text=inserts.get(i, _evidence_text(e, lang)),
             translation_source=e.translation_source if translated else None,
             tafsir=e.tafsir,
+            sharh=e.sharh,
         )
         for i, e in evidence.items() if i in quoted or i in relied
     ]

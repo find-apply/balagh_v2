@@ -1,7 +1,7 @@
 """Verified religious sources, loaded from local data files.
 
 Quran: King Fahd Complex Hafs text (via quran.com), with Tafsir al-Muyassar.
-Hadith: Sahih al-Bukhari and Sahih Muslim.
+Hadith: Sahih al-Bukhari and Sahih Muslim, with explanations from the Hadith Encyclopedia.
 Nothing the model writes is treated as a quote unless it is found here.
 """
 import json
@@ -11,13 +11,14 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
-from .schemas import Evidence, EvidenceKind, Language, Tafsir, TermCheck, TermStatus
+from .schemas import Evidence, EvidenceKind, Language, Sharh, Tafsir, TermCheck, TermStatus
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 
 _quran = json.loads((DATA / "quran.json").read_text(encoding="utf-8"))
 _hadith = json.loads((DATA / "hadith.json").read_text(encoding="utf-8"))
 _tafsir = json.loads((DATA / "tafsir.json").read_text(encoding="utf-8"))
+_sharh = json.loads((DATA / "hadith_sharh.json").read_text(encoding="utf-8"))
 
 # The mushaf's hizb and sajdah marks sit in the verse text; they are page furniture, not words of the verse.
 _quran["verses"] = {k: re.sub(r"\s*[۞۩]\s*", " ", v).strip() for k, v in _quran["verses"].items()}
@@ -112,6 +113,17 @@ def get_verses(surah: int, ayah_start: int, ayah_end: int) -> Optional[Evidence]
     )
 
 
+def get_sharh(collection: str, number: int) -> Optional[Sharh]:
+    """The approved explanation of a hadith, when the encyclopedia's wording matched ours closely
+    enough to be sure it is the same hadith. Unmatched hadiths simply have none."""
+    i = _sharh["index"].get(f"{collection}:{number}")
+    if i is None:
+        return None
+    e = _sharh["entries"][i]
+    return Sharh(text=e["explanation"], grade=e["grade"], attribution=e["attribution"],
+                 source=f"{_sharh['name']} ({_sharh['publisher']})، مدخل {e['id']}")
+
+
 def get_tafsir(surah: int, ayah_start: int, ayah_end: int) -> list[Tafsir]:
     """The approved commentary covering a verse range. One entry may comment on several verses,
     so its own range is named in the source: the explanation must not be read as being about one verse."""
@@ -165,6 +177,7 @@ def search_hadith(query: str, limit: int = 2) -> list[Evidence]:
             source=f"{COLLECTIONS[h['c']]}، حديث رقم {_hadith_number(h)}",
             translation_en=h.get("e"),
             translation_source=f"{HADITH_EN_SOURCE[h['c']]}, no. {_hadith_number(h)}" if h.get("e") else None,
+            sharh=get_sharh(h["c"], h["n"]),
         ))
     return found
 

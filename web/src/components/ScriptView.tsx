@@ -261,6 +261,19 @@ export function ScriptView({ script, source, disabled, onReview, onRevise, onLoc
                 <small>{r.translation_source}</small>
               </p>
             )}
+            {r.sharh && (
+              <details className="tafsir">
+                <summary>
+                  <span className="badge">شرح</span> {r.sharh.source}
+                  <span className="badge ok">{r.sharh.grade}</span>
+                  <span className="badge">{r.sharh.attribution}</span>
+                </summary>
+                <p dir="rtl">{r.sharh.text}</p>
+                <small className="muted">
+                  شرح السيناريو لهذا الحديث يجب أن يتبع هذا الشرح. الشرح كلام الشارح، لا لفظ الحديث.
+                </small>
+              </details>
+            )}
             {r.tafsir.map((t) => (
               <details className="tafsir" key={t.source}>
                 <summary>
