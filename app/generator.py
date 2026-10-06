@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import re
 from pathlib import Path
@@ -7,7 +8,7 @@ from uuid import uuid4
 
 from dotenv import load_dotenv
 from google import genai
-from google.genai import types
+from google.genai import errors as genai_errors, types
 from pydantic import BaseModel
 
 from . import sources
@@ -21,6 +22,10 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 MODEL = os.getenv("REELS_MODEL", "gemini-pro-latest")
 REVIEW_MODEL = os.getenv("REELS_REVIEW_MODEL", "gemini-flash-latest")
+# When the main model's quota runs out mid-session, fall back rather than fail the request.
+FALLBACK_MODEL = os.getenv("REELS_FALLBACK_MODEL", REVIEW_MODEL)
+
+logger = logging.getLogger("balagh")
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
@@ -279,8 +284,8 @@ def _evidence_block(evidence: list[Evidence], lang: Language) -> str:
     return f"<evidence>\n{items}\n</evidence>"
 
 
-async def _generate(system: str, prompt: str, output: type[T], model: str = MODEL) -> T:
-    response = await client.aio.models.generate_content(
+async def _call(model: str, system: str, prompt: str, output: type[T]):
+    return await client.aio.models.generate_content(
         model=model,
         contents=prompt,
         config=types.GenerateContentConfig(
@@ -290,6 +295,18 @@ async def _generate(system: str, prompt: str, output: type[T], model: str = MODE
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         ),
     )
+
+
+async def _generate(system: str, prompt: str, output: type[T], model: str = MODEL) -> T:
+    try:
+        response = await _call(model, system, prompt, output)
+    except genai_errors.APIError as error:
+        # 429 is the quota or rate limit; 503 is the model being overloaded. Both are the model
+        # being unavailable rather than the request being wrong, so try the smaller model once.
+        if error.code not in (429, 503) or model == FALLBACK_MODEL:
+            raise
+        logger.warning("model %s unavailable (%s); falling back to %s", model, error.code, FALLBACK_MODEL)
+        response = await _call(FALLBACK_MODEL, system, prompt, output)
     if response.prompt_feedback and response.prompt_feedback.block_reason:
         raise GenerationRefused("The model declined this brief.")
     candidate = response.candidates[0] if response.candidates else None

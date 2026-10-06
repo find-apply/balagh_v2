@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -10,6 +11,8 @@ from google.genai import errors as genai_errors
 from . import generator, store
 from .schemas import Approval, ApproveIn, BriefIn, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn
 
+logger = logging.getLogger("balagh")
+
 app = FastAPI(title="بلاغ", description="Brief -> 3 video ideas -> verified script -> localization -> review.")
 
 app.add_middleware(
@@ -21,7 +24,7 @@ app.add_middleware(
 
 @app.exception_handler(generator.GenerationRefused)
 async def refused_handler(request: Request, exc: generator.GenerationRefused):
-    return JSONResponse(status_code=422, content={"detail": str(exc)})
+    return JSONResponse(status_code=422, content={"detail": "تعذّر توليد هذا الطلب: امتنع النموذج عن الاستجابة له. جرّب صياغة أخرى للموضوع."})
 
 
 @app.exception_handler(generator.Referral)
@@ -31,14 +34,23 @@ async def referral_handler(request: Request, exc: generator.Referral):
 
 @app.exception_handler(RuntimeError)
 async def generation_failed_handler(request: Request, exc: RuntimeError):
-    return JSONResponse(status_code=502, content={"detail": str(exc)})
+    # These are our own guards firing: a quote that did not match its source, or an incomplete answer.
+    logger.warning("generation failed: %s", exc)
+    return JSONResponse(status_code=502, content={
+        "detail": "لم يكتمل التوليد: لم تطابق الاقتباسات مصادرها بعد محاولتين. فضّلنا ألا نعطيك نصا غير موثّق. أعد المحاولة.",
+    })
 
 
 @app.exception_handler(genai_errors.APIError)
 async def model_api_handler(request: Request, exc: genai_errors.APIError):
-    if exc.code == 429:
-        return JSONResponse(status_code=429, content={"detail": "Model rate limit or quota reached, retry shortly."})
-    return JSONResponse(status_code=502, content={"detail": f"Model API error ({exc.code}): {exc.message}"})
+    logger.warning("model API error %s: %s", exc.code, exc.message)
+    if exc.code in (429, 503):
+        return JSONResponse(status_code=429, content={
+            "detail": "الخدمة مشغولة الآن أو بلغت حدّها. انتظر دقيقة ثم أعد المحاولة. طلبك محفوظ.",
+        })
+    return JSONResponse(status_code=502, content={
+        "detail": "تعذّر الوصول إلى خدمة التوليد. أعد المحاولة بعد قليل.",
+    })
 
 
 def _get_project(project_id: str) -> Project:

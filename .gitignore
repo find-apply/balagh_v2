@@ -11,3 +11,6 @@ dist/
 .DS_Store
 
 eval/cache/
+
+data/hadith_sharh.partial.json
+data/hadith_sharh.progress
