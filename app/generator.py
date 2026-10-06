@@ -267,7 +267,7 @@ def is_children(audience: str) -> bool:
 
 PLACEHOLDER = re.compile(r"\{\{\s*([QH]\d+)(?:\s*:\s*(\d+)(?:\s*-\s*(\d+))?)?\s*\}\}")
 ATTRIBUTION = re.compile(
-    r"قال الله|قال تعالى|قوله تعالى|الآية|الاية|النبي|رسول الله|الرسول|ﷺ|الحديث|حديث"
+    r"قال الله|قال تعالى|قوله تعالى|الآية|الاية|النبي|نبينا|نبيّنا|رسول الله|الرسول|ﷺ|الحديث|حديث"
     r"|\bprophet\b|\bhadith\b|\bquran\b|\bverse\b|\bmessenger\b",
     re.IGNORECASE,
 )
