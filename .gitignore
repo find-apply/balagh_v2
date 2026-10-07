@@ -22,3 +22,4 @@ data/hadith_sharh.progress
 template for inspiration/
 video/public/explainer/clips/
 video/samples/explainer.dry.json
+.claude/settings.local.json

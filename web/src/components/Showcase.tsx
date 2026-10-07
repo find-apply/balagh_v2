@@ -341,13 +341,31 @@ function ReelStrip({ videos }: { videos: Example['videos'] }) {
   )
 }
 
+/** The one video playing with sound, so that starting another stops it and a hover preview does not talk over it. */
+let loud: HTMLVideoElement | null = null
+const TAKE_OVER = 'balagh:reel-play'
+
 function Reel({ v, active, onFocus }: { v: Example['videos'][number]; active: boolean; onFocus: () => void }) {
   const video = useRef<HTMLVideoElement>(null)
   const [sound, setSound] = useState(false)
   const [playing, setPlaying] = useState(false)
+  useEffect(() => {
+    // another reel started with sound: this one stops and goes back to its poster
+    const stop = (e: Event) => {
+      const el = video.current
+      if (!el || (e as CustomEvent<HTMLVideoElement>).detail === el) return
+      if (!el.paused) el.pause()
+      el.currentTime = 0
+      el.muted = true
+      setSound(false)
+    }
+    window.addEventListener(TAKE_OVER, stop)
+    return () => window.removeEventListener(TAKE_OVER, stop)
+  }, [])
   const hoverPlay = () => {
     const el = video.current
     if (!el || sound) return
+    if (loud && loud !== el && !loud.paused) return
     el.muted = true
     el.play().catch(() => undefined)
   }
@@ -363,6 +381,12 @@ function Reel({ v, active, onFocus }: { v: Example['videos'][number]; active: bo
     if (!active) onFocus()
     el.muted = sound
     setSound(!sound)
+    if (!sound) {
+      loud = el
+      window.dispatchEvent(new CustomEvent(TAKE_OVER, { detail: el }))
+    } else if (loud === el) {
+      loud = null
+    }
     if (el.paused) el.play().catch(() => undefined)
   }
   return (
@@ -378,7 +402,10 @@ function Reel({ v, active, onFocus }: { v: Example['videos'][number]; active: bo
           playsInline
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
-          onEnded={() => setSound(false)}
+          onEnded={() => {
+            setSound(false)
+            if (loud === video.current) loud = null
+          }}
         />
         {!sound && (
           <button type="button" className="reel-play" onClick={toggleSound} aria-label={`شغّل مع الصوت: ${v.template}`}>
