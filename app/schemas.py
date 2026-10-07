@@ -237,6 +237,7 @@ class SceneDraft(BaseModel):
     voiceover: str = Field(description="Exact words spoken. Empty string if none.")
     on_screen_text: str = Field(description="Text overlay. Empty string if none.")
     evidence_ids: list[str] = Field(description="Ids of the evidence this scene quotes, relies on, or introduces. Empty if none.")
+    grounding: str = Field(default="", description="When the scene explains what a text means: a short verbatim run (5 to 25 words) copied from the <tafsir> or <sharh> of that text, the passage the explanation rests on. Empty when the scene only quotes, introduces, or does not explain.")
 
 
 class HadithExcerpt(BaseModel):
@@ -329,7 +330,7 @@ class SourceInfo(BaseModel):
 
 
 class Scene(SceneDraft):
-    pass
+    grounded: Optional[bool] = Field(default=None, description="For a scene that explains a text: whether its `grounding` was found verbatim in the approved commentary. None when the scene does not explain.")
 
 
 class ReferenceUsage(str, Enum):

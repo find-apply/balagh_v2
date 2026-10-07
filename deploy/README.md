@@ -31,7 +31,7 @@
 GEMINI_API_KEY=...
 MAGNIFIC_API_KEY=...
 ADMIN_TOKEN=...   # قيمة طويلة عشوائية، تفتح /#/admin
-CORS_ORIGINS=https://balagh.findapply.com
+CORS_ORIGINS=https://balagh.space
 ```
 
 ## ملاحظات من نشر balagh.space
@@ -60,26 +60,31 @@ ssh FindApply 'systemctl restart balagh-api'
 
 ## تحديث الموقع
 
-المستودع خاص، فلا يعمل `git pull` على الخادم. يُرسل الكود من الجهاز المحلي عبر SSH:
+balagh.space يعمل على هذا الجهاز نفسه (`/var/www/balagh`)، فالنشر دفع محلي لا SSH. الأوامر الثلاثة، من مستودع العمل:
 
 ```bash
-git push ssh://FindApply/var/www/balagh main
-ssh FindApply 'cd /var/www/balagh \
-  && .venv/bin/pip install -q -r requirements.txt \
-  && cd web && npm ci --silent \
-  && VITE_API_URL=https://balagh.findapply.com/api npm run build \
-  && deploy/restart.sh'
+git -C /root/balagh_v2 push /var/www/balagh main
+cd /var/www/balagh/web && VITE_API_URL=https://balagh.space/api npx vite build
+/var/www/balagh/deploy/restart.sh          # يلزم فقط إذا تغيّر كود الـ API
 ```
 
-`deploy/restart.sh` ينتظر انتهاء أي تصيير جارٍ قبل إعادة التشغيل؛ `systemctl restart` مباشرة يقطع الفيديو الذي يُصيَّر الآن ويفشله.
+`deploy/restart.sh` ينتظر انتهاء أي تصيير جارٍ قبل إعادة التشغيل؛ `systemctl restart` مباشرة يقطع الفيديو الذي يُصيَّر الآن ويفشله. تغيير الواجهة وحده لا يحتاج إعادة تشغيل.
 
-إذا تغيرت الاعتمادات في `pyproject.toml`، أعد توليد `requirements.txt` قبل الرفع:
+يحتاج الدفع المحلي إعدادين على الخادم، أُضبطا مرة واحدة:
+
+```bash
+git config --global --add safe.directory /var/www/balagh      # المستودع يملكه www-data
+git -C /var/www/balagh config receive.denyCurrentBranch updateInstead
+```
+
+إذا تغيرت الاعتمادات في `pyproject.toml`، أعد توليد `requirements.txt` قبل الدفع ثم ثبّتها على الخادم:
 
 ```bash
 uv export --no-hashes --no-emit-project -o requirements.txt
+/var/www/balagh/.venv/bin/pip install -q -r /var/www/balagh/requirements.txt
 ```
 
-بعد أن يصبح المستودع عاما يمكن استعمال `git pull` على الخادم بدل الدفع عبر SSH.
+الخادم القديم (balagh.findapply.com، عبر `ssh FindApply`) ما زال يعمل على نسخة قديمة ولا يُحدَّث.
 
 ## النشر من الصفر
 

@@ -85,7 +85,14 @@ export function Scenes({ script }: { script: Script }) {
                     {id}
                   </span>
                 ))}
+                {s.grounded === true && <span className="badge ok">الشرح مسنود</span>}
+                {s.grounded === false && <span className="badge warn">الشرح غير مسنود</span>}
               </div>
+            )}
+            {s.grounding && (
+              <p className={`grounding small${s.grounded ? '' : ' bad'}`} dir="rtl">
+                <span className="tag">من التفسير/الشرح</span> «{s.grounding}»
+              </p>
             )}
           </div>
         </li>
@@ -169,7 +176,6 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
 
   return (
     <section className="card" id="s-approve">
-      <h3>الاعتماد البشري</h3>
       <p className="muted">
         {script.author === 'specialist'
           ? 'صاحب المحتوى مختص شرعي: يراجع نسخته بنفسه ويعتمدها، ويستطيع أن يرسل رابط المراجعة لغيره إن أراد رأيا ثانيا. التصدير والفيديو النهائي بعد توقيعه.'
@@ -318,7 +324,6 @@ export function ScriptView({ projectId, script, source, templates, disabled, tab
 
       <div hidden={tab !== 'script'}>
       <section className="card" id="s-script">
-        <h3>السيناريو</h3>
         {script.warnings.length > 0 && (
           <div className="notice warn">
             <strong>تنبيهات آلية</strong>
@@ -478,7 +483,6 @@ export function ScriptView({ projectId, script, source, templates, disabled, tab
 
       <div hidden={tab !== 'review'}>
       <section className="card" id="s-review">
-        <h3>المراجعة</h3>
         {!review && <p className="muted">لم تُراجَع هذه النسخة بعد.</p>}
         {review && (
           <>

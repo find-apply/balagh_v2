@@ -16,10 +16,7 @@ export function TemplatePicker({ templates, chosen, aspect, disabled, onPick }: 
   const rest = templates?.filter((t) => t.aspect !== aspect) ?? []
   return (
     <section className="card">
-      <h3>قالب الفيديو</h3>
-      <p className="muted small">
-        القالب الذي يُحوَّل به هذا السيناريو إلى فيديو. قالب أطفال يكتب أول مرة قصة حوار من السيناريو، وهي نص جديد يلزم اعتماده.
-      </p>
+      <p className="muted small">القالب الذي يُحوَّل به السيناريو إلى فيديو. قالب أطفال يكتب أول مرة قصة حوار، وهي نص جديد يلزم اعتماده.</p>
       {!templates && <p className="muted">تعذر تحميل مكتبة القوالب. تأكد أن الخادم يعمل ثم أعد تحميل الصفحة.</p>}
       {templates && (
         <>

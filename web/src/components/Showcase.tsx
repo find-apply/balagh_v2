@@ -486,7 +486,7 @@ export function Showcase({ onStart }: { onStart: () => void }) {
       </section>
 
       {data.examples.map((ex) => (
-        <section className="section show-example" key={ex.id} id={ex.id}>
+        <section className="section show-example" key={ex.id} id={`ex-${ex.id}`}>
           <div className="section-inner">
             <h2 dir="auto">{ex.title}</h2>
             <div className="show-grid">

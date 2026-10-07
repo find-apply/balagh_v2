@@ -151,6 +151,8 @@ export interface Scene {
   voiceover: string
   on_screen_text: string
   evidence_ids: string[]
+  grounding: string
+  grounded: boolean | null
 }
 
 export interface Tafsir {

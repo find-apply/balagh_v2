@@ -89,3 +89,20 @@ def test_frame_follows_the_platform():
 def test_children_audience_detection():
     assert g.is_children("أطفال من 6 إلى 10 سنوات مع أهلهم")
     assert not g.is_children("شباب مسلمون (18-30)")
+
+
+def test_a_scene_that_explains_a_text_names_its_passage_in_the_commentary(quran_evidence):
+    quran_evidence.tafsir = [type(quran_evidence).model_fields["tafsir"].annotation.__args__[0](text="أي أن مع كل شدة فرجا قريبا، وهذا وعد من الله لعباده", source="تفسير الميسر، الشرح 5-6")]
+    good = scene("الله يقول {{Q1}}. يعني أن مع كل شدة فرجا قريبا", ["Q1"])
+    good.grounding = "مع كل شدة فرجا قريبا"
+    out = g._finalize(draft([good]), make_idea([quran_evidence]), Language.ar)
+    assert out["scenes"][0].grounded is True and not out["warnings"]
+
+    made_up = scene("الله يقول {{Q1}}. يعني أن الصبر يفتح أبواب الرزق", ["Q1"])
+    made_up.grounding = "الصبر يفتح أبواب الرزق"
+    out = g._finalize(draft([made_up]), make_idea([quran_evidence]), Language.ar)
+    assert out["scenes"][0].grounded is False and any("لم يوجد" in w for w in out["warnings"])
+
+    silent = scene("الله يقول {{Q1}}. ومعنى ذلك أن الفرج قريب", ["Q1"])
+    out = g._finalize(draft([silent]), make_idea([quran_evidence]), Language.ar)
+    assert out["scenes"][0].grounded is False and any("دون أن يسند" in w for w in out["warnings"])

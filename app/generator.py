@@ -130,6 +130,10 @@ the text says, at its own scope, and no more.
 `<sharh>` explains it, in your own simple words for this audience; do not go beyond it and do not contradict \
 it. It is prose written about the hadith, not the hadith itself: never quote it and never attribute its words \
 to the Prophet. Where a hadith has no `<sharh>`, keep the explanation to what its words plainly say.
+- On every scene that explains what a verse or hadith means, set `grounding` to a short verbatim run (5 to \
+25 words) copied from that text's `<tafsir>` or `<sharh>`: the passage your explanation rests on. The code checks \
+the run is really there, and the reviewer reads it under the scene. A scene that only quotes or introduces a text, \
+or does not explain one, leaves `grounding` empty. Where a text has no commentary, leave it empty too.
 - A Quran item may carry `<tafsir>`: an approved commentary on those verses. When you explain what a verse \
 means, say what the commentary says, in your own simple words for this audience. Do not go beyond it, and do \
 not contradict it. The commentary is Arabic prose written about the verses, not the verses themselves: never \
@@ -276,6 +280,8 @@ ATTRIBUTION = re.compile(
     r"|\bprophet\b|\bhadith\b|\bquran\b|\bverse\b|\bmessenger\b",
     re.IGNORECASE,
 )
+# A scene that explains a text, as opposed to one that only quotes or introduces it.
+EXPLAINS = re.compile(r"يعني|معنى|المعنى|أي أن|يقصد|المقصود|تعني|يدل|تدل|يخبرنا|يعلمنا|تعلمنا|\bmeans\b|\bmeaning\b|\bteaches\b|\btells us\b|\bthat is\b", re.IGNORECASE)
 REPORTED = re.compile(r"\bقال|يقول|قالت|أخبر|أمر|نهى|وعد|«|\bsaid\b|\bsays\b|\btold\b|\btaught\b|\bpromis", re.IGNORECASE)
 KNOWLEDGE = {
     AudienceKnowledge.familiar: "familiar (knows Islamic terms)",
@@ -517,9 +523,20 @@ def _finalize(draft: ScriptDraft, idea: Idea, lang: Language) -> dict:
         # Defining a word ("the hadith is the Prophet's words") is not an attribution; reporting or quoting is.
         if not ids and ATTRIBUTION.search(text) and REPORTED.search(text):
             warnings.append(f"المشهد {n} يذكر نصا شرعيا أو ينسب قولا دون دليل موثق مرتبط به.")
+        # The explanation's anchor in the approved commentary: present and verbatim, or the reviewer is told.
+        grounded: Optional[bool] = None
+        if s.grounding.strip():
+            commentary = " ".join(t.text for i in ids for t in evidence[i].tafsir) + " " + " ".join(evidence[i].sharh.text for i in ids if evidence[i].sharh)
+            grounded = sources.contains_run(commentary, s.grounding)
+            if not grounded:
+                warnings.append(f"المشهد {n}: المقطع الذي يسند الشرح لم يوجد بنصه في التفسير أو الشرح المعتمد.")
+        elif ids and EXPLAINS.search(text) and any(evidence[i].tafsir or evidence[i].sharh for i in ids):
+            grounded = False
+            warnings.append(f"المشهد {n} يشرح نصا له تفسير أو شرح معتمد دون أن يسند شرحه إلى مقطع منه.")
         scenes.append(Scene(
             start_second=s.start_second, end_second=s.end_second, visual=s.visual, art=s.art,
             voiceover=fill(s.voiceover), on_screen_text=fill(s.on_screen_text), evidence_ids=ids,
+            grounding=s.grounding.strip(), grounded=grounded,
         ))
     hook, cta = fill(draft.hook), fill(draft.call_to_action)
     posts = [p.model_copy(update={"caption": fill(p.caption)}) for p in draft.posts]

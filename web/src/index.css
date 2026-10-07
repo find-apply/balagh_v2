@@ -4014,3 +4014,77 @@ button:not(.primary):disabled {
 .story-card .notice {
   margin: 12px 0 16px;
 }
+
+/* the passage of the approved commentary a scene's explanation rests on */
+.grounding {
+  margin: 6px 0 0;
+  padding: 6px 10px;
+  border-inline-start: 3px solid var(--brand);
+  background: var(--brand-soft);
+  border-radius: 6px;
+  color: var(--ink-2);
+}
+
+.grounding.bad {
+  border-color: var(--bad);
+  background: var(--bad-bg);
+}
+
+/* a folded explanation under a short line: the button stays above the fold on a phone */
+details.more > summary {
+  cursor: pointer;
+  color: var(--brand);
+}
+
+details.more > p {
+  margin-top: 8px;
+}
+
+/* the template library on a phone: compact rows, the picture small beside the text */
+@media (max-width: 720px) {
+  .templates {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .templates .idea {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-areas: 'pic head' 'pic text' 'pic btn';
+    column-gap: 12px;
+    align-items: start;
+    padding: 10px;
+  }
+
+  .templates .preview,
+  .templates .preview.tall {
+    grid-area: pic;
+    width: 96px;
+    height: 96px;
+    margin: 0;
+    border-radius: 10px;
+  }
+
+  .templates .badges {
+    grid-area: head;
+  }
+
+  .templates h4,
+  .templates p {
+    grid-column: 2;
+  }
+
+  .templates p {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .templates .primary {
+    grid-area: btn;
+    justify-self: start;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+  }
+}

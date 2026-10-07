@@ -94,6 +94,7 @@ export function toMarkdown(s: Script): string {
     lines.push(`- الصورة: ${sc.visual}`)
     if (sc.voiceover) lines.push(`- التعليق الصوتي: ${sc.voiceover}`)
     if (sc.on_screen_text) lines.push(`- النص على الشاشة: ${sc.on_screen_text}`)
+    if (sc.grounding) lines.push(`- يستند الشرح إلى (${sc.grounded ? 'وُجد في المعتمد' : 'لم يوجد في المعتمد'}): «${sc.grounding}»`)
     lines.push('')
   })
   lines.push(`**الدعوة إلى الفعل:** ${s.call_to_action}`, '', `**الصوت:** ${s.audio}`, '', '## المصادر', '')
@@ -109,7 +110,7 @@ export function toMarkdown(s: Script): string {
   }
   lines.push('', '## المنشورات', '')
   s.posts.forEach((p) => lines.push(`### ${PLATFORMS[p.platform]}`, '', p.caption, '', p.hashtags.join(' '), ''))
-  lines.push('## الاعتماد', '', `صاحب المحتوى: ${AUTHORS[s.author].label}${s.author === 'specialist' ? ' (مراجعة ذاتية)' : ''}`, '')
+  lines.push('## الاعتماد', '', `صاحب المحتوى: ${AUTHORS[s.author].label}${s.author === 'specialist' ? ' (مراجعة ذاتية)' : ''} · الصفة معلَنة من المستخدم، غير موثّقة`, '')
   s.approvals.forEach((a) => lines.push(`- ${ROLES[a.role]}: ${a.name} (${new Date(a.at).toLocaleString('ar')})`))
   lines.push('', '---', '', s.ai_disclosure)
   return lines.join('\n')
