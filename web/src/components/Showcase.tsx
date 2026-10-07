@@ -355,7 +355,7 @@ function Reel({ v, active, onFocus }: { v: Example['videos'][number]; active: bo
     const el = video.current
     if (!el || sound) return
     el.pause()
-    el.currentTime = 1.5
+    el.currentTime = 0
   }
   const toggleSound = () => {
     const el = video.current
@@ -368,12 +368,13 @@ function Reel({ v, active, onFocus }: { v: Example['videos'][number]; active: bo
   return (
     <figure className={`reel ${v.aspect === '9:16' ? 'tall' : 'wide'}${active ? ' active' : ''}${playing ? ' playing' : ''}`} onMouseEnter={hoverPlay} onMouseLeave={hoverStop}>
       <div className="reel-frame">
-        {/* the #t fragment makes the browser draw the first frame instead of a black box */}
+        {/* the poster is one of the stills the automatic check took of this video */}
         <video
           ref={video}
           controls={sound}
           preload="metadata"
-          src={`${BASE}${v.url}#t=1.5`}
+          poster={`${BASE}${v.url.replace(/\.mp4$/, '_f1.jpg')}`}
+          src={`${BASE}${v.url}`}
           playsInline
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}

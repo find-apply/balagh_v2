@@ -3876,3 +3876,30 @@ details.card[open] > summary {
     display: none;
   }
 }
+
+/* the figure takes the video's width, so a long caption wraps under it instead of widening the frame */
+.reel.tall {
+  width: 292px;
+}
+
+.reel.wide {
+  width: 460px;
+}
+
+.reel figcaption {
+  max-width: none;
+}
+
+.reel .reel-frame {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .reel.tall {
+    width: calc(70vh * 9 / 16);
+  }
+
+  .reel.wide {
+    width: 86vw;
+  }
+}
