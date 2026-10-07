@@ -232,3 +232,11 @@ websockets==16.1.1
     # via
     #   google-genai
     #   uvicorn
+internetarchive==5.11.1
+    # via balagh (pyproject.toml)
+jsonpatch==1.33
+    # via internetarchive
+jsonpointer==3.1.1
+    # via jsonpatch
+tqdm==4.70.1
+    # via internetarchive

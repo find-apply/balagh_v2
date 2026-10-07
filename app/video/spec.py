@@ -12,7 +12,7 @@ from pathlib import Path
 
 from ..schemas import EvidenceKind, Language, Reference, ReferenceUsage, Script, StoryScene, StorySceneKind
 from .. import sources
-from . import catalog, media, recitation
+from . import catalog, hadith_fetch, media, recitation
 
 LEAD = 0.3      # silence before the first line of a scene
 GAP = 0.5       # between lines
@@ -95,6 +95,11 @@ async def recite(ref: Reference, build: Build, quoted_text: str | None = None) -
             build.notes.append(f"تعذر جلب تلاوة {ref.source}، فعُرضت الآية بصمت.")
         return clip
     clip = recitation.hadith_recording(ref)
+    if clip is None and hadith_fetch.enabled():
+        # Bukhari: fetched from the archive on first use, cut to the quoted words and checked before use.
+        clip = await hadith_fetch.obtain(ref)
+        if clip is not None:
+            build.notes.append(f"تسجيل الحديث ({ref.source}) جُلب من الأرشيف وقُصّ وتُحقق منه آليا؛ راجع الحقوق قبل النشر التجاري.")
     if clip is None:
         name = (ref.hadith_key or "").replace(":", "-") or "الحديث"
         build.notes.append(
