@@ -53,7 +53,7 @@ export const ROLES = { creator: 'صانع المحتوى', scholar: 'مراجع 
 
 export const AUTHORS: Record<AuthorRole, { label: string; hint: string }> = {
   specialist: { label: 'مختص شرعي', hint: 'شيخ أو طالب علم: تراجع محتواك بنفسك وتعتمده، وتطلب مراجعة غيرك إن شئت' },
-  creator: { label: 'صانع محتوى', hint: 'كل نسخة يراجعها مختص شرعي قبل النشر، عبر رابط المراجعة' },
+  creator: { label: 'غير مختص', hint: 'صانع محتوى بلا تخصص شرعي: كل نسخة يراجعها مختص شرعي قبل النشر، عبر رابط المراجعة' },
 }
 
 export const CHARACTERS: Record<string, string> = { narr: 'الراوي', salim: 'سالم', maryam: 'مريم', nour: 'نور' }

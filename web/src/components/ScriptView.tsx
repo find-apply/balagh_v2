@@ -165,7 +165,7 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
       <p className="muted">
         {script.author === 'specialist'
           ? 'صاحب المحتوى مختص شرعي: يراجع نسخته بنفسه ويعتمدها، ويستطيع أن يرسل رابط المراجعة لغيره إن أراد رأيا ثانيا. التصدير والفيديو النهائي بعد توقيعه.'
-          : 'صاحب المحتوى صانع محتوى: كل نسخة يراجعها مختص شرعي قبل النشر، عبر رابط المراجعة. لا يُفتح الفيديو النهائي والتصدير قبل اكتمال التوقيعات.'}
+          : 'صاحب المحتوى غير مختص: كل نسخة يراجعها مختص شرعي قبل النشر، عبر رابط المراجعة. لا يُفتح الفيديو النهائي والتصدير قبل اكتمال التوقيعات.'}
       </p>
       <PreviewForReview projectId={projectId} script={script} onGo={onGo} />
       {script.approved && (
@@ -199,6 +199,19 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
           </ul>
         </div>
       )}
+      {script.author === 'specialist' && !script.approved && (
+        <div className={`notice${script.review?.blocking || script.warnings.length ? ' bad' : ''}`}>
+          <strong>قبل توقيعك: ما وجدته المراجعة الآلية.</strong>
+          <p className="small">
+            {!script.review
+              ? 'لم تُجرَ المراجعة الآلية على هذه النسخة بعد. لا تلزمك، لكنها تدلّك على مواضع النظر.'
+              : script.review.blocking
+                ? `${script.review.blocking} ملاحظة مانعة لم تُصحَّح. أنت من يقرر: صحّح في نسخة جديدة، أو اعتمد النسخة كما هي وهي مسؤوليتك.`
+                : 'لا ملاحظات مانعة.'}
+            {script.warnings.length > 0 && ` تنبيه آلي: ${script.warnings.length === 1 ? 'مشهد يذكر' : `${script.warnings.length} مشاهد تذكر`} نصا شرعيا دون دليل موثق مرتبط به.`}
+          </p>
+        </div>
+      )}
       <ul className="approvals">
         {script.required_approvals.map((r) => {
           const done = script.approvals.find((a) => a.role === r.role)
@@ -206,7 +219,8 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
             <li key={r.role} className={done ? 'done' : ''}>
               <div className="badges">
                 <span className={done ? 'badge ok' : 'badge warn'}>{done ? 'معتمد' : 'بانتظار الاعتماد'}</span>
-                <strong>{ROLES[r.role]}</strong>
+                <strong>{r.role === 'creator' && script.author === 'specialist' ? 'مختص شرعي' : ROLES[r.role]}</strong>
+                {r.role === 'creator' && script.author === 'specialist' && <span className="badge info">مراجعة ذاتية</span>}
               </div>
               <p className="muted small">{r.reason}</p>
               {done && (
