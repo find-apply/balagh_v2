@@ -10,6 +10,7 @@ dependencies = [
     "python-dotenv>=1.2.4",
     "sqlalchemy>=2.0.54",
     "internetarchive>=5.0",
+    "openai>=3.26.0",
 ]
 
 [dependency-groups]

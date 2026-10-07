@@ -106,3 +106,25 @@ def test_a_scene_that_explains_a_text_names_its_passage_in_the_commentary(quran_
     silent = scene("الله يقول {{Q1}}. ومعنى ذلك أن الفرج قريب", ["Q1"])
     out = g._finalize(draft([silent]), make_idea([quran_evidence]), Language.ar)
     assert out["scenes"][0].grounded is False and any("دون أن يسند" in w for w in out["warnings"])
+
+
+def test_gpt_models_are_routed_to_openai_and_sources_stay_with_gemini(monkeypatch):
+    """The provider is picked by the model's name; attachments (a video, a file) are only read by Gemini."""
+    import asyncio
+    from google.genai import types
+    from pydantic import BaseModel
+
+    class Out(BaseModel):
+        x: int
+
+    seen = {}
+
+    async def fake_openai(system, prompt, output, model, parts=()):
+        seen["model"] = model
+        return Out(x=1)
+
+    real = g._call_openai
+    monkeypatch.setattr(g, "_call_openai", fake_openai)
+    assert asyncio.run(g._call_model("s", "p", Out, "gpt-5.4")).x == 1 and seen["model"] == "gpt-5.4"
+    with pytest.raises(RuntimeError):
+        asyncio.run(real("s", "p", Out, "gpt-5.4", (types.Part.from_text(text="a source"),)))

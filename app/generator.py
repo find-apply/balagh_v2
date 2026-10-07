@@ -29,6 +29,17 @@ FALLBACK_MODEL = os.getenv("REELS_FALLBACK_MODEL", "gemini-flash-latest")
 logger = logging.getLogger("balagh")
 
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+# A second provider behind the same call: a model name starting with "gpt-" goes to OpenAI. The pipeline around
+# the call (evidence, placeholders, verification, review) is the same whichever model writes.
+_openai = None
+
+
+def _openai_client():
+    global _openai
+    if _openai is None:
+        from openai import AsyncOpenAI
+        _openai = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    return _openai
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -380,6 +391,8 @@ async def _generate(system: str, prompt: str, output: type[T], role: str = "gene
 
 
 async def _call_model(system: str, prompt: str, output: type[T], model: str, parts: tuple[types.Part, ...] = ()) -> T:
+    if model.startswith("gpt-"):
+        return await _call_openai(system, prompt, output, model, parts)
     contents = [types.Content(role="user", parts=[*parts, types.Part.from_text(text=prompt)])] if parts else prompt
     response = await client.aio.models.generate_content(
         model=model,
@@ -400,6 +413,25 @@ async def _call_model(system: str, prompt: str, output: type[T], model: str, par
             raise GenerationRefused("The model declined this brief.")
         raise RuntimeError(f"Incomplete model output (finish_reason={reason})")
     return output.model_validate_json(response.text)
+
+
+async def _call_openai(system: str, prompt: str, output: type[T], model: str, parts: tuple[types.Part, ...] = ()) -> T:
+    """The same structured call through OpenAI. Attachments are not carried over: a brief with a source still
+    goes to Gemini, which reads video and documents."""
+    if parts:
+        raise RuntimeError("Sources (video, files) are read by Gemini; choose a Gemini model for a brief with a source.")
+    response = await _openai_client().responses.parse(
+        model=model,
+        instructions=system,
+        input=prompt,
+        text_format=output,
+    )
+    if response.output_parsed is None:
+        refusal = next((c.refusal for item in response.output for c in getattr(item, "content", []) if getattr(c, "type", "") == "refusal"), None)
+        if refusal:
+            raise GenerationRefused("The model declined this brief.")
+        raise RuntimeError("Incomplete model output (no parsed result)")
+    return response.output_parsed
 
 
 # ---- Ideas ----

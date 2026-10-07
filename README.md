@@ -97,7 +97,8 @@ npm run dev                 # http://localhost:5173
 | المتغير | الوظيفة | الافتراضي |
 |---|---|---|
 | `GEMINI_API_KEY` | مفتاح Gemini (مطلوب) | |
-| `REELS_MODEL` | نموذج التوليد | `gemini-pro-latest` |
+| `REELS_MODEL` | نموذج التوليد. اسم يبدأ بـ`gpt-` يذهب إلى OpenAI (يلزم `OPENAI_API_KEY`)، وما عداه إلى Gemini. المصادر (فيديو، ملفات) يقرؤها Gemini وحده | `gemini-pro-latest` |
+| `OPENAI_API_KEY` | مفتاح OpenAI، يلزم فقط إذا اختير نموذج `gpt-` للتوليد | |
 | `REELS_REVIEW_MODEL` | نموذج المراجعين | `gemini-flash-latest` |
 | `DATABASE_URL` | قاعدة Postgres بدل SQLite | `data/balagh.db` |
 | `ROOT_PATH` | البادئة التي يُخدم تحتها الـAPI خلف nginx (مثل `/api`)، حتى تعمل صفحة `/docs` | فارغ |
