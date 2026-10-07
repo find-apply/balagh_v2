@@ -254,6 +254,7 @@ export interface Script {
   approvals: Approval[]
   change_requests: ChangeRequest[]
   author: AuthorRole
+  must_recheck: ReviewRole[]
   required_approvals: { role: ReviewRole; reason: string }[]
   approved: boolean
   template: string | null

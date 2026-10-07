@@ -273,6 +273,18 @@ async def approve_script(project_id: str, script_id: str, body: ApproveIn) -> Sc
     return script
 
 
+@app.get("/projects/{project_id}/scripts/{script_id}/export", response_model=Script)
+async def export_script(project_id: str, script_id: str) -> Script:
+    """The approved version for publishing. Refused until every role the version requires has signed it: the
+    lock is on the server, not only in the interface."""
+    project = _get_project(project_id)
+    script = _get_script(project, script_id)
+    if not script.approved:
+        missing = [r.role.value for r in script.required_approvals if r.role not in {a.role for a in script.approvals}]
+        raise HTTPException(status_code=423, detail=f"التصدير مقفل حتى يكتمل الاعتماد. ينقص: {'، '.join(missing) or 'طلب تعديل مفتوح'}.")
+    return script
+
+
 @app.post("/projects/{project_id}/scripts/{script_id}/request-changes", response_model=Script)
 async def request_changes(project_id: str, script_id: str, body: ChangeRequestIn) -> Script:
     """A reviewer declines this version and says what must change. The version cannot be approved any more:

@@ -78,3 +78,27 @@ def make_project(script: Script, evidence: list[Evidence]) -> Project:
 
 
 NOW = datetime.now(timezone.utc)
+
+
+import pytest  # noqa: E402
+from app import main, store  # noqa: E402
+from app.schemas import Video, VideoStatus  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+
+@pytest.fixture
+def client(quran_evidence, monkeypatch):
+    script = make_script([make_scene(0, 10, "مرحبا", ["Q1"])], [quoted_ref(quran_evidence)])
+    store.save(make_project(script, [quran_evidence]))
+    started = []
+
+    def fake_start(project_id, script, template_id, preview=False):
+        v = Video(id=f"v{len(started)+1}", project_id=project_id, script_id=script.id, template=template_id,
+                  preview=preview, status=VideoStatus.queued, created_at=NOW)
+        store.save_video(v); started.append(v)
+        return v
+
+    monkeypatch.setattr(main.render, "start", fake_start)
+    c = TestClient(main.app)
+    c.started = started
+    return c

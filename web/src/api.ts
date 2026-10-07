@@ -83,6 +83,7 @@ export const api = {
     request<ReviewReport>('POST', `/projects/${projectId}/scripts/${scriptId}/review`),
   revise: (projectId: string, scriptId: string, notes: string | null) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/revise`, { notes }),
+  exportScript: (projectId: string, scriptId: string) => request<Script>('GET', `/projects/${projectId}/scripts/${scriptId}/export`),
   approve: (projectId: string, scriptId: string, role: ReviewRole, name: string, note?: string) =>
     request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/approve`, { role, name, note: note ?? null }),
   requestChanges: (projectId: string, scriptId: string, role: ReviewRole, name: string, note: string) =>

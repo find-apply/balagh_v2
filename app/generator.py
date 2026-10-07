@@ -12,7 +12,7 @@ from google import genai
 from google.genai import errors as genai_errors, types
 from pydantic import BaseModel
 
-from . import flow_settings, sources, store
+from . import screen, flow_settings, sources, store
 from .video import catalog
 from .schemas import (
     SourcedIdeaDraft, SourcedIdeasDraft,
@@ -427,6 +427,9 @@ async def generate_ideas(brief: BriefIn) -> list[Idea]:
 async def generate_ideas_from(brief: BriefIn, source_part: Optional[types.Part]) -> tuple[list[Idea], str]:
     """Three ideas with their verified evidence, and (with a source) the model's summary of that source."""
     duration = f"{brief.duration_seconds} seconds (fixed by the creator)" if brief.duration_seconds else "not set, suggest one per idea"
+    # A personal case is referred before any model sees it, whatever the model would have said.
+    if screen.personal_case(brief.idea):
+        raise Referral(screen.REFERRAL)
     prompt = (
         f"<idea>{brief.idea or ('not given: take the topics from the attached source' if source_part else 'not given, choose the topics yourself')}</idea>\n\n"
         f"{_target_block(brief, brief.platforms, duration)}"
@@ -439,8 +442,12 @@ async def generate_ideas_from(brief: BriefIn, source_part: Optional[types.Part])
         raise Referral(draft.referral_message or "هذه المسألة تحتاج إلى مفتٍ أو جهة إفتاء مؤهلة تسمع تفاصيلها.")
     if len(draft.ideas) != 3 or any(i.content_level == ContentLevel.D for i in draft.ideas):
         raise RuntimeError("The model did not return 3 usable ideas")
+    # The code's own look at the brief: a disputed matter is level C whatever the model said.
+    raised = screen.disputed(brief.idea)
     ideas = []
     for d in draft.ideas:
+        if raised and d.content_level in (ContentLevel.A, ContentLevel.B):
+            d.content_level = ContentLevel.C
         evidence, unverified = sources.build_evidence(d.quran_requests, d.hadith_queries)
         sourced = isinstance(d, SourcedIdeaDraft)
         ideas.append(Idea(
@@ -707,5 +714,6 @@ async def revise_script(script: Script, idea: Idea, notes: Optional[str], earlie
     fields = await _write(SCRIPT_SYSTEM, prompt, LocalizedDraft if localized else ScriptDraft, idea, script.target.language)
     return script.model_copy(update=dict(
         id=_new_id(), version=script.version + 1, revised_from=script.id, review=None, approvals=[], change_requests=[],
+        must_recheck=sorted({*script.must_recheck, *(c.role for c in script.change_requests)}),
         adaptation_notes=fields["draft"].adaptation_notes if localized else [], **fields,
     ))

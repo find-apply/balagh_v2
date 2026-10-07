@@ -1,28 +1,7 @@
 """The HTTP layer around a seeded project: everything that does not need the model."""
-import pytest
-from fastapi.testclient import TestClient
 
-from app import main, store
-from app.schemas import Video, VideoStatus
+from app import store
 from tests.conftest import NOW, make_project, make_scene, make_script, quoted_ref
-
-
-@pytest.fixture
-def client(quran_evidence, monkeypatch):
-    script = make_script([make_scene(0, 10, "مرحبا", ["Q1"])], [quoted_ref(quran_evidence)])
-    store.save(make_project(script, [quran_evidence]))
-    started = []
-
-    def fake_start(project_id, script, template_id, preview=False):
-        v = Video(id=f"v{len(started)+1}", project_id=project_id, script_id=script.id, template=template_id,
-                  preview=preview, status=VideoStatus.queued, created_at=NOW)
-        store.save_video(v); started.append(v)
-        return v
-
-    monkeypatch.setattr(main.render, "start", fake_start)
-    c = TestClient(main.app)
-    c.started = started
-    return c
 
 
 def test_docs_and_templates(client):

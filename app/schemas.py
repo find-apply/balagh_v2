@@ -437,6 +437,7 @@ class Script(BaseModel):
     review: Optional[ReviewReport] = None
     approvals: list[Approval] = Field(default_factory=list, description="Human sign-offs on this exact version.")
     change_requests: list[ChangeRequest] = Field(default_factory=list, description="Reviewers who declined this version and what they asked for.")
+    must_recheck: list[ReviewRole] = Field(default_factory=list, description="Roles that asked for changes on a version this one corrects: they sign this one too, whoever wrote it.")
     template: Optional[str] = Field(default=None, description="Video template chosen for this script.")
     story: Optional["Story"] = Field(default=None, description="Dialogue story, written when a children's template is chosen.")
     ai_disclosure: str = AI_DISCLOSURE
@@ -466,6 +467,9 @@ class Script(BaseModel):
                 role=ReviewRole.language,
                 reason="نسخة موطّنة: الملاءمة اللغوية والثقافية لا تُفحص آليا.",
             ))
+        for role in self.must_recheck:
+            if all(r.role != role for r in required):
+                required.append(RequiredApproval(role=role, reason="طلب تعديلا على نسخة سابقة، فيراجع التصحيح بنفسه."))
         return required
 
     @computed_field(description="True once every required role has signed off. Required before export.")

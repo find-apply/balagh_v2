@@ -35,8 +35,16 @@ interface Props {
 
 type Handlers = Pick<ScriptActions, 'onReview' | 'onLocalize' | 'onApprove'>
 
-function download(script: Script) {
-  const url = URL.createObjectURL(new Blob([toMarkdown(script)], { type: 'text/markdown;charset=utf-8' }))
+/** The file comes from the server's export, which refuses a version that is not approved. */
+async function download(projectId: string, script: Script) {
+  let approved: Script
+  try {
+    approved = await api.exportScript(projectId, script.id)
+  } catch (e) {
+    alert(e instanceof Error ? e.message : String(e))
+    return
+  }
+  const url = URL.createObjectURL(new Blob([toMarkdown(approved)], { type: 'text/markdown;charset=utf-8' }))
   const a = document.createElement('a')
   a.href = url
   a.download = `${script.title}.md`
@@ -271,7 +279,7 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
       )}
       {editable && (
       <div className="actions">
-        <button disabled={!script.approved} onClick={() => download(script)} title="يتاح بعد اكتمال الاعتماد">
+        <button disabled={!script.approved} onClick={() => void download(projectId, script)} title="يتاح بعد اكتمال الاعتماد">
           صدّر Markdown
         </button>
         {!script.approved && <span className="muted small">التصدير يُفتح بعد اكتمال الاعتماد.</span>}
