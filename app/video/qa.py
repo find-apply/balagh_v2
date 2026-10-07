@@ -17,6 +17,7 @@ SILENCE_MIN = 4.0                    # a pause longer than this is a fault unles
 BLACK_MIN = 1.0
 LENGTH_TOLERANCE = 2.0
 FRAMES = 4
+OUTRO_SECONDS = 3.5     # the caption templates close on a silent call-to-action card (video/src/spec.tsx)
 
 
 @dataclass
@@ -46,6 +47,8 @@ def expected_silences(template_id: str, props: dict) -> list[tuple[float, float]
     for c in props.get("cues", []):                  # captions and geo: a cue with a note is a silent quote
         if c.get("sub"):
             out.append((c["t0"], c["t1"]))
+    if "duration" in props:                          # and the closing card is silent by design
+        out.append((props["duration"], props["duration"] + OUTRO_SECONDS))
     return out
 
 
@@ -155,7 +158,7 @@ def spec_duration(template_id: str, props: dict) -> float | None:
         return props.get("introSeconds", 0) + props.get("ctaSeconds", 0) + sum(s["duration"] for s in props.get("shots", []))
     if "scenes" in props and "cues" not in props:
         return sum(s["duration"] for s in props["scenes"])
-    return props.get("duration")
+    return props["duration"] + OUTRO_SECONDS if "duration" in props else None
 
 
 def load_props(path: Path) -> dict:

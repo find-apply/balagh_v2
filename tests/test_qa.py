@@ -18,7 +18,7 @@ def clip(path, seconds=8, audio="sine=frequency=440:sample_rate=48000", video="c
 def test_quiet_clip_is_normalized(tmp_path):
     p = clip(tmp_path / "quiet.mp4", gain_db=-25)
     before = asyncio.run(qa.inspect(p)).loudness
-    checks, after, stills = asyncio.run(qa.run(p, "captions", {"cues": [], "duration": 8}, 8, tmp_path, "quiet"))
+    checks, after, stills = asyncio.run(qa.run(p, "captions", {"cues": [], "duration": 4.5}, 8, tmp_path, "quiet"))
     assert before < qa.LOUDNESS_RANGE[0]
     assert qa.LOUDNESS_RANGE[0] <= after <= qa.LOUDNESS_RANGE[1]
     assert next(c for c in checks if c.name == "loudness").ok and "سُوّي" in next(c for c in checks if c.name == "loudness").detail
@@ -41,6 +41,11 @@ def test_black_frames_and_wrong_length_are_flagged(tmp_path):
     checks, _, _ = asyncio.run(qa.run(p, "captions", {"cues": [], "duration": 10}, 10, tmp_path, "black"))
     assert not next(c for c in checks if c.name == "black").ok
     assert not next(c for c in checks if c.name == "length").ok
+
+
+def test_caption_templates_end_on_a_silent_card():
+    assert qa.expected_silences("geo", {"cues": [], "duration": 53}) == [(53, 56.5)]
+    assert qa.spec_duration("geo", {"cues": [], "duration": 53}) == 56.5
 
 
 def test_expected_silences_follow_each_template():
