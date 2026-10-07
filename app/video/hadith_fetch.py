@@ -68,7 +68,7 @@ def download(number: int) -> Optional[Path]:
         return out
     try:
         f = _session().get_item(item).get_file(name)
-        f.download(str(out), silent=True, ignore_existing=False)
+        f.download(str(out), verbose=False, ignore_existing=False)
     except Exception as e:  # network, login, or a file that is not there
         logger.warning("archive.org %s/%s: %s", item, name, e)
         out.unlink(missing_ok=True)
