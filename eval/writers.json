@@ -1,0 +1,394 @@
+[
+ {
+  "label": "الصدق في البيع",
+  "idea": "قصة من السوق",
+  "level": "A",
+  "evidence": [
+   "H1"
+  ],
+  "models": {
+   "gemini-pro-latest": {
+    "seconds": 40.1,
+    "title": "قصة من السوق",
+    "hook": "تشتري منتجا من الإنترنت وتصدم بالواقع؟",
+    "level": "A",
+    "scenes": 6,
+    "words": 80,
+    "quoted": [
+     [
+      "H1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] تشتري منتجاً من الإنترنت، وتُصدم بأنه مختلف تماماً عن الصورة؟\n[5-13] في يوم من الأيام، مر النبي ﷺ في السوق على طعام للبيع، فأدخل يده فيه فوجده مبللا.\n[13-21] سأل البائع، فقال: أصابه المطر. فأجابه النبي ﷺ: هلا جعلته فوق الطعام ليراه الناس؟\n[21-27] ثم قال كلمته الحاسمة: «مَنْ غَشَّ فَلَيْسَ مِنِّي»\n[27-35] وهذا لا ينفي إسلامه، بل يعني أنه ترك طريق النبي وسنته، كنوع من الزجر الشديد.\n[35-45] إخفاء عيوب السلعة، أو تجميلها بفلاتر خادعة، هو غش صريح. كن أميناً، فالصدق هو أساس البركة.",
+    "cta": "شارك المقطع لتنشر الوعي والأمانة بين الناس."
+   },
+   "gpt-5.4": {
+    "seconds": 21.8,
+    "title": "قصة من السوق",
+    "hook": "تشتري منتجًا من الإنترنت ثم تُصدم بالواقع؟",
+    "level": "A",
+    "scenes": 6,
+    "words": 110,
+    "quoted": [
+     [
+      "H1",
+      "quoted"
+     ]
+    ],
+    "warnings": [
+     "المشهد 2 يشرح نصا له تفسير أو شرح معتمد دون أن يسند شرحه إلى مقطع منه."
+    ],
+    "grounded": [
+     false,
+     true,
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] تشتري منتجًا من الإنترنت، ثم تفاجأ أن الواقع غير الصورة؟\n[5-11] هذا المعنى ليس جديدًا. في السوق، وقع موقف نبوي واضح جدًا في مسألة الغش.\n[11-20] النبي صلى الله عليه وسلم مرَّ على طعام للبيع، فوجد أسفله مبللًا، ثم قال: «مَا هَذَا يَا صَاحِبَ الطَّعَامِ. قَالَ أَصَابَتْهُ السَّمَاءُ يَا رَسُولَ اللَّهِ. قَالَ أَفَلاَ جَعَلْتَهُ فَوْقَ الطَّعَامِ كَىْ يَرَاهُ النَّاسُ مَنْ غَشَّ فَلَيْسَ مِنِّي»\n[20-28] المشكلة لم تكن في وجود البلل فقط، بل في إخفائه عن الناس حتى يُخدعوا.\n[28-36] واليوم يدخل هذا في صور كثيرة: فلاتر تخدع، زوايا تخفي العيب، أو وصف لا يطابق الحقيقة.\n[36-45] إذا انتسبتَ لهدي النبي، فلا تجمع بينه وبين الغش. أظهر العيب، واصدق، فالصدق من هديه، والغش ليس من أخلاقنا.",
+    "cta": "قبل أن تبيع أو تروّج: هل أظهرت الحقيقة كاملة؟"
+   }
+  }
+ },
+ {
+  "label": "بر الوالدين",
+  "idea": "خمس دقائق للبر",
+  "level": "A",
+  "evidence": [
+   "H1",
+   "H2"
+  ],
+  "models": {
+   "gemini-pro-latest": {
+    "seconds": 52.4,
+    "title": "خمس دقائق للبر",
+    "hook": "مشغول طول اليوم بالدراسة والعمل؟ هكذا تبر والديك في خمس دقائق فقط.",
+    "level": "A",
+    "scenes": 5,
+    "words": 87,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 1,
+    "findings": [
+     {
+      "sev": "blocking",
+      "who": "audience",
+      "issue": "تمت الإشارة إلى الحديث والاستدلال به بعبارة «تأمل هذا الحديث» دون بيان درجة ثبوته، وهو ما يخالف ضابط مصطلح «الحديث» المعتمد الذي يشترط بيان درجة الثبوت عند الاستدلال."
+     }
+    ],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] مشغول طول اليوم بالدراسة والعمل؟ هكذا تبر والديك في خمس دقائق فقط.\n[6-15] وسط زحمة يومك، أرسل لهما رسالة قصيرة: طمنوني عنكم، أحتاج دعواتكم.. هذا يسعد قلبهما جدا.\n[15-23] أو خصص لهما دعوة ثابتة في سجودك، لا تفارق صلاتك أبدا.\n[23-30] أو مكالمة سريعة في الطريق. البر لا يحتاج دائما لوقت طويل، بل لقلب حاضر.\n[30-45] تأمل هذا الحديث: «سَأَلْتُ النَّبِيَّ صلى الله عليه وسلم أَىُّ الْعَمَلِ أَحَبُّ إِلَى اللَّهِ قَالَ الصَّلاَةُ عَلَى وَقْتِهَا. قَالَ ثُمَّ أَىُّ قَالَ ثُمَّ بِرُّ الْوَالِدَيْنِ» فبرهما يكون بالإحسان إليهما والقيام بحقهما. لا تبخل عليهما بوقتك!",
+    "cta": "شارك المقطع وذكر غيرك، وابدأ اليوم ببر والديك."
+   },
+   "gpt-5.4": {
+    "seconds": 26.3,
+    "title": "خمس دقائق للبر",
+    "hook": "مشغول طول اليوم بالدراسة والشغل؟ تستطيع أن تبر والديك في خمس دقائق متفرقة.",
+    "level": "A",
+    "scenes": 8,
+    "words": 116,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] مشغول طول اليوم بالدراسة والشغل؟ تستطيع أن تبر والديك في خمس دقائق متفرقة.\n[5-10] أول شيء: أرسل لهما رسالة قصيرة في وسط اليوم. فقط: كيف حالكما؟ هل تحتاجان شيئًا؟\n[10-16] ثانيًا: اتصل دقيقة واحدة. ليس لازمًا كلام طويل، المهم حضورك ولطفك.\n[16-22] ثالثًا: اجعل لهما دعاءً ثابتًا في السجود. هذا لا يأخذ وقتًا، لكنه يربط قلبك ببرهما كل يوم.\n[22-28] رابعًا: اقض لهما حاجة صغيرة: طلب، موعد، مشوار، أو حتى تذكير نافع.\n[28-34] البر ليس مشروعًا ضخمًا. هو إحسان متكرر: كلمة طيبة، خدمة، ودعاء.\n[34-41] واسمع هذا الترتيب العظيم: «الصَّلاَةُ عَلَى وَقْتِهَا. قَالَ ثُمَّ أَىُّ قَالَ ثُمَّ بِرُّ الْوَالِدَيْنِ. قَالَ ثُمَّ أَىُّ قَالَ الْجِهَادُ فِي سَبِيلِ اللَّهِ»\n[41-45] إذا كان بر الوالدين من أحب الأعمال إلى الله، فلا تؤجله. ابدأ اليوم بخمس دقائق.",
+    "cta": "اختر الآن خطوة واحدة، ونفذها قبل أن تغلق الفيديو."
+   }
+  }
+ },
+ {
+  "label": "أطفال: الصدق",
+  "idea": "طريق الصدق المستقيم",
+  "level": "A",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gemini-pro-latest": {
+    "seconds": 33.0,
+    "title": "طريق الصدق المستقيم",
+    "hook": "هل تحبون المشي في طريق مضيء وجميل، أم طريق مظلم ومتعب؟",
+    "level": "A",
+    "scenes": 7,
+    "words": 71,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] هل تحبون المشي في طريق مضيء وجميل، أم طريق مظلم ومتعب؟\n[5-10] الكذب يشبه طريقا متعرجا، يجعلنا نشعر بالقلق دائما.\n[10-16] لكن الصدق طريق مستقيم وسهل، نمشي فيه ونحن مطمئنون!\n[16-22] هذا الطريق الرائع يأخذنا مباشرة إلى الجنة بسلام وسعادة.\n[22-31] لأن الله يحب الصادقين، يقول لنا في القرآن: «يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ ٱتَّقُواْ ٱللَّهَ وَكُونُواْ مَعَ ٱلصَّٰدِقِينَ»\n[31-38] أي أن نقول الصدق دائما، في كل أمورنا وشؤوننا.\n[38-45] هيا ارسموا مع أهلكم طريقا مستقيما واكتبوا: طريق الصدق!",
+    "cta": "هيا ارسموا مع أهلكم طريقا مستقيما واكتبوا: طريق الصدق!"
+   },
+   "gpt-5.4": {
+    "seconds": 21.5,
+    "title": "طريق الصدق المستقيم",
+    "hook": "هل تفضّل طريقًا مضيئًا وسهلًا، أم طريقًا مظلمًا ومخيفًا؟",
+    "level": "A",
+    "scenes": 7,
+    "words": 67,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] هل تفضّل طريقًا مضيئًا وسهلًا، أم طريقًا مظلمًا ومخيفًا؟\n[5-10] الصدق مثل طريق مستقيم. واضح، هادئ، وسهل.\n[10-15] أما الكذب، فهو طريق متعرّج يجعل القلب قلقًا ومتعبًا.\n[15-20] والصدق نجاة. يجعل الإنسان يمشي بسلام وطمأنينة.\n[20-29] واسمعوا هذا التوجيه الجميل من القرآن: «يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ ٱتَّقُواْ ٱللَّهَ وَكُونُواْ مَعَ ٱلصَّٰدِقِينَ»\n[29-37] يعني: نحب الصدق، ونقول الحق، ونكون مع الصادقين في كلامنا ووعودنا.\n[37-45] واليوم، ارسم مع أهلك طريقًا مستقيمًا، واكتب عليه: طريق الصدق.",
+    "cta": "اليوم مع أهلكم: ارسموا خطًّا مستقيمًا على ورقة، واكتبوا عليه: طريق الصدق، ثم اذكروا موقفًا صغيرًا تختارون فيه الصدق."
+   }
+  }
+ },
+ {
+  "label": "خلافي: الموسيقى",
+  "idea": "التخلص من إدمان الأغاني",
+  "level": "C",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gemini-pro-latest": {
+    "seconds": 36.4,
+    "title": "التخلص من إدمان الأغاني",
+    "hook": "٣ خطوات عملية لتتخلص من إدمان الأغاني والموسيقى للأبد.",
+    "level": "C",
+    "scenes": 9,
+    "words": 92,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-4] ثلاث خطوات عملية للتخلص من إدمان الأغاني للأبد.\n[4-8] هذا الإدمان يشتت القلب، والله تعالى يقول عن لهو الحديث:\n[8-18] «وَمِنَ ٱلنَّاسِ مَن يَشۡتَرِي لَهۡوَ ٱلۡحَدِيثِ لِيُضِلَّ عَن سَبِيلِ ٱللَّهِ بِغَيۡرِ عِلۡمٖ وَيَتَّخِذَهَا هُزُوًاۚ أُوْلَٰٓئِكَ لَهُمۡ عَذَابٞ مُّهِينٞ»\n[18-23] والمقصود به كل ما يلهي عن طاعة الله ويصد عن مرضاته.\n[23-28] الخطوة الأولى: احذف كل قوائم الموسيقى وتطبيقاتها من هاتفك.\n[28-34] الثانية: املأ الفراغ، استبدلها بتلاوات تحبها، أو أناشيد خالية من المعازف.\n[34-39] الثالثة: الدعاء المستمر، ادع الله أن يعلق قلبك بالقرآن.\n[39-43] ورغم وجود تفاصيل وخلاف بين العلماء فاسأل أهل العلم الموثوقين.\n[43-45] شارك المقطع، وكن سبب هداية لغيرك.",
+    "cta": "شارك المقطع لعلها تكون بداية تغيير لشخص آخر."
+   },
+   "gpt-5.4": {
+    "seconds": 25.5,
+    "title": "٣ خطوات عملية لتخفيف التعلّق بالأغاني",
+    "hook": "٣ خطوات عملية تساعدك على كسر التعلّق بالأغاني.",
+    "level": "C",
+    "scenes": 9,
+    "words": 140,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-4] إذا صارت الأغاني أول شيء وآخر شيء في يومك، فابدأ بهذه ٣ الخطوات.\n[4-8] لكن انتبه: مسألة الموسيقى فيها كلام معروف بين أهل العلم، فلا تأخذ هذا الفيديو كفتوى.\n[8-13] الخطوة الأولى: ألغِ متابعة القوائم، واحذف الاختصارات، واصنع مسافة بينك وبين المصدر.\n[13-19] لأن التعلّق لا ينكسر غالبًا بالقوة فقط، بل بتقليل الوصول السهل الذي يعيدك كل مرة.\n[19-25] الخطوة الثانية: لا تترك فراغًا. استبدلها فورًا بتلاوات تحبها، أو أناشيد صوتية خالية من المعازف.\n[25-31] واسمع هذا التحذير من القرآن: «وَمِنَ ٱلنَّاسِ مَن يَشۡتَرِي لَهۡوَ ٱلۡحَدِيثِ لِيُضِلَّ عَن سَبِيلِ ٱللَّهِ بِغَيۡرِ عِلۡمٖ وَيَتَّخِذَهَا هُزُوًاۚ أُوْلَٰٓئِكَ لَهُمۡ عَذَابٞ مُّهِينٞ»\n[31-36] المقصود التحذير من كل ما يُلهي عن طاعة الله ويصدّ عن مرضاته، فلا تستهِن بما يسرق قلبك.\n[36-41] الخطوة الثالثة: ادعُ كثيرًا. قل: يا الله، اصرف قلبي عن التعلّق بما يبعدني عنك.\n[41-45] لا تنتظر كمالًا مفاجئًا. ابدأ اليوم، وكرّر هذه الخطوات، وإن أشكل عليك الحكم فاسأل أهل العلم.",
+    "cta": "جرّب خطوة واحدة اليوم، واكتب: ما البديل الذي ستبدأ به؟"
+   }
+  }
+ },
+ {
+  "label": "إنجليزي: الصلاة",
+  "idea": "The Ultimate Daily Reset",
+  "level": "B",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gemini-pro-latest": {
+    "seconds": 30.1,
+    "title": "The Ultimate Daily Reset",
+    "hook": "Ever wish life had a pause button? Muslims get one five times a day.",
+    "level": "B",
+    "scenes": 7,
+    "words": 109,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] Ever wish life had a pause button? Muslims get one five times a day.\n[5-10] When screens never stop buzzing and work piles up, we all need a break.\n[10-15] Before praying, Muslims physically wash away the stress, leaving the noise behind.\n[15-22] This daily prayer is an act of worship, bringing a complete disconnection from worldly distractions.\n[22-35] In the Quran, God explains the clear purpose of this connection: «Indeed, I am Allāh. There is no deity except Me, so worship Me and establish prayer for My remembrance.»\n[35-41] Prayer anchors us, reminding us to worship Him alone and keep Him in our thoughts.\n[41-45] Could your daily routine use a reset like this?",
+    "cta": "Follow for more insights into finding peace through Islam."
+   },
+   "gpt-5.4": {
+    "seconds": 13.7,
+    "title": "The Ultimate Daily Reset",
+    "hook": "Ever wish life had a pause button? For Muslims, it happens five times a day.",
+    "level": "B",
+    "scenes": 7,
+    "words": 124,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] Ever wish life had a pause button? For Muslims, it happens five times a day.\n[5-10] When life feels nonstop, the daily prayer works like a built-in pause.\n[10-15] You stop, wash up, step away from the noise, and reset your body and mind.\n[15-21] It is not just ritual. It is Worship: turning your attention away from everything else, back to your Creator.\n[21-31] The Quran says: «Indeed, I am Allāh. There is no deity except Me, so worship Me and establish prayer for My remembrance.»\n[31-38] So prayer is not meant to be a burden. It is a way to remember God again and again through the day.\n[38-45] Even if you are just learning about Islam, maybe ask: what would five real pauses change in my life?",
+    "cta": "Follow for simple, honest introductions to Islam."
+   }
+  }
+ },
+ {
+  "label": "توطين: الابتلاء → EN",
+  "idea": "ليس عقابا.. بل ترقية",
+  "level": "B",
+  "evidence": [
+   "H1",
+   "H2"
+  ],
+  "models": {
+   "gemini-pro-latest": {
+    "error": "AttributeError: 'TermCheck' object has no attribute 'term'"
+   },
+   "gpt-5.4": {
+    "seconds": 25.0,
+    "title": "ليس عقابًا.. بل ترقية",
+    "hook": "هل كل ابتلاء يعني أن الله يعاقبك؟",
+    "level": "B",
+    "scenes": 7,
+    "words": 103,
+    "quoted": [
+     [
+      "H1",
+      "quoted"
+     ],
+     [
+      "H2",
+      "paraphrased"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true,
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] هل كل ابتلاء في حياتك يعني أن الله يعاقبك؟\n[5-10] ليس دائمًا. أحيانًا أنت لا تُدفَع بعيدًا... بل تُرفَع أعلى.\n[10-17] اسمع هذا الوعد النبوي: «مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلاَ وَصَبٍ وَلاَ هَمٍّ وَلاَ حُزْنٍ وَلاَ أَذًى وَلاَ غَمٍّ حَتَّى الشَّوْكَةِ يُشَاكُهَا، إِلاَّ كَفَّرَ اللَّهُ بِهَا مِنْ خَطَايَاهُ»\n[17-25] يعني أن الألم والهم والحزن لا يضيع عند الله، بل يكون سببًا في تكفير الخطايا.\n[25-33] فليس كل ضيق علامة غضب، بل قد يكون طريقًا سريعًا لتطهيرك ورفع قدرك عند الله.\n[33-40] حين تفهم هذا، يتغير سؤالك من: لماذا أنا؟ إلى: ماذا يريد الله أن يطهّر فيَّ؟\n[40-45] فاهدأ، واصبر، واحتسب... فقد يكون هذا الابتلاء رحمةً تسوقك إلى أعلى.",
+    "cta": "إذا لامستك الفكرة، أرسلها لمن يمر بابتلاء.",
+    "localized": {
+     "seconds": 19.8,
+     "title": "Not Every Hard Time Is Punishment",
+     "hook": "When life hurts, does it always mean God is punishing you?",
+     "level": "B",
+     "scenes": 7,
+     "words": 166,
+     "quoted": [
+      [
+       "H1",
+       "quoted"
+      ],
+      [
+       "H2",
+       "paraphrased"
+      ]
+     ],
+     "warnings": [],
+     "grounded": [
+      true,
+      true,
+      true,
+      true
+     ],
+     "blocking": 0,
+     "findings": [
+      {
+       "sev": "suggestion",
+       "who": "meaning",
+       "issue": "ادعاء في الأصل لم يرد في النسخة الموطّنة: الابتلاء قد يكون سبباً لرفع قدر المسلم ودرجته عند الله.. حُذف معنى رفع الدرجات وعلو القدر عند الله من النص المترجم، واقتصر الحديث على مغفرة السيئات والتطهير."
+      }
+     ],
+     "claims": [
+      "preserved",
+      "preserved",
+      "preserved",
+      "dropped",
+      "preserved"
+     ],
+     "terms": null,
+     "text": "[0-5] When life hurts, does it always mean God is punishing you?\n[5-10] Not always. In Islam, sometimes pain is not pushing you away. It may be cleaning you.\n[10-18] Listen to this saying of the Prophet Muhammad, peace and blessings be upon him: «No fatigue, nor disease, nor sorrow, nor sadness, nor hurt, nor distress befalls a Muslim, even if it were the prick he receives from a thorn, but that Allah expiates some of his sins for that»\n[18-26] That means pain, stress, sadness, even small hurts, are not wasted with Allah. For a Muslim, they can be a reason some sins are erased.\n[26-34] So not every hard moment is a sign of anger. Sometimes it is part of purification: your record being cleaned before Allah.\n[34-40] That changes the question from, why is this happening to me, to: what might I be learning, and what is being wiped away?\n[40-45] So breathe, be patient, and seek the reward with Allah. This pain may carry mercy you cannot yet see.",
+     "cta": "If this changed how you see hardship, share it with someone going through a difficult time."
+    }
+   }
+  }
+ }
+]

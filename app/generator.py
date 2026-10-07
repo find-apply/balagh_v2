@@ -25,6 +25,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 # When the main model's quota runs out mid-session, fall back rather than fail the request.
 FALLBACK_MODEL = os.getenv("REELS_FALLBACK_MODEL", "gemini-flash-latest")
+SOURCE_MODEL = os.getenv("REELS_SOURCE_MODEL", "gemini-pro-latest")  # reads a brief's video or file; OpenAI gets no attachments here
 
 logger = logging.getLogger("balagh")
 
@@ -156,7 +157,8 @@ SCRIPT_SYSTEM = f"""You are a short-form video scriptwriter for Islamic content.
 
 The scenes must cover the whole video from second 0 to the target duration with no gaps or overlaps. \
 The first scene delivers the hook. The voiceover has to be speakable in the time its scene is given \
-(roughly 2-2.5 words per second), so cut words rather than overrun.
+(roughly 2-2.5 words per second: a 45-second video is at most about 100 spoken words in all, a 60-second one \
+about 135), so cut words rather than overrun; count the words of every scene against its seconds.
 
 {AUDIENCE_RULES}
 
@@ -367,6 +369,8 @@ async def _generate(system: str, prompt: str, output: type[T], role: str = "gene
     `parts` are attachments (a video, a document, an image) the model reads before the prompt."""
     flow = flow_settings.defaults() if PLAIN else flow_settings.current()
     model = flow.review_model if role == "review" else flow.generation_model
+    if parts and model.startswith("gpt-"):
+        model = SOURCE_MODEL  # the source (a video, a file) is read by Gemini whichever model writes
     if flow.extra_rules.strip():
         system += f"\n\nAdditional editorial rules from the platform's administrators (binding):\n{flow.extra_rules.strip()}"
     started = time.monotonic()

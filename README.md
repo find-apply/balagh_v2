@@ -63,8 +63,8 @@
 | الجزء | التقنية |
 |---|---|
 | الـ API | Python، FastAPI، Pydantic |
-| التوليد | Gemini (`gemini-pro-latest`) بمخرجات منظّمة |
-| المراجعون | Gemini (`gemini-flash-latest`)، ثلاثة طلبات متوازية |
+| التوليد | OpenAI (`gpt-5.4`) بمخرجات منظّمة؛ Gemini يقرأ مصادر الإلهام |
+| المراجعون | Gemini (`gemini-flash-latest`)، ثلاثة طلبات متوازية: نموذج من شركة أخرى يراجع ما كتبه الأول |
 | التحقق من النصوص | بحث ومطابقة محليان في `app/sources.py`، دون نموذج |
 | التخزين | SQLite، أو Postgres عبر `DATABASE_URL` |
 | الواجهة | React، TypeScript، Vite |
@@ -97,7 +97,8 @@ npm run dev                 # http://localhost:5173
 | المتغير | الوظيفة | الافتراضي |
 |---|---|---|
 | `GEMINI_API_KEY` | مفتاح Gemini (مطلوب) | |
-| `REELS_MODEL` | نموذج التوليد. اسم يبدأ بـ`gpt-` يذهب إلى OpenAI (يلزم `OPENAI_API_KEY`)، وما عداه إلى Gemini. المصادر (فيديو، ملفات) يقرؤها Gemini وحده | `gemini-pro-latest` |
+| `REELS_MODEL` | نموذج التوليد (الأفكار والسيناريو والتوطين والتصحيح). اسم يبدأ بـ`gpt-` يذهب إلى OpenAI (يلزم `OPENAI_API_KEY`)، وما عداه إلى Gemini | `gpt-5.4` |
+| `REELS_SOURCE_MODEL` | نموذج Gemini الذي يقرأ مصدر الإلهام (فيديو، ملف) حين يكون الكاتب من OpenAI | `gemini-pro-latest` |
 | `OPENAI_API_KEY` | مفتاح OpenAI، يلزم فقط إذا اختير نموذج `gpt-` للتوليد | |
 | `REELS_REVIEW_MODEL` | نموذج المراجعين | `gemini-flash-latest` |
 | `DATABASE_URL` | قاعدة Postgres بدل SQLite | `data/balagh.db` |
