@@ -1,9 +1,11 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type React from 'react'
 import { BASE } from '../api'
 import raw from '../showcase.json'
 import { CHARACTERS, CLAIMS, KNOWLEDGE, LANGUAGES, PLATFORMS, REVIEWERS, STORY_SCENES } from '../labels'
 import type { AudienceKnowledge, Language, Platform } from '../types'
 import { Logo } from './Landing'
+import { Reveal } from './reveal'
 
 /** Two real runs, as the user entered them and as they came out, including what the reviewers caught. */
 interface ShowScript {
@@ -237,32 +239,162 @@ function Story({ story }: { story: ShowStory }) {
   )
 }
 
-/** All the videos in one swipeable strip, like a reels feed: scroll-snap on touch, arrows on desktop. */
+/** All the videos in one swipeable strip, like a reels feed: scroll-snap on touch, drag and arrows on desktop.
+ * The reel nearest the centre is the active one; the others step back. Hovering a reel plays it muted; a click
+ * on the picture turns the sound on. */
 function ReelStrip({ videos }: { videos: Example['videos'] }) {
   const strip = useRef<HTMLDivElement>(null)
-  const step = (dir: number) => strip.current?.scrollBy({ left: dir * (strip.current.clientWidth * 0.8), behavior: 'smooth' })
+  const [active, setActive] = useState(0)
+  const [edge, setEdge] = useState({ start: true, end: false })
+  const [dragging, setDragging] = useState(false)
+  const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null)
+
+  useEffect(() => {
+    const el = strip.current
+    if (!el) return
+    const update = () => {
+      const r = el.getBoundingClientRect()
+      const cx = r.left + r.width / 2
+      let best = 0
+      let dist = Infinity
+      Array.from(el.children).forEach((c, i) => {
+        const b = c.getBoundingClientRect()
+        const d = Math.abs(b.left + b.width / 2 - cx)
+        if (d < dist) {
+          dist = d
+          best = i
+        }
+      })
+      setActive(best)
+      // In a right-to-left strip Chrome reports scrollLeft as a negative number.
+      const x = Math.abs(el.scrollLeft)
+      const max = el.scrollWidth - el.clientWidth
+      setEdge({ start: x < 6, end: x > max - 6 })
+    }
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => {
+      el.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [videos])
+
+  const goTo = (i: number) => (strip.current?.children[i] as HTMLElement | undefined)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  const step = (dir: number) => goTo(Math.max(0, Math.min(videos.length - 1, active + dir)))
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'mouse' || !strip.current) return
+    drag.current = { x: e.clientX, left: strip.current.scrollLeft, moved: false }
+  }
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = drag.current
+    if (!d || !strip.current) return
+    const dx = e.clientX - d.x
+    if (!d.moved && Math.abs(dx) < 5) return
+    d.moved = true
+    setDragging(true)
+    strip.current.scrollLeft = d.left - dx
+  }
+  const endDrag = () => {
+    if (drag.current?.moved) {
+      // land on the nearest reel once the mouse lets go
+      setTimeout(() => goTo(active), 0)
+    }
+    drag.current = null
+    setDragging(false)
+  }
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (dragging) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+  }
+
   return (
-    <div className="reels">
-      <button className="reels-arrow prev" aria-label="السابق" onClick={() => step(1)}>
+    <div className={`reels${edge.start ? ' at-start' : ''}${edge.end ? ' at-end' : ''}`}>
+      <button className="reels-arrow prev" aria-label="السابق" onClick={() => step(-1)} disabled={active === 0}>
         ‹
       </button>
-      <div className="reels-strip" ref={strip}>
-        {videos.map((v) => (
-          <figure key={v.url} className={v.aspect === '9:16' ? 'reel tall' : 'reel wide'}>
-            <video controls preload="metadata" src={BASE + v.url} playsInline />
-            <figcaption>
-              <strong>{v.template}</strong> · {Math.round(v.seconds)} ث
-              <span className="muted small" dir="auto">
-                {v.example}
-              </span>
-            </figcaption>
-          </figure>
+      <div
+        className={`reels-strip${dragging ? ' dragging' : ''}`}
+        ref={strip}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerLeave={endDrag}
+        onClickCapture={onClickCapture}
+      >
+        {videos.map((v, i) => (
+          <Reel key={v.url} v={v} active={i === active} onFocus={() => goTo(i)} />
         ))}
       </div>
-      <button className="reels-arrow next" aria-label="التالي" onClick={() => step(-1)}>
+      <button className="reels-arrow next" aria-label="التالي" onClick={() => step(1)} disabled={active === videos.length - 1}>
         ›
       </button>
+      <div className="reels-dots" role="tablist" aria-label="الفيديوهات">
+        {videos.map((v, i) => (
+          <button key={v.url} role="tab" aria-selected={i === active} aria-label={`${v.template} · ${v.example}`} className={i === active ? 'on' : ''} onClick={() => goTo(i)} />
+        ))}
+      </div>
     </div>
+  )
+}
+
+function Reel({ v, active, onFocus }: { v: Example['videos'][number]; active: boolean; onFocus: () => void }) {
+  const video = useRef<HTMLVideoElement>(null)
+  const [sound, setSound] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const hoverPlay = () => {
+    const el = video.current
+    if (!el || sound) return
+    el.muted = true
+    el.play().catch(() => undefined)
+  }
+  const hoverStop = () => {
+    const el = video.current
+    if (!el || sound) return
+    el.pause()
+    el.currentTime = 1.5
+  }
+  const toggleSound = () => {
+    const el = video.current
+    if (!el) return
+    if (!active) onFocus()
+    el.muted = sound
+    setSound(!sound)
+    if (el.paused) el.play().catch(() => undefined)
+  }
+  return (
+    <figure className={`reel ${v.aspect === '9:16' ? 'tall' : 'wide'}${active ? ' active' : ''}${playing ? ' playing' : ''}`} onMouseEnter={hoverPlay} onMouseLeave={hoverStop}>
+      <div className="reel-frame">
+        {/* the #t fragment makes the browser draw the first frame instead of a black box */}
+        <video
+          ref={video}
+          controls={sound}
+          preload="metadata"
+          src={`${BASE}${v.url}#t=1.5`}
+          playsInline
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => setSound(false)}
+        />
+        {!sound && (
+          <button type="button" className="reel-play" onClick={toggleSound} aria-label={`شغّل مع الصوت: ${v.template}`}>
+            <span className="reel-play-icon" aria-hidden="true">
+              {playing ? '🔇' : '▶'}
+            </span>
+            <span className="reel-play-time">{Math.round(v.seconds)} ث</span>
+          </button>
+        )}
+      </div>
+      <figcaption>
+        <strong>{v.template}</strong> · {Math.round(v.seconds)} ث
+        <span className="muted small" dir="auto">
+          {v.example}
+        </span>
+      </figcaption>
+    </figure>
   )
 }
 
@@ -303,19 +435,21 @@ export function Showcase({ onStart }: { onStart: () => void }) {
 
       <section className="section alt" id="reels">
         <div className="section-inner">
-          <span className="eyebrow">الفيديوهات</span>
-          <h2>كما خرجت من بلاغ، بلا مونتاج</h2>
+          <Reveal>
+            <span className="eyebrow">الفيديوهات</span>
+            <h2>كما خرجت من بلاغ، بلا مونتاج</h2>
+          </Reveal>
           <p className="muted small">
             اسحب أو استعمل الأسهم. الصوت مولَّد للحوار والشرح؛ الآية بتلاوة قارئ، والحديث يُعرض بصمت حتى يوضع تسجيل قارئ.
           </p>
-          <div className="stats show-stats">
-            {data.stats.map((r) => (
-              <div className="stat" key={r.label}>
+          <Reveal className="stats show-stats" stagger>
+            {data.stats.map((r, i) => (
+              <div className="stat" key={r.label} style={{ '--i': i } as React.CSSProperties}>
                 <strong>{r.value}</strong>
                 <span>{r.label}</span>
               </div>
             ))}
-          </div>
+          </Reveal>
           <h3 className="strip-title">ريلز عمودية (9:16) · TikTok وReels وShorts</h3>
           <ReelStrip videos={reels} />
           <h3 className="strip-title">حلقات أفقية (16:9) · YouTube</h3>

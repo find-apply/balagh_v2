@@ -1,4 +1,6 @@
+import type React from 'react'
 import { BASE } from '../api'
+import { CountUp, Reveal } from './reveal'
 
 const STEPS = [
   { title: 'ثلاث أفكار', text: 'من موضوع تكتبه، أو يقترح بلاغ المواضيع حسب جمهورك ومنصاتك.' },
@@ -94,7 +96,7 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
 
       <section className="hero">
         <div className="hero-inner">
-          <div className="hero-copy">
+          <div className="hero-copy enter">
             <span className="eyebrow">محتوى يعرّف بالإسلام عبر اللغات والثقافات</span>
             <h1>
               سيناريوهات قصيرة مقنعة،
@@ -127,38 +129,42 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
       </section>
 
       <section className="band">
-        <div className="section-inner problem">
+        <Reveal className="section-inner problem">
           <h2>المشكلة</h2>
           <p>
             صانع المحتوى الذي يستعين بنموذج لغوي يحصل على سيناريو مقنع في ثوان، لكنه لا يعرف هل الآية بلفظها، وهل الحديث في
             مصدره، وهل بقي المعنى كما هو حين نُقل النص إلى جمهور آخر. التحقق اليدوي يأخذ وقتا أطول من الكتابة نفسها.
           </p>
-        </div>
+        </Reveal>
       </section>
 
       <section id="how" className="section">
         <div className="section-inner">
-          <span className="eyebrow">كيف يعمل</span>
-          <h2>من الفكرة إلى نسخة معتمدة في ست خطوات</h2>
-          <ol className="steps-grid">
+          <Reveal>
+            <span className="eyebrow">كيف يعمل</span>
+            <h2>من الفكرة إلى نسخة معتمدة في ست خطوات</h2>
+          </Reveal>
+          <Reveal as="ol" className="steps-grid" stagger>
             {STEPS.map((s, i) => (
-              <li key={s.title}>
+              <li key={s.title} style={{ '--i': i } as React.CSSProperties}>
                 <span className="num">{i + 1}</span>
                 <h3>{s.title}</h3>
                 <p className="muted">{s.text}</p>
               </li>
             ))}
-          </ol>
+          </Reveal>
         </div>
       </section>
 
       <section id="trust" className="section alt">
         <div className="section-inner">
-          <span className="eyebrow">الضمانات</span>
-          <h2>ضوابط في الكود، لا في تعليمات النموذج وحدها</h2>
-          <div className="trust-grid">
-            {GUARANTEES.map((g) => (
-              <div className="trust" key={g.title}>
+          <Reveal>
+            <span className="eyebrow">الضمانات</span>
+            <h2>ضوابط في الكود، لا في تعليمات النموذج وحدها</h2>
+          </Reveal>
+          <Reveal className="trust-grid" stagger>
+            {GUARANTEES.map((g, i) => (
+              <div className="trust" key={g.title} style={{ '--i': i } as React.CSSProperties}>
                 <span className="check">✓</span>
                 <div>
                   <h3>{g.title}</h3>
@@ -166,8 +172,8 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
                 </div>
               </div>
             ))}
-          </div>
-          <div className="split">
+          </Reveal>
+          <Reveal className="split" stagger>
             <div>
               <h3>ما يقوم به الذكاء الاصطناعي</h3>
               <p className="muted">اقتراح الزوايا، والصياغة بلغة الجمهور، والتكييف الثقافي، والمراجعة الأولية.</p>
@@ -176,22 +182,24 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
               <h3>ما لا يُترك له</h3>
               <p className="muted">نص الآية والحديث، ونسبته، وترجمته، وقرار النشر.</p>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       <section id="results" className="section">
         <div className="section-inner">
-          <span className="eyebrow">النتائج</span>
-          <h2>تقييم على 16 موضوعا و6 أسئلة فتوى و28 خطأ مزروعا</h2>
-          <div className="stats">
-            {RESULTS.map((r) => (
-              <div className="stat" key={r.label}>
-                <strong>{r.value}</strong>
+          <Reveal>
+            <span className="eyebrow">النتائج</span>
+            <h2>تقييم على 16 موضوعا و6 أسئلة فتوى و28 خطأ مزروعا</h2>
+          </Reveal>
+          <Reveal className="stats" stagger>
+            {RESULTS.map((r, i) => (
+              <div className="stat" key={r.label} style={{ '--i': i } as React.CSSProperties}>
+                <CountUp value={r.value} />
                 <span>{r.label}</span>
               </div>
             ))}
-          </div>
+          </Reveal>
           <p className="muted small">
             العينة صغيرة والتشغيل واحد، ولم يراجع مختص شرعي المخرجات بعد. ما يضيفه بلاغ هو الضمان والتتبع.{' '}
             <a href="#/examples">شاهد مثالين حقيقيين من الطلب إلى الفيديو ←</a>
@@ -200,13 +208,13 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
       </section>
 
       <section className="cta-band">
-        <div className="section-inner">
+        <Reveal className="section-inner">
           <h2>جاهز لأول سيناريو موثّق؟</h2>
           <p>اختر جمهورك ومنصتك، واترك الباقي لبلاغ. كل خانة فيها خيار تلقائي.</p>
           <button className="primary big light" onClick={onStart}>
             {cta} ←
           </button>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="footer">
