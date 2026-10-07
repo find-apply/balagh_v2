@@ -255,7 +255,7 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
             <select value={chosen} onChange={(e) => setRole(e.target.value as ReviewRole)}>
               {pending.map((r) => (
                 <option key={r.role} value={r.role}>
-                  {ROLES[r.role]}
+                  {r.role === 'creator' && script.author === 'specialist' ? 'مختص شرعي (مراجعة ذاتية)' : ROLES[r.role]}
                 </option>
               ))}
             </select>
