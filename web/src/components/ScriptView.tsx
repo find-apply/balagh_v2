@@ -163,8 +163,9 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
     <section className="card" id="s-approve">
       <h3>الاعتماد البشري</h3>
       <p className="muted">
-        المراجعة على قدر الخطر: يحدد بلاغ من يلزم اعتماده لهذه النسخة، ولا يُفتح الفيديو النهائي والتصدير قبل اكتماله.
-        المراجع يشاهد المعاينة ثم يوقّع.
+        {script.author === 'specialist'
+          ? 'صاحب المحتوى مختص شرعي: يراجع نسخته بنفسه ويعتمدها، ويستطيع أن يرسل رابط المراجعة لغيره إن أراد رأيا ثانيا. التصدير والفيديو النهائي بعد توقيعه.'
+          : 'صاحب المحتوى صانع محتوى: كل نسخة يراجعها مختص شرعي قبل النشر، عبر رابط المراجعة. لا يُفتح الفيديو النهائي والتصدير قبل اكتمال التوقيعات.'}
       </p>
       <PreviewForReview projectId={projectId} script={script} onGo={onGo} />
       {script.approved && (

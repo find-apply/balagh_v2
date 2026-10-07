@@ -1,4 +1,4 @@
-import type { AudienceKnowledge, ContentLevel, Language, Platform, Script } from './types'
+import type { AudienceKnowledge, AuthorRole, ContentLevel, Language, Platform, Script } from './types'
 
 export const PLATFORMS: Record<Platform, string> = {
   tiktok: 'TikTok',
@@ -50,6 +50,11 @@ export const LEVELS: Record<ContentLevel, string> = {
 export const REVIEWERS = { scholarly: 'المراجع العلمي', audience: 'مراجع الجمهور', meaning: 'مراجع المعنى' }
 
 export const ROLES = { creator: 'صانع المحتوى', scholar: 'مراجع شرعي', language: 'مراجع لغوي وثقافي' }
+
+export const AUTHORS: Record<AuthorRole, { label: string; hint: string }> = {
+  specialist: { label: 'مختص شرعي', hint: 'شيخ أو طالب علم: تراجع محتواك بنفسك وتعتمده، وتطلب مراجعة غيرك إن شئت' },
+  creator: { label: 'صانع محتوى', hint: 'كل نسخة يراجعها مختص شرعي قبل النشر، عبر رابط المراجعة' },
+}
 
 export const CHARACTERS: Record<string, string> = { narr: 'الراوي', salim: 'سالم', maryam: 'مريم', nour: 'نور' }
 
@@ -104,7 +109,7 @@ export function toMarkdown(s: Script): string {
   }
   lines.push('', '## المنشورات', '')
   s.posts.forEach((p) => lines.push(`### ${PLATFORMS[p.platform]}`, '', p.caption, '', p.hashtags.join(' '), ''))
-  lines.push('## الاعتماد', '')
+  lines.push('## الاعتماد', '', `صاحب المحتوى: ${AUTHORS[s.author].label}${s.author === 'specialist' ? ' (مراجعة ذاتية)' : ''}`, '')
   s.approvals.forEach((a) => lines.push(`- ${ROLES[a.role]}: ${a.name} (${new Date(a.at).toLocaleString('ar')})`))
   lines.push('', '---', '', s.ai_disclosure)
   return lines.join('\n')

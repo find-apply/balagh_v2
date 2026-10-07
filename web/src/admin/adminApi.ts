@@ -81,6 +81,7 @@ export interface PendingApproval {
   title: string
   version: number
   content_level: string
+  author: 'creator' | 'specialist'
   localized: boolean
   missing: string[]
   signed: string[]

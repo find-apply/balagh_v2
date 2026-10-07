@@ -2,6 +2,8 @@
 
 export type Language = 'ar' | 'en'
 export type AudienceKnowledge = 'familiar' | 'basic' | 'new'
+/** Who is making the content: a religious specialist approves their own versions; a creator's versions go to a specialist. */
+export type AuthorRole = 'creator' | 'specialist'
 export type ContentLevel = 'A' | 'B' | 'C' | 'D'
 export type Platform =
   | 'tiktok'
@@ -22,6 +24,7 @@ export interface AudienceSpec {
 }
 
 export interface Brief extends AudienceSpec {
+  author: AuthorRole
   idea: string | null
   platforms: Platform[]
   duration_seconds: number | null
@@ -250,6 +253,7 @@ export interface Script {
   review: ReviewReport | null
   approvals: Approval[]
   change_requests: ChangeRequest[]
+  author: AuthorRole
   required_approvals: { role: ReviewRole; reason: string }[]
   approved: boolean
   template: string | null

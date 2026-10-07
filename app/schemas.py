@@ -27,6 +27,13 @@ class AudienceKnowledge(str, Enum):
     new = "new"            # discovering Islam
 
 
+class AuthorRole(str, Enum):
+    """Who is making the content. It decides who must sign a version: a religious specialist reviews their own
+    content, an ordinary creator's content goes to a specialist. The role is declared, not verified."""
+    creator = "creator"        # an ordinary content creator
+    specialist = "specialist"  # a qualified religious specialist: a shaykh, a student of knowledge
+
+
 class ContentLevel(str, Enum):
     """Content levels from the challenge's scientific reference."""
     A = "A"  # settled core knowledge: answer directly with the source
@@ -55,6 +62,10 @@ class AudienceSpec(BaseModel):
 
 
 class BriefIn(AudienceSpec):
+    author: AuthorRole = Field(
+        default=AuthorRole.creator,
+        description="Who is making the content. A specialist approves their own versions; a creator's versions need a specialist's signature.",
+    )
     idea: Optional[str] = Field(
         default=None, min_length=3, max_length=2000, examples=["فضل صلاة الفجر"],
         description="Leave null to let the AI pick the topics itself.",
@@ -415,6 +426,7 @@ class Script(BaseModel):
     audio: str
     references: list[Reference] = Field(description="Every verified text the script uses, with its source.")
     content_level: ContentLevel
+    author: AuthorRole = Field(default=AuthorRole.creator, description="Who made this content, from the brief.")
     needs_specialist_review: bool
     review_note: str
     warnings: list[str] = Field(description="Scenes that mention a religious text without linked evidence.")
@@ -432,16 +444,23 @@ class Script(BaseModel):
     draft: Optional[ScriptDraft] = Field(default=None, exclude=True)
 
 
-    @computed_field(description="Who must sign off before export. Review is proportionate to risk.")
+    @computed_field(description="Who must sign off before export. It depends on who made the content: a specialist "
+                                "approves their own versions, a creator's versions also need a religious specialist.")
     @property
     def required_approvals(self) -> list[RequiredApproval]:
-        required = [RequiredApproval(role=ReviewRole.creator, reason="صاحب المحتوى يعتمد كل نسخة قبل تصديرها.")]
-        if self.content_level == ContentLevel.C:
-            required.append(RequiredApproval(role=ReviewRole.scholar, reason="مستوى المحتوى (ج): مسألة خلافية أو عالية الحساسية."))
-        elif self.review and self.review.blocking:
-            required.append(RequiredApproval(role=ReviewRole.scholar, reason="في المراجعة الآلية ملاحظات مانعة لم تُصحَّح."))
-        elif self.warnings:
-            required.append(RequiredApproval(role=ReviewRole.scholar, reason="تنبيه آلي: مشهد يذكر نصا شرعيا دون دليل موثق مرتبط به."))
+        if self.author == AuthorRole.specialist:
+            required = [RequiredApproval(role=ReviewRole.creator, reason="مختص شرعي: يراجع محتواه بنفسه ويعتمده. المراجعة الآلية تنبّهه ولا تلزمه.")]
+        else:
+            required = [RequiredApproval(role=ReviewRole.creator, reason="صاحب المحتوى يعتمد كل نسخة قبل تصديرها.")]
+            if self.content_level == ContentLevel.C:
+                why = "مسألة خلافية أو عالية الحساسية (المستوى ج)."
+            elif self.review and self.review.blocking:
+                why = "في المراجعة الآلية ملاحظات مانعة لم تُصحَّح."
+            elif self.warnings:
+                why = "تنبيه آلي: مشهد يذكر نصا شرعيا دون دليل موثق مرتبط به."
+            else:
+                why = "الشرح مولَّد، والنصوص الشرعية وحدها هي المضمونة بالنظام."
+            required.append(RequiredApproval(role=ReviewRole.scholar, reason=f"صانع المحتوى ليس مختصا: كل نسخة يراجعها مختص شرعي قبل النشر. {why}"))
         if self.localized_from:
             required.append(RequiredApproval(
                 role=ReviewRole.language,

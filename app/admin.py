@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from . import flow_settings, generator, sources, store
 from .flow_settings import FlowSettings
-from .schemas import ContentLevel, Project, ReviewRole
+from .schemas import AuthorRole, ContentLevel, Project, ReviewRole
 
 
 def require_admin(authorization: Optional[str] = Header(default=None)) -> None:
@@ -45,6 +45,7 @@ class PendingApproval(BaseModel):
     title: str
     version: int
     content_level: ContentLevel
+    author: AuthorRole
     localized: bool
     missing: list[ReviewRole]
     signed: list[ReviewRole]
@@ -169,7 +170,7 @@ async def approvals() -> list[PendingApproval]:
                 continue
             signed = {a.role for a in s.approvals}
             out.append(PendingApproval(
-                project_id=p.id, script_id=s.id, title=s.title, version=s.version, content_level=s.content_level,
+                project_id=p.id, script_id=s.id, title=s.title, version=s.version, content_level=s.content_level, author=s.author,
                 localized=s.localized_from is not None, signed=sorted(signed),
                 missing=[r.role for r in s.required_approvals if r.role not in signed],
             ))

@@ -13,7 +13,7 @@ os.environ.pop("ADMIN_TOKEN", None)
 import pytest  # noqa: E402
 
 from app import sources  # noqa: E402
-from app.schemas import (  # noqa: E402
+from app.schemas import (AuthorRole,   # noqa: E402
     AudienceSpec, BriefIn, ContentLevel, Evidence, EvidenceKind, Idea, Platform, PlatformPost, Project,
     Reference, ReferenceUsage, Scene, SceneArt, ArtKind, Script,
 )
@@ -55,9 +55,9 @@ def make_scene(start: int, end: int, voiceover: str, ids: list[str] = (), screen
 
 def make_script(scenes: list[Scene], references: list[Reference], *, level: ContentLevel = ContentLevel.A,
                 warnings: list[str] = (), script_id: str = "s1", platforms: list[Platform] = (Platform.tiktok,),
-                dialect: str | None = None) -> Script:
+                dialect: str | None = None, author: AuthorRole = AuthorRole.specialist) -> Script:
     return Script(
-        id=script_id, idea_id="idea1", target=AudienceSpec(audience="شباب", language="ar", dialect=dialect,
+        id=script_id, idea_id="idea1", author=author, target=AudienceSpec(audience="شباب", language="ar", dialect=dialect,
                                                            audience_knowledge="familiar", tone=None),
         platforms=list(platforms), title="عنوان", duration_seconds=30, hook="خطاف", scenes=scenes,
         call_to_action="شارك", audio="بلا موسيقى", references=references, content_level=level,

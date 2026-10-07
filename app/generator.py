@@ -599,7 +599,7 @@ async def generate_script(brief: BriefIn, idea: Idea, duration_seconds: int, not
     if notes:
         prompt += f"\n\n<creator_notes>{notes}</creator_notes>"
     fields = await _write(SCRIPT_SYSTEM, prompt, ScriptDraft, idea, target.language)
-    return Script(id=_new_id(), idea_id=idea.id, target=target, platforms=brief.platforms,
+    return Script(id=_new_id(), idea_id=idea.id, target=target, platforms=brief.platforms, author=brief.author,
                   duration_seconds=duration_seconds, template=template, **fields)
 
 
@@ -624,7 +624,7 @@ async def localize_script(source: Script, idea: Idea, target: AudienceSpec, plat
     if notes:
         prompt += f"\n\n<creator_notes>{notes}</creator_notes>"
     fields = await _write(LOCALIZE_SYSTEM, prompt, LocalizedDraft, idea, target.language)
-    script = Script(id=_new_id(), idea_id=idea.id, localized_from=source.id, target=target, platforms=platforms,
+    script = Script(id=_new_id(), idea_id=idea.id, localized_from=source.id, target=target, platforms=platforms, author=source.author,
                     duration_seconds=duration_seconds, template=source.template, adaptation_notes=fields["draft"].adaptation_notes, **fields)
     script.terminology = sources.check_terms(
         _spoken_text(source), source.target.language, _spoken_text(script), target.language,

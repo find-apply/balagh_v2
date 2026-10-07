@@ -15,7 +15,7 @@ export function Approvals() {
         onOpen={(a) => go(`#/admin/projects/${a.project_id}/${a.script_id}`)}
         empty="لا شيء بانتظار الاعتماد."
         columns={[
-          { header: 'السيناريو', cell: (a) => <Cell title={a.title} sub={`v${num(a.version)}${a.localized ? ' · موطّنة' : ''}`} /> },
+          { header: 'السيناريو', cell: (a) => <Cell title={a.title} sub={`v${num(a.version)} · ${a.author === 'specialist' ? 'مختص شرعي' : 'صانع محتوى'}${a.localized ? ' · موطّنة' : ''}`} /> },
           { header: 'المستوى', cell: (a) => <LevelBadge level={a.content_level} /> },
           { header: 'وقّع', cell: (a) => a.signed.map((r) => <Tag key={r} tone="ok" icon="check">{ROLES[r]}</Tag>) },
           { header: 'ينتظر', cell: (a) => a.missing.map((r) => <Tag key={r} tone="warn" icon="clock">{ROLES[r]}</Tag>) },

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { AudienceSpec, Brief, Platform } from '../types'
+import type { AudienceSpec, AuthorRole, Brief, Platform } from '../types'
 import { GROUPS } from '../audiences'
 import { AudienceFields, PlatformPicker } from './AudienceFields'
 import { ChoiceField } from './ChoiceField'
-import { ASPECTS, aspectOf, KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
+import { ASPECTS, aspectOf, AUTHORS, KNOWLEDGE, LANGUAGES, PLATFORMS } from '../labels'
 import { api } from '../api'
 
 const TOPICS = [
@@ -29,6 +29,7 @@ const LAST_KEY = 'balagh.lastBrief'
 
 /** A complete brief a first-time visitor can run as is, to see the whole flow before writing their own. */
 const EXAMPLE: Brief = {
+  author: 'creator',
   idea: 'الصدق في البيع: لماذا يرزق الله التاجر الصادق؟',
   audience: GROUPS[0].label,
   language: 'ar',
@@ -69,6 +70,7 @@ interface Props {
 export function BriefForm({ disabled, initial, onSubmit }: Props) {
   const [start] = useState(() => initial ?? lastBrief())
   const [idea, setIdea] = useState(initial?.idea ?? '')
+  const [author, setAuthor] = useState<AuthorRole>(start?.author ?? 'creator')
   const [audience, setAudience] = useState<AudienceSpec>(() =>
     start
       ? {
@@ -96,6 +98,7 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
     if (disabled || platforms.length === 0 || uploading) return
     const brief: Brief = {
       ...audience,
+      author,
       idea: idea.trim() || null,
       platforms,
       duration_seconds: duration ? Number(duration) : null,
@@ -143,6 +146,7 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
   }
 
   const summary: [string, string, boolean][] = [
+    ['أنت', AUTHORS[author].label, false],
     ['الموضوع', idea.trim() || 'يقترحه بلاغ', !idea.trim()],
     ['الجمهور', audience.audience || 'غير محدد', false],
     ['اللغة', `${LANGUAGES[audience.language]}${audience.dialect ? ` · ${audience.dialect}` : ''}`, false],
@@ -181,6 +185,17 @@ export function BriefForm({ disabled, initial, onSubmit }: Props) {
               <p className="muted small">اكتب فكرتك، أو اختر موضوعا جاهزا، أو اتركها فارغة ليقترح بلاغ.</p>
             </div>
           </header>
+          <div className="field author-field">
+            <span>من أنت؟ <span className="muted small">يحدد من يعتمد المحتوى قبل النشر</span></span>
+            <div className="chips">
+              {(['specialist', 'creator'] as AuthorRole[]).map((a) => (
+                <button type="button" key={a} className={author === a ? 'chip on' : 'chip'} title={AUTHORS[a].hint} onClick={() => setAuthor(a)}>
+                  {AUTHORS[a].label}
+                </button>
+              ))}
+            </div>
+            <small className="muted">{AUTHORS[author].hint}.</small>
+          </div>
           <div className="field">
             <textarea
               className="topic"
