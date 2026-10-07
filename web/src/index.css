@@ -3903,3 +3903,100 @@ details.card[open] > summary {
     width: 86vw;
   }
 }
+
+/* ---------- Phone pass: the fixed bars give the content its room back ---------- */
+
+/* a disabled primary button looks disabled, not like a paler primary */
+button.primary:disabled {
+  opacity: 1;
+  background: var(--line);
+  border-color: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+button:not(.primary):disabled {
+  opacity: 0.55;
+}
+
+/* a portrait template is shown whole, not cropped to a face or a corner */
+.templates .preview.tall {
+  object-fit: contain;
+  background: var(--brand-soft);
+}
+
+/* anchors land below the sticky stepper instead of under it */
+.workspace [id] {
+  scroll-margin-top: 96px;
+}
+
+/* the stepper fades at its edges to say it scrolls, and the current step sits in the middle */
+.workspace > .stepper {
+  scrollbar-width: none;
+}
+
+.workspace > .stepper::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .mobile-bar {
+    transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+  }
+
+  .mobile-bar.away {
+    transform: translateY(-100%);
+  }
+
+  .workspace > .stepper {
+    top: 0;
+    padding: 10px 14px;
+    margin-inline: -16px;
+    border-radius: 0;
+    border-inline: none;
+    gap: 2px;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  }
+
+  .stepper li {
+    font-size: 0.82rem;
+  }
+
+  .stepper li:not(.on) .step-label {
+    color: var(--muted);
+  }
+
+  .flowbar {
+    padding: 8px 12px;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .flowbar .ghost {
+    display: none;
+  }
+
+  .flowbar-text strong {
+    font-size: 0.88rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+  }
+
+  .flowbar .primary {
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+
+  .ws-head {
+    margin-bottom: 10px;
+  }
+
+  .workspace [id] {
+    scroll-margin-top: 72px;
+  }
+}

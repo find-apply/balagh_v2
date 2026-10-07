@@ -14,6 +14,19 @@ interface Props {
 /** The page frame for every signed-in screen: a rail on wide screens, a drawer behind a top bar on narrow ones. */
 export function AppShell({ rail, action, menuLabel, children }: Props) {
   const [open, setOpen] = useState(false)
+  // On a phone the bar gives the content its height back: it slides away on scrolling down, back on scrolling up.
+  const [away, setAway] = useState(false)
+  useEffect(() => {
+    let last = window.scrollY
+    const onScroll = () => {
+      const y = window.scrollY
+      if (Math.abs(y - last) < 8) return
+      setAway(y > last && y > 120)
+      last = y
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     const close = () => setOpen(false)
@@ -26,7 +39,7 @@ export function AppShell({ rail, action, menuLabel, children }: Props) {
       <aside className="shell-rail">{rail}</aside>
       <div className="scrim" onClick={() => setOpen(false)} />
       <div className="shell-main">
-        <header className="mobile-bar">
+        <header className={`mobile-bar${away ? ' away' : ''}`}>
           <button className="menu" aria-label={menuLabel} onClick={() => setOpen(true)}>
             <Icon name="menu" size={20} />
           </button>
