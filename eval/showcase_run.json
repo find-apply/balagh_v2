@@ -1,0 +1,313 @@
+{
+ "arabic": {
+  "project": "7cd661d29fb647f493cf2da8f7398344",
+  "first_id": "06c29db5",
+  "source_id": "06c29db5",
+  "localized_first": null,
+  "approved_id": "06c29db5",
+  "chosen": 1,
+  "steps": [
+   {
+    "kind": "ideas",
+    "n": 3
+   },
+   {
+    "kind": "script",
+    "version": 1,
+    "idea": "3 علامات قبل أن تبيع"
+   },
+   {
+    "kind": "review",
+    "version": 1,
+    "blocking": 0,
+    "findings": 0
+   },
+   {
+    "kind": "approve",
+    "roles": [
+     "creator"
+    ]
+   }
+  ],
+  "videos": [
+   {
+    "template": "geo",
+    "id": "87aaf0d7e259",
+    "status": "done",
+    "url": "/media/videos/87aaf0d7e259.mp4",
+    "duration_seconds": 88.79,
+    "new_images": 0,
+    "new_clips": 0,
+    "notes": [
+     "لا يوجد تسجيل للحديث (صحيح مسلم، حديث رقم 101، جزء من الحديث)، فعُرض بصمت. لإسماعه ضع تسجيلا باسم data/recitations/muslim-101.mp3."
+    ],
+    "preview": false,
+    "error": null
+   }
+  ]
+ },
+ "from-video": {
+  "project": "ad2e06d39d06454d95e9651b28b8bb76",
+  "first_id": "6ce722c0",
+  "source_id": "6ce722c0",
+  "localized_first": null,
+  "approved_id": "6ce722c0",
+  "chosen": 0,
+  "steps": [
+   {
+    "kind": "ideas",
+    "n": 3
+   },
+   {
+    "kind": "script",
+    "version": 1,
+    "idea": "اختبار التوحيد في السوق"
+   },
+   {
+    "kind": "review",
+    "version": 1,
+    "blocking": 0,
+    "findings": 0
+   },
+   {
+    "kind": "approve",
+    "roles": [
+     "creator"
+    ]
+   }
+  ],
+  "videos": [
+   {
+    "template": "geo",
+    "id": "6c87db894045",
+    "status": "done",
+    "url": "/media/videos/6c87db894045.mp4",
+    "duration_seconds": 63.85,
+    "new_images": 0,
+    "new_clips": 7,
+    "notes": [],
+    "preview": false,
+    "error": null
+   }
+  ]
+ },
+ "english": {
+  "project": "23e15bb31fa147a894de1e6251da5d14",
+  "first_id": "8830ac44",
+  "source_id": "8830ac44",
+  "localized_first": null,
+  "approved_id": "8830ac44",
+  "chosen": 0,
+  "steps": [
+   {
+    "kind": "ideas",
+    "n": 3
+   },
+   {
+    "kind": "script",
+    "version": 1,
+    "idea": "Hardship Is Not Abandonment"
+   },
+   {
+    "kind": "review",
+    "version": 1,
+    "blocking": 0,
+    "findings": 0
+   },
+   {
+    "kind": "approve",
+    "roles": [
+     "creator"
+    ]
+   }
+  ],
+  "videos": [
+   {
+    "template": "captions",
+    "id": "d9f12a37130f",
+    "status": "done",
+    "url": "/media/videos/d9f12a37130f.mp4",
+    "duration_seconds": 97.69,
+    "new_images": 0,
+    "new_clips": 6,
+    "notes": [],
+    "preview": false,
+    "error": null
+   }
+  ]
+ },
+ "reels": {
+  "project": "ff4c8bc6261c4912bb6efd58d40fd75e",
+  "first_id": "f252b943",
+  "source_id": "f252b943",
+  "localized_first": null,
+  "approved_id": "f252b943",
+  "chosen": 0,
+  "steps": [
+   {
+    "kind": "ideas",
+    "n": 3
+   },
+   {
+    "kind": "script",
+    "version": 1,
+    "idea": "ليست النهاية"
+   },
+   {
+    "kind": "review",
+    "version": 1,
+    "blocking": 0,
+    "findings": 0
+   },
+   {
+    "kind": "approve",
+    "roles": [
+     "creator"
+    ]
+   }
+  ],
+  "videos": [
+   {
+    "template": "captions",
+    "id": "7b4fdfbd0dc9",
+    "status": "done",
+    "url": "/media/videos/7b4fdfbd0dc9.mp4",
+    "duration_seconds": 42.43,
+    "new_images": 0,
+    "new_clips": 6,
+    "notes": [],
+    "preview": false,
+    "error": null
+   },
+   {
+    "template": "geo",
+    "id": "cfec968f3750",
+    "status": "done",
+    "url": "/media/videos/cfec968f3750.mp4",
+    "duration_seconds": 42.43,
+    "new_images": 0,
+    "new_clips": 0,
+    "notes": [],
+    "preview": false,
+    "error": null
+   }
+  ]
+ },
+ "adults": {
+  "project": "c69a9fdac8d64e9bbac1c88690393936",
+  "first_id": "76c7aea1",
+  "source_id": "76c7aea1",
+  "localized_first": "cd6b0ff7",
+  "approved_id": "cd6b0ff7",
+  "chosen": 1,
+  "steps": [
+   {
+    "kind": "ideas",
+    "n": 3
+   },
+   {
+    "kind": "script",
+    "version": 1,
+    "idea": "ماذا يفعل الصابر أول ساعة؟"
+   },
+   {
+    "kind": "review",
+    "version": 1,
+    "blocking": 0,
+    "findings": 0
+   },
+   {
+    "kind": "localize",
+    "version": 1,
+    "language": "en"
+   },
+   {
+    "kind": "review",
+    "version": 1,
+    "blocking": 0,
+    "findings": 0
+   },
+   {
+    "kind": "approve",
+    "roles": [
+     "creator",
+     "language"
+    ]
+   }
+  ],
+  "videos": []
+ },
+ "kids": {
+  "project": "73170d0a85cc4027b9c9c8aa936bcf06",
+  "first_id": "2bb87cf9",
+  "source_id": "2bb87cf9",
+  "localized_first": null,
+  "approved_id": "2bb87cf9",
+  "chosen": 0,
+  "steps": [
+   {
+    "kind": "ideas",
+    "n": 3
+   },
+   {
+    "kind": "script",
+    "version": 1,
+    "idea": "نصف الساندويتش، كامل المحبة"
+   },
+   {
+    "kind": "review",
+    "version": 1,
+    "blocking": 0,
+    "findings": 0
+   },
+   {
+    "kind": "story",
+    "scenes": 9
+   },
+   {
+    "kind": "approve",
+    "roles": [
+     "creator"
+    ]
+   }
+  ],
+  "videos": [
+   {
+    "template": "kids",
+    "id": "527e9620e036",
+    "status": "done",
+    "url": "/media/videos/527e9620e036.mp4",
+    "duration_seconds": 109.76,
+    "new_images": 6,
+    "new_clips": 17,
+    "notes": [],
+    "preview": false,
+    "error": null
+   },
+   {
+    "template": "chalk",
+    "id": "66fede5cb116",
+    "status": "done",
+    "url": "/media/videos/66fede5cb116.mp4",
+    "duration_seconds": 109.76,
+    "new_images": 0,
+    "new_clips": 0,
+    "notes": [],
+    "preview": false,
+    "error": null
+   },
+   {
+    "template": "teaser",
+    "id": "ecb7b90d2d3d",
+    "status": "done",
+    "url": "/media/videos/ecb7b90d2d3d.mp4",
+    "duration_seconds": 28.31,
+    "new_images": 0,
+    "new_clips": 0,
+    "notes": [],
+    "preview": false,
+    "error": null
+   }
+  ]
+ }
+}

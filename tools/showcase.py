@@ -49,7 +49,13 @@ MAX_ROUNDS = 4   # correction rounds before giving up on a clean review
 
 
 def api(method: str, path: str, body=None, timeout=600) -> dict:
-    r = httpx.request(method, BASE + path, json=body, timeout=timeout)
+    # a 502/503 is the API restarting (deploy, or a reload after a render): wait and ask again
+    for attempt in range(6):
+        r = httpx.request(method, BASE + path, json=body, timeout=timeout)
+        if r.status_code in (502, 503) and method == "GET":
+            time.sleep(10)
+            continue
+        break
     if r.status_code >= 400:
         raise RuntimeError(f"{method} {path} → {r.status_code}: {r.text[:300]}")
     return r.json() if r.content else {}
@@ -128,10 +134,15 @@ def run_videos() -> None:
                 continue
             sid = r["approved_id"]
             pid = r["project"]
-            if template != ex.get("story"):
-                api("PUT", f"/projects/{pid}/scripts/{sid}/template", {"template": template})
-            video = api("POST", f"/projects/{pid}/scripts/{sid}/videos", {"template": template})
-            log(ex["id"], f"{template}: rendering {video['id']}")
+            existing = [v for v in api("GET", f"/projects/{pid}/scripts/{sid}/videos") if v["template"] == template and v["status"] != "failed"]
+            if existing:
+                video = existing[-1]
+                log(ex["id"], f"{template}: resuming {video['id']} ({video['status']})")
+            else:
+                if template != ex.get("story"):
+                    api("PUT", f"/projects/{pid}/scripts/{sid}/template", {"template": template})
+                video = api("POST", f"/projects/{pid}/scripts/{sid}/videos", {"template": template})
+                log(ex["id"], f"{template}: rendering {video['id']}")
             t0 = time.monotonic()
             while video["status"] not in ("done", "failed"):
                 time.sleep(15)
@@ -219,7 +230,7 @@ def write() -> None:
         dict(value=str(len(examples)), label="مشاريع حقيقية على هذا الموقع"),
         dict(value=str(videos_total), label="فيديوهات، بلا مونتاج"),
         dict(value=str(len(langs)), label="لغات: " + "، ".join({"ar": "عربية", "en": "إنجليزية"}[x] for x in sorted(langs))),
-        dict(value=str(blocking_total), label="ملاحظة مانعة أمسكها المراجعون الآليون قبل البشر"),
+        dict(value=str(blocking_total), label="ملاحظة مانعة من المراجعين الآليين (Gemini) على ما كتبه GPT-5.4"),
         dict(value="0", label="نص شرعي كتبه النموذج"),
     ]
     OUT.write_text(json.dumps(dict(examples=examples, guards=old["guards"], stats=stats, feedback=old["feedback"]), ensure_ascii=False, indent=1))
