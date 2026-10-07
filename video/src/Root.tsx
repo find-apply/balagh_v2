@@ -9,6 +9,8 @@ import {Captions} from './templates/Captions';
 import {Chalk} from './templates/Chalk';
 import {Geo} from './templates/Geo';
 import {Kids} from './templates/Kids';
+import {Explainer, ExplainerSpec, explainerFrames} from './templates/Explainer';
+import explainerSample from '../samples/explainer.json';
 
 // Composition ids match the `composition` field in catalog.json. Content comes in with --props={"spec": ...}.
 const metadata = ({props}: {props: {spec: VideoSpec}}) => ({durationInFrames: totalFrames(props.spec)});
@@ -17,6 +19,8 @@ const defaults = {spec: sample as VideoSpec};
 const storyDefaults = {spec: storySample as StorySpec};
 const teaserMetadata = ({props}: {props: {spec: TeaserSpec}}) => ({durationInFrames: teaserFrames(props.spec)});
 const teaserDefaults = {spec: teaserSample as TeaserSpec};
+const explainerMetadata = ({props}: {props: {spec: ExplainerSpec}}) => ({durationInFrames: explainerFrames(props.spec)});
+const explainerDefaults = {spec: explainerSample as ExplainerSpec};
 
 export const Root: React.FC = () => (
   <>
@@ -30,5 +34,7 @@ export const Root: React.FC = () => (
       defaultProps={storyDefaults} calculateMetadata={storyMetadata} />
     <Composition id="Teaser" component={Teaser} fps={FPS} width={720} height={1280} durationInFrames={1}
       defaultProps={teaserDefaults} calculateMetadata={teaserMetadata} />
+    <Composition id="Explainer" component={Explainer} fps={FPS} width={1920} height={1080} durationInFrames={1}
+      defaultProps={explainerDefaults} calculateMetadata={explainerMetadata} />
   </>
 );

@@ -17,3 +17,8 @@ media/
 video/out/
 data/hadith_sharh.partial.json
 data/hadith_sharh.progress
+
+# Explainer: reference material and the showcase clips copied from media/
+template for inspiration/
+video/public/explainer/clips/
+video/samples/explainer.dry.json
