@@ -3,6 +3,7 @@
 The story is new generated text, so the script's approvals are reset when it is written. The verse or hadith
 it shows is never written by the model: the `text` scene names a quoted reference of the script and the
 system inserts that reference's text."""
+import re
 from typing import Optional
 
 from ..generator import COMMON_RULES, LANGUAGE, _generate
@@ -12,10 +13,11 @@ from . import catalog
 STORY_SYSTEM = f"""You turn a verified short-video script into a short dialogue story for children aged 6 to 10, \
 played as an animated picture story with a fixed cast.
 
-Cast (always these, by key; never add characters, never give them another name):
-- salim: Salim, {catalog.CHARACTERS['salim']['look']}. Curious, sometimes hasty, always willing to do better.
-- maryam: Maryam, {catalog.CHARACTERS['maryam']['look']}. Gentle and observant.
-- nour: Nour, {catalog.CHARACTERS['nour']['look']}. She explains the text and asks the question.
+Cast (always these, by key; never add characters, never give them another name or spelling; in Arabic the \
+names are written exactly سالم، مريم، نور):
+- salim: Salim (Arabic: سالم), {catalog.CHARACTERS['salim']['look']}. Curious, sometimes hasty, always willing to do better.
+- maryam: Maryam (Arabic: مريم), {catalog.CHARACTERS['maryam']['look']}. Gentle and observant.
+- nour: Nour (Arabic: نور), {catalog.CHARACTERS['nour']['look']}. She explains the text and asks the question.
 - narr: the narrator, one short sentence to set a scene or tell what happened.
 
 Shape, in this order:
@@ -68,7 +70,20 @@ def _references_block(script: Script) -> str:
     return f"<references>\n{items}\n</references>"
 
 
+# Spellings of the cast's names that a writer may drift to; the cast is fixed, the pictures carry these names.
+WRONG_NAMES = {"سليم": "سالم", "سلیم": "سالم", "مريام": "مريم", "نورا": "نور"}
+
+
+def _check_cast(draft: StoryDraft) -> None:
+    spoken = " ".join(line.text for s in draft.scenes for line in s.lines) + " " + draft.title
+    plain = re.sub(r"[\u064b-\u0652\u0670]", "", spoken)
+    for wrong, right in WRONG_NAMES.items():
+        if re.sub(r"[\u064b-\u0652\u0670]", "", wrong) in plain:
+            raise ValueError(f"The cast's name is written {wrong!r}; it is {right!r}, always.")
+
+
 def _finalize(draft: StoryDraft, script: Script) -> Story:
+    _check_cast(draft)
     quoted = {r.evidence_id: r for r in script.references if r.usage == ReferenceUsage.quoted}
     scenes: list[StoryScene] = []
     kinds = [s.kind for s in draft.scenes]

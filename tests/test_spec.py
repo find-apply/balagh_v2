@@ -81,3 +81,15 @@ def test_hadith_without_recording_is_silent_with_a_note(hadith_evidence, no_netw
     assert no_network["speak"] == ["قال النبي ﷺ:"]
     assert any("لا يوجد تسجيل" in n for n in build.notes)
     assert len(props["audio"]) == 1
+
+
+def test_a_story_that_misspells_the_cast_is_rejected():
+    """The writer may transliterate Salim as سليم; the cast's Arabic name is سالم and the pictures carry it."""
+    import pytest
+    from app.schemas import Line, StoryDraft, StorySceneDraft, StorySceneKind
+    from app.video import story
+    bad = StoryDraft(title="قصة", review_note="", scenes=[StorySceneDraft(kind=StorySceneKind.story, lines=[Line(who="salim", text="أَنَا سَلِيمٌ وَهَذِهِ مَرْيَمُ")], image_prompt="x", present=["salim"], evidence_id="", cards=[], question="", choices=[])])
+    with pytest.raises(ValueError, match="سالم"):
+        story._check_cast(bad)
+    good = StoryDraft(title="قصة", review_note="", scenes=[StorySceneDraft(kind=StorySceneKind.story, lines=[Line(who="salim", text="أَنَا سَالِمٌ وَهَذِهِ مَرْيَمُ")], image_prompt="x", present=["salim"], evidence_id="", cards=[], question="", choices=[])])
+    story._check_cast(good)
