@@ -4000,3 +4000,17 @@ button:not(.primary):disabled {
     scroll-margin-top: 72px;
   }
 }
+
+/* the story card stands out from the template library above it */
+.story-card {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--brand-soft);
+}
+
+.story-card > summary h3 {
+  color: var(--brand);
+}
+
+.story-card .notice {
+  margin: 12px 0 16px;
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CHARACTERS, STORY_SCENES } from '../labels'
 import type { Script } from '../types'
 
@@ -12,14 +12,26 @@ interface Props {
 export function StoryView({ script, disabled, onRewrite }: Props) {
   const story = script.story
   const [notes, setNotes] = useState('')
+  const box = useRef<HTMLDetailsElement>(null)
+  // A story that has just been written scrolls into view: it is new text the creator has not read yet.
+  const fresh = Boolean(story) && script.approvals.length === 0
+  useEffect(() => {
+    if (fresh) box.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [fresh, story?.title])
   if (!story) return null
   const dir = script.target.language === 'en' ? 'ltr' : 'rtl'
   return (
-    <details className="card">
+    <details className="card story-card" id="s-story" ref={box} open>
       <summary>
-        <h3>قصة الأطفال: {story.title}</h3>
+        <h3>ما سيُعرض في الفيديو: قصة «{story.title}»</h3>
         <span className="muted small">{story.scenes.length} مشاهد · حوار مولَّد بشخصيات ثابتة، والنص الشرعي فيه من المصدر لا من النموذج؛ يُعتمد مع السيناريو</span>
       </summary>
+      {fresh && (
+        <div className="notice">
+          <strong>كُتبت قصة حوار من سيناريوك. اقرأها قبل الاعتماد، فهي نص جديد.</strong>
+          <p className="small">قالب الأطفال يعرض حوارا بين سالم ومريم والمعلمة نور، لا تعليقا صوتيا. السيناريو الأصلي يبقى مرجعا، والفيديو يعرض هذه القصة. الآية والحديث لا تنطقهما الشخصيات: يأتيان في مشهد مستقل من المصدر.</p>
+        </div>
+      )}
       <ol className="scenes story" dir={dir}>
         {story.scenes.map((s, i) => (
           <li key={i}>
