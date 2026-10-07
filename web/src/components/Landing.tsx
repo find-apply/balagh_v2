@@ -27,9 +27,20 @@ const RESULTS = [
   { value: '0/8', label: 'سيناريو سليم عُلّم خطأً' },
 ]
 
-export function Logo() {
+/** The brand mark links to the home page wherever it appears; `plain` renders it without the link, for a
+ * parent that already makes it a button. */
+export function Logo({ plain = false }: { plain?: boolean } = {}) {
+  if (plain) return <LogoMark />
   return (
-    <span className="logo">
+    <a className="logo" href="#" aria-label="الصفحة الرئيسية">
+      <LogoMark inner />
+    </a>
+  )
+}
+
+function LogoMark({ inner = false }: { inner?: boolean }) {
+  return (
+    <span className={inner ? 'logo-inner' : 'logo'}>
       <svg viewBox="0 0 64 64" aria-hidden="true">
         <rect width="64" height="64" rx="16" fill="currentColor" />
         <text x="32" y="45" fontSize="34" fontWeight="700" textAnchor="middle" fill="#fff">

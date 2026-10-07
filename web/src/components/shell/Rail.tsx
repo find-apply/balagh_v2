@@ -11,7 +11,7 @@ export function Rail({ children }: { children: ReactNode }) {
 export function RailBrand({ onClick, badge }: { onClick?: () => void; badge?: string }) {
   const logo = onClick ? (
     <button className="logo-button" onClick={onClick} aria-label="الصفحة الرئيسية">
-      <Logo />
+      <Logo plain />
     </button>
   ) : (
     <Logo />

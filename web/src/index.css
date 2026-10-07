@@ -4088,3 +4088,18 @@ details.more > p {
     font-size: 0.9rem;
   }
 }
+
+/* the brand mark is a link to the home page */
+a.logo {
+  text-decoration: none;
+}
+
+a.logo:hover {
+  opacity: 0.85;
+}
+
+.logo-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
