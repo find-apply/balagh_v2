@@ -1,0 +1,492 @@
+[
+ {
+  "label": "الصدق في البيع",
+  "idea": "معادلة البركة الرقمية",
+  "level": "B",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 25.0,
+    "title": "معادلة البركة الرقمية",
+    "hook": "تبيع أونلاين أو تعمل كفريلانسر؟ البركة لا تبدأ بعد الربح، بل من طريقة البيع نفسها.",
+    "level": "B",
+    "scenes": 7,
+    "words": 102,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [
+     "المشهد 3: المقطع الذي يسند الشرح لم يوجد بنصه في التفسير أو الشرح المعتمد.",
+     "المشهد 5: المقطع الذي يسند الشرح لم يوجد بنصه في التفسير أو الشرح المعتمد."
+    ],
+    "grounded": [
+     false,
+     true,
+     false,
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] تبيع أونلاين أو تعمل كفريلانسر؟ البركة لا تبدأ بعد الربح، بل من طريقة البيع نفسها.\n[5-11] اسمع هذا الوعيد: «وَيۡلٞ لِّلۡمُطَفِّفِينَ ۝ ٱلَّذِينَ إِذَا ٱكۡتَالُواْ عَلَى ٱلنَّاسِ يَسۡتَوۡفُونَ ۝ وَإِذَا كَالُوهُمۡ أَو وَّزَنُوهُمۡ يُخۡسِرُونَ»\n[11-17] التطفيف ليس رقمًا ناقصًا فقط، بل كل بخسٍ لحق الناس في البيع.\n[17-24] أول خطوة: اكتب وصفًا دقيقًا. اذكر العيب قبل الميزة، ولا تُخفِ ما يؤثر على قرار الشراء.\n[24-31] ثانيًا: لا تستخدم فلاتر تخدع. تحسين الإضاءة شيء، وتغيير الحقيقة شيء آخر.\n[31-38] ثالثًا: سلِّم في الموعد. وإذا تأخرت، فأخبر العميل مبكرًا. التأخير بلا بيان نقصٌ في الحق.\n[38-45] المعادلة بسيطة: قد تربح صفقة بالخداع، لكن البركة تكون مع الصدق. راجع متجرك اليوم.",
+    "cta": "راجع وصفك وصورك ومواعيدك اليوم، وأغلق باب التطفيف الرقمي."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 58.1,
+    "title": "معادلة البركة الرقمية",
+    "hook": "تبيع عبر الإنترنت أو تعمل مستقلًّا؟ هل وصفك يطابق ما تسلّمه؟",
+    "level": "B",
+    "scenes": 7,
+    "words": 89,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] تبيع عبر الإنترنت أو تعمل مستقلًّا؟ هل وصفك يطابق ما تسلّمه؟\n[5-15] قال الله تعالى: «وَيۡلٞ لِّلۡمُطَفِّفِينَ ۝ ٱلَّذِينَ إِذَا ٱكۡتَالُواْ عَلَى ٱلنَّاسِ يَسۡتَوۡفُونَ ۝ وَإِذَا كَالُوهُمۡ أَو وَّزَنُوهُمۡ يُخۡسِرُونَ»\n[15-22] المطفف يستوفي حقه، ثم ينقص حق غيره في الكيل أو الوزن. هذا هو التحذير.\n[22-28] كخطوة عملية في البيع الرقمي: اكتب وصفًا دقيقًا، واذكر عيوب المنتج بوضوح.\n[28-34] اعرض صورًا واقعية؛ تجنّب الفلاتر التي تغيّر لون المنتج أو تخفي عيوبه.\n[34-40] وفي العمل المستقل: حدّد موعدًا واقعيًّا للتسليم، والتزم بما اتفقت عليه.\n[40-45] قبل النشر، راجع وصفك وصورك وموعدك. احفظ هذه القائمة لطلبك القادم.",
+    "cta": "احفظ هذه القائمة لطلبك القادم."
+   }
+  }
+ },
+ {
+  "label": "بر الوالدين",
+  "idea": "عادات صغيرة لبر الوالدين",
+  "level": "A",
+  "evidence": [
+   "Q1",
+   "H1",
+   "H2"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 26.7,
+    "title": "عادات صغيرة لبر الوالدين",
+    "hook": "مشغول طول اليوم؟ 3 أفعال للبر.",
+    "level": "A",
+    "scenes": 7,
+    "words": 98,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ],
+     [
+      "H1",
+      "quoted"
+     ],
+     [
+      "H2",
+      "paraphrased"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] مشغول طول اليوم؟ جرّب ثلاث عادات صغيرة للبر، ما تأخذ منك وقتًا كبيرًا.\n[5-12] أول عادة: رسالة صباحية صادقة. سلام، دعاء، أو كلمة تفرّح القلب.\n[12-19] الثانية: خمس دقائق استماع حقيقي. بدون شاشة، بدون مقاطعة، فقط حضور واحترام.\n[19-27] الثالثة: ادعُ لهما في السجود. هذا برّ خفي، لكنه عظيم عند الله.\n[27-34] واسمع هذا الدعاء من القرآن: «وَٱخۡفِضۡ لَهُمَا جَنَاحَ ٱلذُّلِّ مِنَ ٱلرَّحۡمَةِ وَقُل رَّبِّ ٱرۡحَمۡهُمَا كَمَا رَبَّيَانِي صَغِيرٗا»\n[34-40] والقاعدة التي تعينك: «أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ تَعَالَى أَدْوَمُهَا وَإِنْ قَلَّ» يعني لا تحتقر العمل الصغير إذا ثبتَّ عليه.\n[40-45] ابدأ اليوم بواحدة فقط، ثم الزمها. البر لا يحتاج فراغًا كبيرًا، يحتاج صدقًا واستمرارًا.",
+    "cta": "اختر عادة واحدة الليلة، وابدأ بها من اليوم."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 60.3,
+    "title": "عادات صغيرة لبر الوالدين",
+    "hook": "مشغول طوال اليوم؟ إليك ثلاث عادات لبر والديك.",
+    "level": "A",
+    "scenes": 7,
+    "words": 81,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ],
+     [
+      "H1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-4] مشغول طوال اليوم؟ إليك ثلاث عادات لبر والديك.\n[4-11] الأولى: رسالة صباحية صادقة. اسأل والديك عن حالهما، وقل لهما إنك تفكر فيهما.\n[11-18] الثانية: خمس دقائق من الاستماع. ضع الهاتف جانبًا، وأنصت لهما حتى يكملا كلامهما.\n[18-23] الثالثة: ادعُ لهما بالرحمة، واجعل الدعاء عادةً يومية.\n[23-32] قال الله تعالى: «وَٱخۡفِضۡ لَهُمَا جَنَاحَ ٱلذُّلِّ مِنَ ٱلرَّحۡمَةِ وَقُل رَّبِّ ٱرۡحَمۡهُمَا كَمَا رَبَّيَانِي صَغِيرٗا»\n[32-40] وقال النبي صلى الله عليه وسلم: «أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ تَعَالَى أَدْوَمُهَا وَإِنْ قَلَّ»\n[40-45] اختر عادةً تبدأ بها اليوم، وضع لها تذكيرًا في هاتفك.",
+    "cta": "اختر عادةً تبدأ بها اليوم، وضع لها تذكيرًا في هاتفك."
+   }
+  }
+ },
+ {
+  "label": "أطفال: الصدق",
+  "idea": "الصادق الأمين",
+  "level": "A",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 29.5,
+    "title": "الصادق الأمين",
+    "hook": "هل تعرفون ماذا كان الناس يسمون نبينا محمدا ﷺ قبل الإسلام؟",
+    "level": "A",
+    "scenes": 7,
+    "words": 93,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] هل تعرفون ماذا كان الناس يسمون نبينا محمدا ﷺ قبل الإسلام؟\n[5-10] كانوا يسمونه: الصادق الأمين.\n[10-17] يعني: يقول الصدق، ويحفظ الأمانة. لذلك كان الناس يثقون به كثيرا.\n[17-24] حتى إنهم كانوا يتركون أشياءهم الثمينة عنده، لأنه لا يكذب أبدا.\n[24-32] والله تعالى أخبرنا عن رسول الله ﷺ فقال: «لَّقَدۡ كَانَ لَكُمۡ فِي رَسُولِ ٱللَّهِ أُسۡوَةٌ حَسَنَةٞ لِّمَن كَانَ يَرۡجُواْ ٱللَّهَ وَٱلۡيَوۡمَ ٱلۡأٓخِرَ وَذَكَرَ ٱللَّهَ كَثِيرٗا»\n[32-39] يعني: نتعلم من رسول الله ﷺ، فنقول الصدق، ونحفظ ما عندنا من أمانات.\n[39-45] نحن نحب رسول الله ﷺ. الليلة، اطلب من ماما أو بابا أن يحكوا لك قصة عن الصادق الأمين.",
+    "cta": "الليلة، اطلب من ماما أو بابا أن يحكوا لك قصة عن الصادق الأمين."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 114.7,
+    "title": "الصادق الأمين",
+    "hook": "هل تعرفون بماذا كان الناس يلقبون نبينا محمدًا، صلى الله عليه وسلم، قبل الإسلام؟",
+    "level": "A",
+    "scenes": 7,
+    "words": 82,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-7] هل تعرفون بماذا كان الناس يلقبون نبينا محمدًا، صلى الله عليه وسلم، قبل الإسلام؟\n[7-14] بالصادق الأمين! كان الناس يثقون به، ويتركون عنده أشياءهم الثمينة ليحفظها لهم.\n[14-18] لنستمع إلى آية من القرآن، كلام الله:\n[18-29] «لَّقَدۡ كَانَ لَكُمۡ فِي رَسُولِ ٱللَّهِ أُسۡوَةٌ حَسَنَةٞ لِّمَن كَانَ يَرۡجُواْ ٱللَّهَ وَٱلۡيَوۡمَ ٱلۡأٓخِرَ وَذَكَرَ ٱللَّهَ كَثِيرٗا»\n[29-34] نحب رسول الله، ونقتدي به؛ أي نتعلم منه الصدق والأمانة.\n[34-40] مثلًا، إذا كسرت لعبة بالخطأ، قل الحقيقة بهدوء: أنا كسرتها، وأريد إصلاحها.\n[40-45] اطلب من أمك أو أبيك الليلة قصة عن الصادق الأمين.",
+    "cta": "اطلب من أمك أو أبيك الليلة قصة عن الصادق الأمين."
+   }
+  }
+ },
+ {
+  "label": "خلافي: الموسيقى",
+  "idea": "أثر الصوت على القلب",
+  "level": "C",
+  "evidence": [
+   "H1",
+   "H2"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 30.4,
+    "title": "أثر الصوت على القلب",
+    "hook": "لماذا يهتم الإسلام بما يدخل إلى آذاننا؟ لأن القلب يتأثر قبل أن نشعر.",
+    "level": "C",
+    "scenes": 6,
+    "words": 107,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [
+     {
+      "sev": "suggestion",
+      "who": "scholarly",
+      "issue": "تم تصنيف المحتوى بمستوى (C - المسائل الخلافية أو الحساسة)، في حين أن السيناريو يركز على التزكية والتوجيه القيمي العام حول أثر المشتتات وصلاح القلب مستنداً إلى أصل نبوي عام، وتجنب الخوض في تفاصيل الخلاف الفقهي."
+     }
+    ],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] لماذا يهتم الإسلام بما يدخل إلى آذاننا؟ لأن كثرة ما نسمع تترك أثرها في القلب.\n[6-13] المسألة ليست مجرد نقاش حلال وحرام فقط، بل أيضًا: ماذا يصنع هذا الصوت بخشوعك وصفاء داخلك؟\n[13-21] إذا امتلأ يومك بالضجيج والمشتتات، قد يتكوّن حاجز خفي بينك وبين تدبر القرآن ولذة الذكر.\n[21-30] واسمع هذا الأصل النبوي: «أَلاَ وَإِنَّ فِي الْجَسَدِ مُضْغَةً إِذَا صَلَحَتْ صَلَحَ الْجَسَدُ كُلُّهُ وَإِذَا فَسَدَتْ فَسَدَ الْجَسَدُ كُلُّهُ أَلاَ وَهِيَ الْقَلْبُ»\n[30-37] المعنى: صلاح القلب ينعكس على الجسد كله، وفساده يفسد أثره على بقية الإنسان.\n[37-45] لذلك راقب سمعك. ليس كل مباح نافعًا لقلبك، والعلماء يختلفون في بعض التفاصيل. عمليًا: بدّل جزءًا من وقت السماع اليومي بقرآن أو ذكر أو علم نافع.",
+    "cta": "جرّب اليوم عشر دقائق أقل من الضجيج، وعشر دقائق أكثر مع القرآن."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 45.7,
+    "title": "أثر ما تسمعه على قلبك",
+    "hook": "ما الذي تسمعه كل يوم؟ وهل يترك لك مساحة للخشوع؟",
+    "level": "C",
+    "scenes": 6,
+    "words": 87,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] ما الذي تسمعه كل يوم؟ وهل يترك لك مساحة للخشوع؟\n[5-10] جرّب أن تلاحظ: بعد التنقّل بين المقاطع، هل يسهل عليك التركيز؟\n[10-23] وفي حديث صحيح، قال النبي صلى الله عليه وسلم: «أَلاَ وَإِنَّ فِي الْجَسَدِ مُضْغَةً إِذَا صَلَحَتْ صَلَحَ الْجَسَدُ كُلُّهُ وَإِذَا فَسَدَتْ فَسَدَ الْجَسَدُ كُلُّهُ أَلاَ وَهِيَ الْقَلْبُ»\n[23-29] هذا تذكير بأهمية صلاح القلب، لا حكم على كل صوت تسمعه.\n[29-36] وفي بعض أحكام الاستماع خلاف بين العلماء؛ فاسأل أهل العلم، ولا تكتفِ بمقطع.\n[36-45] اليوم، استبدل خمس دقائق من المقاطع باستماع هادئ للقرآن، ثم لاحظ حضورك. احفظ الفكرة وجرّبها.",
+    "cta": "استبدل خمس دقائق من المقاطع باستماع هادئ للقرآن، ثم لاحظ حضورك. احفظ الفكرة وجرّبها."
+   }
+  }
+ },
+ {
+  "label": "إنجليزي: الصلاة",
+  "idea": "The Spiritual Reset",
+  "level": "B",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 17.1,
+    "title": "The Spiritual Reset",
+    "hook": "What if you paused five times a day just to reset your soul?",
+    "level": "B",
+    "scenes": 8,
+    "words": 108,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] What if you had to stop five times a day and just breathe?\n[5-10] Not because your phone died, but because your inner battery did.\n[10-16] In Islam, Muslims do exactly that: five intentional pauses spread through the day.\n[16-22] They step away from work, screens, and pressure to reconnect with their Creator.\n[22-28] With standing, bowing, and prostrating, the body slows down and the heart refocuses.\n[28-36] The Quran says: «Indeed, I am Allāh. There is no deity except Me, so worship Me and establish prayer for My remembrance.»\n[36-41] This practice is called Salah: the Muslim prayer, an act of worship and remembrance.\n[41-45] Less escape, more return. That is the spiritual reset.",
+    "cta": "What part of Salah would you want explained next?"
+   },
+   "gpt-6.1-sol": {
+    "seconds": 51.5,
+    "title": "The Spiritual Reset",
+    "hook": "What if your day had five pauses—not just to recharge, but to reconnect?",
+    "level": "B",
+    "scenes": 6,
+    "words": 90,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-7] What if your day had five pauses—not just to recharge, but to reconnect?\n[7-14] Like charging a phone, stepping away from screens can feel like a reset.\n[14-21] Muslims pray five times daily, standing, bowing, and prostrating—lowering their bodies to the ground.\n[21-27] This is Salah: prayer offered in worship of God, not just a break.\n[27-38] The Quran says: «Indeed, I am Allāh. There is no deity except Me, so worship Me and establish prayer for My remembrance.»\n[38-45] It's about remembering God, not just disconnecting. What would you like to know about Salah?",
+    "cta": "What would you like to know about Salah?"
+   }
+  }
+ },
+ {
+  "label": "توطين: الابتلاء → EN",
+  "idea": "الصدمة الأولى",
+  "level": "B",
+  "evidence": [
+   "Q1",
+   "H1",
+   "H2"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 27.3,
+    "title": "الصدمة الأولى",
+    "hook": "كيف تعرف أنك نجحت في اختبار الله من أول لحظة؟",
+    "level": "B",
+    "scenes": 7,
+    "words": 90,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ],
+     [
+      "H1",
+      "paraphrased"
+     ],
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [
+     "المشهد 7: المقطع الذي يسند الشرح لم يوجد بنصه في التفسير أو الشرح المعتمد."
+    ],
+    "grounded": [
+     true,
+     true,
+     true,
+     false
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] كيف تعرف أنك نجحت في اختبار الله من أول لحظة؟\n[5-10] ليس بعد ساعة، ولا بعد يوم. الاختبار يبدأ في رد فعلك الأولى.\n[10-16] قال النبي صلى الله عليه وسلم: «الصَّبْرُ عِنْدَ الصَّدْمَةِ الأُولَى»\n[16-23] يعني الصبر الأعظم أجرًا هو ما يظهر عند أول ضربة، قبل أن تهدأ النفس وتستوعب.\n[23-31] ولهذا علّمنا الله عن الصابرين: «ٱلَّذِينَ إِذَآ أَصَٰبَتۡهُم مُّصِيبَةٞ قَالُوٓاْ إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ»\n[31-38] عوّد لسانك عليها فور الخبر السيئ. هذه الكلمة تذكّرك أنك لله، وأن الرجوع إليه حق.\n[38-45] ليس المطلوب ألا تحزن، بل أن تبدأ صح. عند الصدمة الأولى، قلها مباشرة.",
+    "cta": "احفظها اليوم، ورددها عند أول خبر يوجعك: إنا لله وإنا إليه راجعون.",
+    "localized": {
+     "seconds": 50.7,
+     "title": "When Bad News Hits",
+     "hook": "When bad news hits, how can you respond well?",
+     "level": "B",
+     "scenes": 7,
+     "words": 98,
+     "quoted": [
+      [
+       "Q1",
+       "quoted"
+      ],
+      [
+       "H1",
+       "paraphrased"
+      ],
+      [
+       "H2",
+       "quoted"
+      ]
+     ],
+     "warnings": [],
+     "grounded": [
+      true,
+      true,
+      true,
+      true
+     ],
+     "blocking": 0,
+     "findings": [],
+     "claims": [
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved"
+     ],
+     "terms": null,
+     "text": "[0-4] When bad news hits, how can you respond well?\n[4-9] The test starts straight away—not an hour or a day later.\n[9-19] An authentic hadith—a report from Islam’s Prophet Muhammad—says: «The real patience is at the first stroke of a calamity»\n[19-25] The greatest reward is for patience at that first shock, before you settle.\n[25-37] Islam’s scripture, the Quran, describes these patient people: «Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"»\n[37-41] A reminder: we belong to God and return to Him.\n[41-45] You can grieve. Learn these words; say them straight away.",
+     "cta": "Learn the words quoted from the Quran, and practise saying them when painful news first reaches you."
+    }
+   },
+   "gpt-6.1-sol": {
+    "seconds": 45.6,
+    "title": "الصدمة الأولى",
+    "hook": "عند الخبر المؤلم، لماذا تكون اللحظة الأولى مهمة؟",
+    "level": "B",
+    "scenes": 6,
+    "words": 77,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ],
+     [
+      "H1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true,
+     true
+    ],
+    "blocking": 1,
+    "findings": [
+     {
+      "sev": "blocking",
+      "who": "scholarly",
+      "issue": "تنسب العبارة قول النبي صلى الله عليه وسلم «إِنَّمَا الصَّبْرُ عِنْدَ الصَّدْمَةِ الأُولَى» إلى موضع بكاء المرأة عند القبر، بينما الثابت في سياق الحديث (H1) أنه قال لها عند القبر: «اتَّقِي اللَّهَ وَاصْبِرِي»، وإنما قال ل"
+     }
+    ],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] عند الخبر المؤلم، لماذا تكون اللحظة الأولى مهمة؟\n[5-14] قال النبي صلى الله عليه وسلم لامرأة تبكي عند قبر: «إِنَّمَا الصَّبْرُ عِنْدَ الصَّدْمَةِ الأُولَى»\n[14-22] هذا يوجّه انتباهنا إلى الصبر حين تقع المصيبة، وقت اشتداد وقعها علينا، لا بعد هدوء المفاجأة فقط.\n[22-32] وفي سورة البقرة وصفٌ للصابرين: «ٱلَّذِينَ إِذَآ أَصَٰبَتۡهُم مُّصِيبَةٞ قَالُوٓاْ إِنَّا لِلَّهِ وَإِنَّآ إِلَيۡهِ رَٰجِعُونَ»\n[32-39] المعنى: نحن مملوكون لله، يدبّر أمرنا، وإليه نعود للحساب والجزاء.\n[39-45] عوّد لسانك الاسترجاع عند المصيبة. احفظ هذا التذكير، وشاركه مع من تحب.",
+    "cta": "عوّد لسانك الاسترجاع عند المصيبة. احفظ هذا التذكير، وشاركه مع من تحب.",
+    "localized": {
+     "seconds": 49.3,
+     "title": "When Painful News Hits",
+     "hook": "When painful news hits, why does your first response matter?",
+     "level": "B",
+     "scenes": 6,
+     "words": 100,
+     "quoted": [
+      [
+       "Q1",
+       "quoted"
+      ],
+      [
+       "H1",
+       "quoted"
+      ]
+     ],
+     "warnings": [],
+     "grounded": [
+      true,
+      true,
+      true
+     ],
+     "blocking": 1,
+     "findings": [
+      {
+       "sev": "blocking",
+       "who": "scholarly",
+       "issue": "يذكر التعليق الصوتي أن النبي صلى الله عليه وسلم قال للمرأة جملة «إنما الصبر عند الصدمة الأولى» وهي تبكي عند القبر، بينما الثابت في نص الحديث (H1) وشرحه أنه قال لها عند القبر: «اتقي الله واصبري»، وإنما قال لها: «إنما الصب"
+      }
+     ],
+     "claims": [
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved"
+     ],
+     "terms": null,
+     "text": "[0-5] When painful news hits, why does your first response matter?\n[5-17] Muhammad, Islam’s Prophet, peace be upon him, told a woman crying beside a grave: «Verily, the patience is at the first stroke of a calamity»\n[17-23] This highlights patience when hardship first strikes—not only once the shock has eased.\n[23-33] The Quran describes patient people: «Who, when disaster strikes them, say, \"Indeed we belong to Allāh, and indeed to Him we will return.\"»\n[33-41] We belong to God, who governs us. After death, we return to Him for resurrection, judgement, and reward or punishment.\n[41-45] Practise saying this; save and share with loved ones.",
+     "cta": "Practise saying this; save and share with loved ones."
+    }
+   }
+  }
+ }
+]
