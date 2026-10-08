@@ -17,7 +17,7 @@ class FlowSettings(BaseModel):
 
 def defaults() -> FlowSettings:
     return FlowSettings(
-        generation_model=os.getenv("REELS_MODEL", "gpt-5.4"),
+        generation_model=os.getenv("REELS_MODEL", "gpt-6.1-sol"),
         review_model=os.getenv("REELS_REVIEW_MODEL", "gemini-flash-latest"),
     )
 
