@@ -1,8 +1,10 @@
 """An optional source for the ideas: a public YouTube video, or an uploaded PDF, image or text file.
 
-The source only inspires the angles; it is read by the model and never stored beyond the generation. Every
-religious text still goes through the same verification as without a source, so a text the source cites
-is used only if it is found in the Quran or the two Sahihs."""
+The source only inspires the angles. It is read once, by a model that can watch and read, into a digest
+(its argument, its examples with their loci, the texts it cites as it gives them); the digest is kept with the
+project and is what the ideas, the script and the localization are written from, by whichever model writes.
+The source itself is never stored. Every religious text still goes through the same verification as without a
+source, so a text the source cites is used only if it is found in the Quran or the two Sahihs."""
 import logging
 import re
 import shutil
@@ -15,6 +17,7 @@ from uuid import uuid4
 import httpx
 from google.genai import types
 
+from .schemas import SourceDigest
 from .video import media
 
 logger = logging.getLogger("balagh.inspiration")
@@ -119,6 +122,21 @@ async def resolve(source_url: Optional[str], source_file: Optional[str]) -> Opti
         mime = next(m for m, ext in ACCEPTED.items() if ext == path.suffix)
         return Source(part=types.Part.from_bytes(data=path.read_bytes(), mime_type=mime), kind="file", label=name, path=path)
     return None
+
+
+DIGEST_SYSTEM = """You read a SOURCE (a video, a document or an image) for a creator of short Islamic videos, and \
+write a faithful digest of it. Report what the source says, in its order; do not add, judge or correct. Quote every \
+religious text the source cites verbatim as the source gives it, with where it occurs, and say what the source \
+attributes it to; do not fix or complete the citation yourself. Give every example, story and question with its \
+locus (mm:ss for a video, page or heading for a document). Write the summary, the argument and the examples in \
+the language asked for; keep the citations in the language of the source."""
+
+
+async def digest(source: Source, language: str) -> SourceDigest:
+    """One reading of the source, by the model that can watch and read it. The result is text: any writer
+    uses it after that, and the source itself is never sent again."""
+    from . import generator  # late import: generator imports this module
+    return await generator.read_source(DIGEST_SYSTEM, f"Write the digest with summary, argument and examples in {language}.", SourceDigest, source.part)
 
 
 def discard(source: Optional[Source]) -> None:

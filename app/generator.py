@@ -419,6 +419,23 @@ async def _call_model(system: str, prompt: str, output: type[T], model: str, par
     return output.model_validate_json(response.text)
 
 
+async def read_source(system: str, prompt: str, output: type[T], part: types.Part) -> T:
+    """Reads an attachment (a video, a file) with the model that reads attachments, whatever model writes."""
+    return await _generate(system, prompt, output, parts=(part,))
+
+
+def _source_block(digest) -> str:
+    """The source's digest as text for a writer: angles, examples and questions to draw on; citations to see,
+    never to trust. A missing digest gives an empty block."""
+    if digest is None:
+        return ""
+    ex = "\n".join(f'  <example locus="{e.locus}">{e.text}</example>' for e in digest.examples)
+    ci = "\n".join(f'  <cited locus="{c.locus}" as="{c.attributed_to}">{c.text}</cited>' for c in digest.citations)
+    arg = "\n".join(f"  - {a}" for a in digest.argument)
+    return (f'<source language="{digest.language}">\n<summary>{digest.summary}</summary>\n<argument>\n{arg}\n</argument>\n'
+            f"<examples>\n{ex}\n</examples>\n<citations note=\"as the source gives them; NOT verified, request texts the normal way\">\n{ci}\n</citations>\n</source>")
+
+
 async def _call_openai(system: str, prompt: str, output: type[T], model: str, parts: tuple[types.Part, ...] = ()) -> T:
     """The same structured call through OpenAI. Attachments are not carried over: a brief with a source still
     goes to Gemini, which reads video and documents."""
@@ -440,7 +457,8 @@ async def _call_openai(system: str, prompt: str, output: type[T], model: str, pa
 
 # ---- Ideas ----
 
-SOURCE_RULES = """A SOURCE is attached (a video, a document or an image). Use it for the angles, the examples, the \
+SOURCE_RULES = """A SOURCE is given as a digest (<source>): the points it makes, its examples, stories and questions \
+with their loci, and the religious texts it cites as it gives them. Use it for the angles, the examples, the \
 stories and the questions the audience has, and say in `source_locus` where in the source each idea comes from \
 (a timestamp mm:ss for a video, a page or heading for a document). Do not copy the source's wording: write your own. \
 Religious texts work exactly as without a source: describe and request them, and the system verifies them; a text \
@@ -466,18 +484,19 @@ async def generate_ideas(brief: BriefIn) -> list[Idea]:
     return ideas
 
 
-async def generate_ideas_from(brief: BriefIn, source_part: Optional[types.Part]) -> tuple[list[Idea], str]:
-    """Three ideas with their verified evidence, and (with a source) the model's summary of that source."""
+async def generate_ideas_from(brief: BriefIn, digest) -> tuple[list[Idea], str]:
+    """Three ideas with their verified evidence, and (with a source) the model's summary of that source.
+    `digest` is the source's reading (SourceDigest), given to the writer as text."""
     duration = f"{brief.duration_seconds} seconds (fixed by the creator)" if brief.duration_seconds else "not set, suggest one per idea"
     # A personal case is referred before any model sees it, whatever the model would have said.
     if screen.personal_case(brief.idea):
         raise Referral(screen.REFERRAL)
     prompt = (
-        f"<idea>{brief.idea or ('not given: take the topics from the attached source' if source_part else 'not given, choose the topics yourself')}</idea>\n\n"
+        f"<idea>{brief.idea or ('not given: take the topics from the source' if digest else 'not given, choose the topics yourself')}</idea>\n\n"
         f"{_target_block(brief, brief.platforms, duration)}"
     )
-    if source_part is not None:
-        draft = await _generate(f"{IDEAS_SYSTEM}\n\n{SOURCE_RULES}", prompt, SourcedIdeasDraft, parts=(source_part,))
+    if digest is not None:
+        draft = await _generate(f"{IDEAS_SYSTEM}\n\n{SOURCE_RULES}", f"{_source_block(digest)}\n\n{prompt}", SourcedIdeasDraft)
     else:
         draft = await _generate(IDEAS_SYSTEM, prompt, IdeasDraft)
     if draft.brief_level == ContentLevel.D:
@@ -648,7 +667,7 @@ def _art_block(template: Optional[str]) -> str:
 
 
 async def generate_script(brief: BriefIn, idea: Idea, duration_seconds: int, notes: Optional[str],
-                          template: Optional[str] = None) -> Script:
+                          template: Optional[str] = None, digest=None) -> Script:
     target = AudienceSpec(**brief.model_dump(include=set(AudienceSpec.model_fields)))
     prompt = (
         f"{_target_block(target, brief.platforms, f'{duration_seconds} seconds')}\n\n"
@@ -656,6 +675,8 @@ async def generate_script(brief: BriefIn, idea: Idea, duration_seconds: int, not
         f"{_evidence_block(idea.evidence, target.language)}\n\n"
         f"{_art_block(template)}"
     )
+    if digest is not None:
+        prompt = f"{_source_block(digest)}\n\nThe chosen idea came from this source: draw its examples, stories and questions from the source where they fit, in your own words, at their loci. Religious texts are requested and verified the normal way; a text the source cites is not verified by that.\n\n{prompt}"
     if notes:
         prompt += f"\n\n<creator_notes>{notes}</creator_notes>"
     fields = await _write(SCRIPT_SYSTEM, prompt, ScriptDraft, idea, target.language)

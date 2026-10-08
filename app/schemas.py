@@ -321,12 +321,34 @@ class Idea(IdeaCore):
     source_mentions: list[str] = Field(default_factory=list, description="Texts the source cites that are outside the verified sources (not the two Sahihs or the Quran); shown, never used.")
 
 
+class SourceExample(BaseModel):
+    locus: str = Field(description="Where in the source: a timestamp mm:ss for a video, a page or heading for a document, 'the image' for an image.")
+    text: str = Field(description="The example, story, or question, in a sentence or two of your own words.")
+
+
+class SourceCitation(BaseModel):
+    locus: str = Field(description="Where in the source the text is cited.")
+    text: str = Field(description="The religious text as the source words it, verbatim as heard or read, without the speaker's commentary.")
+    attributed_to: str = Field(description="What the source says it is: a verse (which surah if said), a hadith (which book if said), or a saying.")
+
+
+class SourceDigest(BaseModel):
+    """A structured reading of the source, made once by a model that can watch and read, then given as text
+    to whichever model writes the ideas, the script and the localization."""
+    summary: str = Field(description="Two or three sentences in the brief's language: what the source is about and the stance it takes.")
+    argument: list[str] = Field(description="The main points in the order the source makes them, one short line each (3 to 8).")
+    examples: list[SourceExample] = Field(description="Every story, example, image, or question the source uses to make its point, with its locus. Up to 12.")
+    citations: list[SourceCitation] = Field(description="Every religious text the source cites, verbatim as the source gives it. Empty if none.")
+    language: str = Field(description="The language or dialect of the source, e.g. 'Moroccan darija', 'English'.")
+
+
 class SourceInfo(BaseModel):
     """What the ideas were inspired by, kept with the project for the record."""
     kind: str = Field(examples=["youtube", "file"])
     label: str = Field(description="The video title or the file name.")
     url: Optional[str] = None
-    summary: str = Field(default="", description="The model's two-sentence summary of the source.")
+    summary: str = Field(default="", description="The model's short summary of the source.")
+    digest: Optional[SourceDigest] = Field(default=None, description="The structured reading of the source the ideas and the script were written from.")
 
 
 class Scene(SceneDraft):

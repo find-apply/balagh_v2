@@ -145,10 +145,11 @@ async def create_project(brief: BriefIn, x_client_id: Optional[str] = Header(def
     except inspiration.SourceError as e:
         raise HTTPException(status_code=400, detail=str(e))
     try:
-        ideas, summary = await generator.generate_ideas_from(brief, source.part if source else None)
+        digest = await inspiration.digest(source, "Arabic" if brief.language == "ar" else "English") if source else None
     finally:
-        inspiration.discard(source)
-    info = SourceInfo(kind=source.kind, label=source.label, url=source.url, summary=summary) if source else None
+        inspiration.discard(source)  # read once; the digest is what is kept
+    ideas, summary = await generator.generate_ideas_from(brief, digest)
+    info = SourceInfo(kind=source.kind, label=source.label, url=source.url, summary=summary or (digest.summary if digest else ""), digest=digest) if source else None
     project = Project(id=uuid4().hex, brief=brief.model_copy(update={"source_file": None}), ideas=ideas, source=info)
     store.save(project)
     if x_client_id:
@@ -206,6 +207,7 @@ async def create_script(project_id: str, idea_id: str, body: ScriptIn) -> Script
         _check_template(body.template)
     script = await generator.generate_script(
         project.brief, idea, body.duration_seconds or idea.duration_seconds, body.notes, body.template,
+        digest=project.source.digest if project.source else None,
     )
     project.scripts[script.id] = script
     store.save(project)

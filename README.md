@@ -98,7 +98,7 @@ npm run dev                 # http://localhost:5173
 |---|---|---|
 | `GEMINI_API_KEY` | مفتاح Gemini (مطلوب) | |
 | `REELS_MODEL` | نموذج التوليد (الأفكار والسيناريو والتوطين والتصحيح). اسم يبدأ بـ`gpt-` يذهب إلى OpenAI (يلزم `OPENAI_API_KEY`)، وما عداه إلى Gemini | `gpt-5.4` |
-| `REELS_SOURCE_MODEL` | نموذج Gemini الذي يقرأ مصدر الإلهام (فيديو، ملف) حين يكون الكاتب من OpenAI | `gemini-pro-latest` |
+| `REELS_SOURCE_MODEL` | نموذج Gemini الذي يقرأ مصدر الإلهام (فيديو، ملف) مرة واحدة ويكتب محضره: الحجة، والأمثلة بمواضعها، والنصوص التي يستشهد بها كما وردت. المحضر يُحفظ مع المشروع ويصل نصًّا إلى كاتب الأفكار والسيناريو أيًّا كان | `gemini-pro-latest` |
 | `OPENAI_API_KEY` | مفتاح OpenAI، يلزم فقط إذا اختير نموذج `gpt-` للتوليد | |
 | `REELS_REVIEW_MODEL` | نموذج المراجعين | `gemini-flash-latest` |
 | `DATABASE_URL` | قاعدة Postgres بدل SQLite | `data/balagh.db` |

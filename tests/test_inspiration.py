@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import generator as g, inspiration, main, sources
-from app.schemas import BriefIn, Evidence, EvidenceKind, Platform, QuranRequest, SourcedIdeaDraft, SourcedIdeasDraft, ContentLevel
+from app.schemas import SourceCitation, SourceDigest, SourceExample, BriefIn, Evidence, EvidenceKind, Platform, QuranRequest, SourcedIdeaDraft, SourcedIdeasDraft, ContentLevel
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -122,13 +122,17 @@ def test_sourced_ideas_put_evidence_first_and_keep_the_locus(monkeypatch):
         idea("بلا نص", "01:00", []), idea("بنص", "02:30", ["لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه"]), idea("بلا نص 2", "03:00", [])])
     seen = {}
     async def fake(system, prompt, output, role="generation", parts=()):
-        seen["parts"] = parts; seen["system"] = system; return draft
+        seen["parts"] = parts; seen["system"] = system; seen["prompt"] = prompt; return draft
     monkeypatch.setattr(g, "_generate", fake)
     brief = BriefIn(idea=None, audience="شباب", language="ar", dialect=None, audience_knowledge="familiar", tone=None,
                     platforms=[Platform.tiktok], duration_seconds=45)
-    part = object()
-    ideas, summary = asyncio.run(g.generate_ideas_from(brief, part))
-    assert seen["parts"] == (part,) and "SOURCE" in seen["system"]
+    digest = SourceDigest(summary="درس عن الصدق", argument=["الصدق نجاة"], language="Moroccan darija",
+                          examples=[SourceExample(locus="01:18", text="قصة التاجر")],
+                          citations=[SourceCitation(locus="02:00", text="التاجر الصدوق الأمين", attributed_to="حديث")])
+    ideas, summary = asyncio.run(g.generate_ideas_from(brief, digest))
+    # the source reaches the writer as text, never as an attachment: any writer can take it
+    assert seen["parts"] == () and "SOURCE" in seen["system"]
+    assert '<example locus="01:18">قصة التاجر</example>' in seen["prompt"] and "NOT verified" in seen["prompt"]
     assert summary == "ملخص"
     assert [i.title for i in ideas] == ["بنص", "بلا نص", "بلا نص 2"]
     assert [i.id for i in ideas] == ["1", "2", "3"]
@@ -147,3 +151,31 @@ def test_without_a_source_nothing_changes(monkeypatch):
                     platforms=[Platform.tiktok], duration_seconds=45)
     ideas = asyncio.run(g.generate_ideas(brief))
     assert [i.source_locus for i in ideas] == ["", "", ""] and all(i.source_mentions == [] for i in ideas)
+
+
+def test_the_source_is_read_once_and_its_digest_reaches_ideas_and_script(monkeypatch, tmp_path):
+    """The digest is made at project creation and kept; the script writer gets it as text."""
+    from app import inspiration, store
+    from app.schemas import SourceDigest
+    reads, writers = [], []
+    digest = SourceDigest(summary="ملخص", argument=["نقطة"], examples=[], citations=[], language="Arabic")
+
+    async def fake_resolve(url, file):
+        return inspiration.Source(part=object(), kind="youtube", label="درس", url=url)
+
+    async def fake_digest(source, language):
+        reads.append(language); return digest
+
+    async def fake_ideas(brief, d):
+        writers.append(("ideas", d)); return ([], "")
+
+    monkeypatch.setattr(inspiration, "resolve", fake_resolve)
+    monkeypatch.setattr(inspiration, "digest", fake_digest)
+    monkeypatch.setattr(g, "generate_ideas_from", fake_ideas)
+    c = TestClient(main.app)
+    body = {"idea": None, "audience": "شباب", "language": "ar", "dialect": None, "audience_knowledge": "familiar",
+            "tone": None, "platforms": ["tiktok"], "duration_seconds": 45, "source_url": "https://youtu.be/9bf3L7IO3vE"}
+    r = c.post("/projects", json=body)
+    assert r.status_code == 201, r.text
+    assert reads == ["Arabic"] and writers == [("ideas", digest)]
+    assert r.json()["source"]["digest"]["argument"] == ["نقطة"]
