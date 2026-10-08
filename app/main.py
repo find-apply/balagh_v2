@@ -11,7 +11,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from google.genai import errors as genai_errors
 
-from . import admin, flow_settings, generator, inspiration, store
+from . import admin, flow_settings, generator, inspiration, screen, store
 from .schemas import (
     Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, HistoryEntry, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, StoryIn,
     SourceInfo, TemplateIn, Video, VideoIn, VideoTemplate,
@@ -308,6 +308,8 @@ async def choose_template(project_id: str, script_id: str, body: TemplateIn) -> 
     project = _get_project(project_id)
     script = _get_script(project, script_id)
     _check_template(body.template)
+    if catalog.is_story(body.template) and not screen.children(script.target.audience):
+        raise HTTPException(status_code=409, detail="هذا قالب للأطفال: يكتب قصة حوار بشخصيات ثابتة (سالم ومريم والمعلمة نور) وتقدَّم للأطفال مع أهلهم. جمهور هذه النسخة ليس أطفالا، فاختر قالبا من قوالب الكبار، أو وطّن السيناريو لجمهور من الأطفال أولا.")
     if catalog.is_story(body.template) and script.story is None:
         script.story = await story.write_story(script)
         script.approvals = []

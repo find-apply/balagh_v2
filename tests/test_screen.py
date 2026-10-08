@@ -45,3 +45,16 @@ def test_export_is_refused_until_approved(client):
     assert r.status_code == 423 and "مقفل" in r.json()["detail"]
     client.post("/projects/p1/scripts/s1/approve", json={"role": "creator", "name": "يونس"})
     assert client.get("/projects/p1/scripts/s1/export").status_code == 200
+
+
+def test_children_s_audience_is_recognised_in_either_language():
+    assert screen.children("أطفال من 6 إلى 10 سنوات مع أهلهم")
+    assert screen.children("Kids aged 7 to 9")
+    assert not screen.children("شباب مسلمون (18-30)")
+    assert not screen.children("Young people in the UK exploring Islam")
+
+
+def test_a_children_s_template_is_refused_for_adults(client):
+    r = client.put("/projects/p1/scripts/s1/template", json={"template": "kids"})
+    assert r.status_code == 409 and "للأطفال" in r.json()["detail"]
+    assert client.put("/projects/p1/scripts/s1/template", json={"template": "geo"}).status_code == 200

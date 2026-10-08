@@ -44,6 +44,20 @@ REFERRAL = ("يبدو أن سؤالك عن حالة شخصية بعينها. ه�
             "ولا يصلح له فيديو عام. يمكنك طلب فيديو عن الحكم العام للمسألة دون ذكر حالتك.")
 
 
+# An audience of children: the templates that tell a dialogue story with the fixed cast are for them alone.
+CHILDREN = [r"\bاطفال\b", r"\bطفل\b", r"\bاولاد\b", r"\bصغار\b", r"\bبراعم\b", r"\bkids?\b", r"\bchildren\b", r"\bchild\b", r"\btoddlers?\b",
+            r"\b(?:[3-9]|1[0-2])\s*(?:الى|-|–|to)\s*(?:[4-9]|1[0-2])\s*(?:سنوات|سنه|years?)\b", r"\bages? [3-9]\b", r"\bages? 1[0-2]\b"]
+_CHILDREN = [re.compile(p.translate(str.maketrans("أإآةى", "اااهي")), re.IGNORECASE) for p in CHILDREN]
+
+
+def children(audience: Optional[str]) -> bool:
+    """Whether the audience, as the brief words it, is children."""
+    if not audience:
+        return False
+    t = normalise(audience)
+    return any(p.search(t) for p in _CHILDREN)
+
+
 def normalise(text: str) -> str:
     text = re.sub(r"[ً-ْٰـ]", "", text)       # diacritics, tatweel
     text = text.translate(str.maketrans("أإآةى", "اااهي"))

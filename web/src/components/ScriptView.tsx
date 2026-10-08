@@ -475,6 +475,7 @@ export function ScriptView({ projectId, script, source, templates, disabled, tab
           templates={templates}
           chosen={script.template}
           aspect={aspectOf(script.platforms)}
+          audience={script.target.audience}
           disabled={disabled || !actions}
           onPick={(t) => actions?.onTemplate(t)}
         />
