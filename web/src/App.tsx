@@ -125,7 +125,7 @@ export default function App() {
   }
 
   async function job(b: Busy, work: () => Promise<void>) {
-    setBusy(b)
+    setBusy({ ...b, started: Date.now() })
     setError(null)
     setReferral(null)
     try {
@@ -177,7 +177,7 @@ export default function App() {
       notifyIfAway('بلاغ: السيناريو جاهز', script.title)
       if (location.hash === pending) go(projectHash(pid, script.id), true)
       if (autoReview) {
-        setBusy({ task: TASKS.review, projectId: pid, kind: 'review', scriptId: script.id, step: 'الخطوة 2 من 2' })
+        setBusy({ task: TASKS.review, projectId: pid, kind: 'review', scriptId: script.id, step: 'الخطوة 2 من 2', started: Date.now() })
         await reviewNow(pid, script.id)
       }
     })
@@ -250,7 +250,7 @@ export default function App() {
             <>
               {creating && busy && (
                 <div className="gen-flow">
-                  <Progress key={busy.task.title} task={busy.task} />
+                  <Progress key={busy.task.title} task={busy.task} since={busy.started} />
                   <IdeaSkeletons />
                 </div>
               )}

@@ -69,4 +69,6 @@ export interface Busy {
   scriptId?: string
   /** Position in a chained flow, such as "الخطوة 1 من 2". */
   step?: string
+  /** When this job started (ms), so the progress card keeps counting when the user leaves the tab and comes back. */
+  started?: number
 }

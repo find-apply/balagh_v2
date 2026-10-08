@@ -227,7 +227,7 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
 
       {pending && writing && here && (
         <div className="gen-flow">
-          <Progress key={here.task.title} task={here.task} step={here.step} />
+          <Progress key={here.task.title} task={here.task} step={here.step} since={here.started} />
           <ScriptSkeleton />
         </div>
       )}
@@ -253,7 +253,7 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
 
       {active && (
         <>
-          {reviewing && here && <Progress key={here.task.title} task={here.task} step={here.step} />}
+          {reviewing && here && <Progress key={here.task.title} task={here.task} step={here.step} since={here.started} />}
           <ScriptView
             key={active.id}
             projectId={project.id}

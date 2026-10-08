@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
 import type { Task } from '../tasks'
 
-function useSeconds() {
-  const [seconds, setSeconds] = useState(0)
+/** Seconds since the job started; counted from the start time, not from when this card mounted. */
+function useSeconds(since?: number) {
+  const [start] = useState(() => since ?? Date.now())
+  const elapsed = () => Math.max(0, Math.floor((Date.now() - start) / 1000))
+  const [seconds, setSeconds] = useState(elapsed)
   useEffect(() => {
-    const timer = setInterval(() => setSeconds((s) => s + 1), 1000)
+    const timer = setInterval(() => setSeconds(elapsed()), 1000)
     return () => clearInterval(timer)
-  }, [])
+  }, [start])
   return seconds
 }
 
 /** Inline generation progress. The API answers in one response, so stages advance on a time estimate and never all complete early. */
-export function Progress({ task, step }: { task: Task; step?: string }) {
-  const seconds = useSeconds()
+export function Progress({ task, step, since }: { task: Task; step?: string; since?: number }) {
+  const seconds = useSeconds(since)
   const share = task.expected / task.stages.length
   const current = Math.min(Math.floor(seconds / share), task.stages.length - 1)
   const percent = Math.round(92 * (1 - Math.exp(-seconds / (task.expected * 0.6))))
