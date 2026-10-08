@@ -1,0 +1,636 @@
+[
+ {
+  "label": "الصدق في البيع",
+  "idea": "وهم الشطارة المادية",
+  "level": "B",
+  "evidence": [
+   "Q1",
+   "H1",
+   "H2",
+   "H3"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 70.8,
+    "title": "وهم الشطارة المادية",
+    "hook": "تظن أن إخفاء عيب السلعة شطارة؟",
+    "level": "B",
+    "scenes": 5,
+    "words": 77,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] تظن أن إخفاء عيب السلعة شطارة؟\n[5-12] هاتف فيه عيب، فتخفيه ليبدو أفضل وتطلب سعرًا أعلى. هل ارتفاع السعر وحده يعني أنك ربحت؟\n[12-25] قال النبي صلى الله عليه وسلم: «الْبَيِّعَانِ بِالْخِيَارِ مَا لَمْ يَتَفَرَّقَا، فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا»\n[25-36] الصدق وبيان العيوب سبب للبركة في هذا البيع، والكذب والكتمان يمحقانها. هذا ليس وعدًا بمضاعفة رصيدك.\n[36-45] قبل نشر إعلانك، اذكر العيب بوضوح، وصوّره كما هو. احفظ هذا التذكير قبل بيعك القادم.",
+    "cta": "قبل نشر إعلانك، اذكر العيب بوضوح، وصوّره كما هو. احفظ هذا التذكير قبل بيعك القادم."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 45.9,
+    "title": "وهم الشطارة المادية",
+    "hook": "تظن أن إخفاء عيب السلعة شطارة؟ فكّر مرة أخرى.",
+    "level": "B",
+    "scenes": 6,
+    "words": 89,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] تظن أن إخفاء عيب السلعة شطارة؟ فكّر مرة أخرى.\n[5-11] تبيع هاتفك، وتخفي عيب البطارية لتطلب سعرًا أعلى. لكن ماذا عن بركة البيع؟\n[11-25] قال النبي صلى الله عليه وسلم: «الْبَيِّعَانِ بِالْخِيَارِ مَا لَمْ يَتَفَرَّقَا، فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا»\n[25-34] الحديث لا يعد بزيادة الرصيد؛ بل يربط بركة البيع بالصدق والبيان، ومحقها بالكذب والكتمان. فلا تجعل رقم الربح معيارك الوحيد.\n[34-40] قبل نشر إعلانك، اذكر العيب الذي تعرفه بوضوح، ولا تُخفه خلف صورة جميلة.\n[40-45] راجع إعلانك اليوم: هل وصفت السلعة بصدق، أم أخفيت عيبًا؟",
+    "cta": "راجع إعلانك اليوم: هل وصفت السلعة بصدق، أم أخفيت عيبًا؟"
+   },
+   "gpt-6-luna": {
+    "seconds": 19.6,
+    "title": "وهم الشطارة المادية",
+    "hook": "تظن أن إخفاء عيب السلعة شطارة؟",
+    "level": "B",
+    "scenes": 7,
+    "words": 69,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] تظن أن إخفاء عيب السلعة شطارة؟\n[5-11] قد يبدو الرقم أكبر، لكن إخفاء العيب ليس صدقاً في البيع.\n[11-17] والحديث النبوي يذكر البركة في البيع عند الصدق والبيان.\n[17-27] وجاء في الحديث: «فَإِنْ صَدَقَا وَبَيَّنَا بُورِكَ لَهُمَا فِي بَيْعِهِمَا، وَإِنْ كَذَبَا وَكَتَمَا مُحِقَتْ بَرَكَةُ بَيْعِهِمَا»\n[27-35] المعنى هنا عن البيع نفسه: الصدق والبيان بركة في البيع، والكذب والكتمان يمحقان بركته.\n[35-41] فلا تجعل مكسباً ظاهراً سبباً لكتمان عيب تعرفه.\n[41-45] هل تذكر العيب حين تبيع؟",
+    "cta": "شاركها مع من يبيع ويشتري."
+   }
+  }
+ },
+ {
+  "label": "بر الوالدين",
+  "idea": "٣ أفعال سريعة للبر",
+  "level": "A",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 20.7,
+    "title": "٣ أفعال سريعة للبر",
+    "hook": "ثلاث خطوات للبر.. وأنت في قمة انشغالك!",
+    "level": "A",
+    "scenes": 6,
+    "words": 78,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 1,
+    "findings": [
+     {
+      "sev": "blocking",
+      "who": "scholarly",
+      "issue": "وُصفت الآية الكريمة كاملة بأنها «دعاء قرآني» يُدعى به في السجود، في حين أن أول الآية أمر بالتواضع وخفض الجناح (وَاخْفِضْ لَهُمَا جَنَاحَ الذُّلِّ مِنَ الرَّحْمَةِ وَقُلْ)، وصيغة الدعاء الواردة فيها هي فقط: (رَبِّ ارْحَمْ"
+     }
+    ],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] مشغول جدًا؟ هذه ثلاث خطوات سريعة للبر، لا تأخذ منك دقيقة.\n[5-13] أولًا: في السجود، ادعُ لوالديك بهذا الدعاء القرآني: «وَٱخۡفِضۡ لَهُمَا جَنَاحَ ٱلذُّلِّ مِنَ ٱلرَّحۡمَةِ وَقُل رَّبِّ ٱرۡحَمۡهُمَا كَمَا رَبَّيَانِي صَغِيرٗا»\n[13-20] هذا من البر: تواضع ورحمة، وأن تسأل الله لهما الرحمة أحياءً وأمواتًا.\n[20-28] ثانيًا: أرسل لهما مقطعًا صوتيًا عفويًا: أحبكما، ودعواتكما تفرق معي.\n[28-37] ثالثًا: إذا قاطعاك وأنت مشغول، ابتسم، واهدأ، ولا تُظهر التذمر.\n[37-45] ابدأ اليوم بواحدة منها، ثم زد الثانية والثالثة. البر ليس كلامًا كثيرًا، بل أفعالًا ثابتة.",
+    "cta": "ابدأ الآن: ادعُ لهما اليوم، وأرسل رسالة صوتية قبل أن تُكمل التمرير."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 52.0,
+    "title": "٣ أفعال سريعة للبر",
+    "hook": "ثلاث خطوات للبرّ، وأنت في قمة انشغالك!",
+    "level": "A",
+    "scenes": 6,
+    "words": 75,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-4] ثلاث خطوات للبرّ، وأنت في قمة انشغالك!\n[4-17] قال الله تعالى: «وَٱخۡفِضۡ لَهُمَا جَنَاحَ ٱلذُّلِّ مِنَ ٱلرَّحۡمَةِ وَقُل رَّبِّ ٱرۡحَمۡهُمَا كَمَا رَبَّيَانِي صَغِيرٗا»\n[17-25] أولًا: ادعُ لوالديك بالرحمة. اجعل لهما نصيبًا من دعائك، سواء كانا على قيد الحياة أو متوفَّيَين.\n[25-34] ثانيًا: أرسل رسالة صوتية قصيرة: أحبكما، وأقدّر تعبكما معي. لا تحتاج إلى مناسبة لتعبّر عن محبتك.\n[34-42] ثالثًا: إذا ناداك أحدهما وأنت مشغول، ابتسم وأجب بلطف. وإن احتجت وقتًا، اطلبه بهدوء، دون تذمّر.\n[42-45] اختر خطوة، وابدأ بها اليوم.",
+    "cta": "اختر خطوة، وابدأ بها اليوم."
+   },
+   "gpt-6-luna": {
+    "seconds": 24.5,
+    "title": "٣ أفعال سريعة للبر",
+    "hook": "ثلاث خطوات للبر.. وأنت في قمة انشغالك!",
+    "level": "A",
+    "scenes": 6,
+    "words": 63,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-4] ثلاث خطوات للبر.. وأنت في قمة انشغالك!\n[4-17] الأولى: اجعل سجودك فرصة للدعاء لهما. قال الله تعالى: «وَٱخۡفِضۡ لَهُمَا جَنَاحَ ٱلذُّلِّ مِنَ ٱلرَّحۡمَةِ وَقُل رَّبِّ ٱرۡحَمۡهُمَا كَمَا رَبَّيَانِي صَغِيرٗا»\n[17-23] والآية ترشد إلى التواضع لهما، وسؤال الله أن يرحمهما.\n[23-30] الثانية: أرسل رسالة صوتية قصيرة، وقل لهما ببساطة: أحبكما.\n[30-38] الثالثة: إذا قاطعا عملك، قابل ذلك بابتسامة، ولا تُظهر التذمّر.\n[38-45] اختر خطوة اليوم، وابدأ بها مع والديك.",
+    "cta": "اختر خطوة اليوم، وابدأ بها مع والديك."
+   }
+  }
+ },
+ {
+  "label": "أطفال: الصدق",
+  "idea": "الكوب المكسور",
+  "level": "A",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 24.1,
+    "title": "الكوب المكسور",
+    "hook": "ماذا لو كسرنا شيئًا بالخطأ؟ هل نخفيه أم نقول الصدق؟",
+    "level": "A",
+    "scenes": 7,
+    "words": 77,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] ماذا لو كسرنا شيئًا بالخطأ؟ هل نخفي السر، أم نقول الحقيقة؟\n[6-12] أحيانًا نخاف، ونفكر: لو أخفيتُه، فلن يعرف أحد.\n[12-19] لكن الإسلام يعلمنا الصدق. والصدق يعني: أن نقول ما حدث كما حدث، بلا زيادة ولا تغيير.\n[19-27] واسمعوا هذه الآية: «يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ ٱتَّقُواْ ٱللَّهَ وَكُونُواْ مَعَ ٱلصَّٰدِقِينَ»\n[27-34] عندما نقول: أنا الذي كسرتُه بالخطأ، يتعلم أهلنا أن يثقوا بنا.\n[34-40] ويمكننا أيضًا أن نعتذر، ثم نساعد في إصلاح الخطأ قدر استطاعتنا.\n[40-45] الآن اذهبوا إلى والديكم، وعِدوهما أن تقولوا الصدق دائمًا.",
+    "cta": "اذهب إلى والديك الآن، عانقهما، وقل: أعدكما أن أقول الصدق دائمًا."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 52.2,
+    "title": "الكوب المكسور",
+    "hook": "ماذا لو كسرنا شيئًا بالخطأ... هل نخفي السر؟",
+    "level": "A",
+    "scenes": 7,
+    "words": 80,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] ماذا لو كسرنا شيئًا بالخطأ... هل نخفي السر؟\n[6-12] سقط الكوب وأنت تلعب؟ قد تقلق، وهذا شعور نفهمه. خذ نفسًا هادئًا.\n[12-20] قال الله تعالى: «يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ ٱتَّقُواْ ٱللَّهَ وَكُونُواْ مَعَ ٱلصَّٰدِقِينَ»\n[20-27] الصدق يعني أن نحكي ما حدث دون تغيير، في اللعب وفي البيت.\n[27-35] يمكنك أن تقول: أمي، سقط الكوب مني بالخطأ وانكسر. هل تساعدينني؟ الصدق يساعد أهلنا على فهم ما حدث.\n[35-40] وللأهل: استقبلوا الصدق بهدوء، وساعدوا طفلكم على إصلاح خطئه.\n[40-45] عانق والديك إن أحببت، وقل لهما: سأقول الحقيقة عندما أخطئ.",
+    "cta": "عانق والديك إن أحببت، وقل لهما: سأقول الحقيقة عندما أخطئ."
+   },
+   "gpt-6-luna": {
+    "seconds": 23.8,
+    "title": "الكوب المكسور",
+    "hook": "ماذا لو انكسر شيء بالخطأ؟ هل نخفي ما حدث، أم نقول الحقيقة؟",
+    "level": "A",
+    "scenes": 6,
+    "words": 65,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-7] تخيّلوا: انكسر كوبٌ بالخطأ. هل نخفي ما حدث، أم نقول الحقيقة؟\n[7-13] قد نشعر بالقلق، لكن يمكننا أن نتوقف، ونأخذ نفسًا، ثم نتكلم.\n[13-24] «يَٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ ٱتَّقُواْ ٱللَّهَ وَكُونُواْ مَعَ ٱلصَّٰدِقِينَ»\n[24-31] أي نكون صادقين في كلامنا وعهودنا، وفي أمورنا كلها.\n[31-38] إذا وقع شيء، قل بهدوء: أنا أسقطت الكوب دون قصد. هل أساعد؟\n[38-45] جرّبوا اليوم مع أحد والديكم: احكوا بصدق عن موقف صغير، واطلبوا عناقًا إن أحببتم.",
+    "cta": "احكوا مع أحد والديكم بصدق عن موقف صغير اليوم، واطلبوا عناقًا إن أحببتم."
+   }
+  }
+ },
+ {
+  "label": "خلافي: الموسيقى",
+  "idea": "صراع القلب",
+  "level": "C",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 27.4,
+    "title": "صراع القلب",
+    "hook": "هل فعلًا القرآن والموسيقى لا يجتمعان في قلب واحد؟",
+    "level": "C",
+    "scenes": 8,
+    "words": 105,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] هل فعلًا القرآن والموسيقى لا يجتمعان في قلب واحد؟\n[5-10] المسألة ليست شعارًا سريعًا، بل أثرٌ يدخل القلب ويترك فيه بصمته.\n[10-16] بعض ما نسمعه يحرّك المشاعر بقوة، لكن ليس كل ما يحرّكك يطمئنك.\n[16-23] أما القرآن، فاستمع إلى هذا الوصف: «ٱلَّذِينَ ءَامَنُواْ وَتَطۡمَئِنُّ قُلُوبُهُم بِذِكۡرِ ٱللَّهِۗ أَلَا بِذِكۡرِ ٱللَّهِ تَطۡمَئِنُّ ٱلۡقُلُوبُ»\n[23-30] الآية تتكلم عن طمأنينة حقيقية؛ سكونٍ في القلب بذكر الله، لا مجرد اندفاعٍ عابر.\n[30-36] ولذلك يتكلم الناس عن صراع القلب: ماذا تغذّي كل يوم؟ الضجيج أم السكينة؟\n[36-41] جرّب بنفسك: ثلاثة أيام فقط، بدّل قائمة الموسيقى بتلاوات قرآن، وراقب قلبك.\n[41-45] وعلى فكرة، هذه من المسائل التي يتكلم فيها أهل العلم بتفصيل، فارجع إليهم، لكن لا تفوّت التجربة.",
+    "cta": "ابدأ اليوم: ثلاثة أيام قرآن بدل الموسيقى، ثم اكتب أثر ذلك عليك."
+   },
+   "gpt-6.1-sol": {
+    "seconds": 50.4,
+    "title": "ما الذي يطمئن قلبك؟",
+    "hook": "هل فعلًا القرآن والموسيقى لا يجتمعان في قلب واحد؟",
+    "level": "C",
+    "scenes": 6,
+    "words": 75,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] هل فعلًا القرآن والموسيقى لا يجتمعان في قلب واحد؟\n[5-14] لا نجعل هذه العبارة قاعدةً عن القلوب. وفي أحكام الموسيقى خلاف بين العلماء؛ فاسأل أهل العلم.\n[14-26] قال الله تعالى: «ٱلَّذِينَ ءَامَنُواْ وَتَطۡمَئِنُّ قُلُوبُهُم بِذِكۡرِ ٱللَّهِۗ أَلَا بِذِكۡرِ ٱللَّهِ تَطۡمَئِنُّ ٱلۡقُلُوبُ»\n[26-33] بكلام بسيط: طاعة الله وذكره سبب لسكون القلب وأُنسه، لا مجرد تغيير المزاج.\n[33-40] جرّب ثلاثة أيام: استبدل قائمة الموسيقى بتلاوات، وخصص وقتًا للاستماع بانتباه، لا كخلفية.\n[40-45] لاحظ أثر التجربة عليك، دون أن تحكم على قلوب الآخرين.",
+    "cta": "جرّب ثلاثة أيام من الاستماع بانتباه إلى التلاوات، ولاحظ أثر التجربة عليك دون الحكم على الآخرين."
+   },
+   "gpt-6-luna": {
+    "seconds": 25.7,
+    "title": "صراع القلب",
+    "hook": "هل فعلاً لا يجتمع القرآن والموسيقى في قلب واحد؟",
+    "level": "C",
+    "scenes": 6,
+    "words": 77,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] هل فعلاً لا يجتمع القرآن والموسيقى في قلب واحد؟\n[6-13] لا يصح أن نجزم بهذا بإطلاق؛ فحكم الموسيقى محل اختلاف بين العلماء.\n[13-19] لكن ماذا يقول القرآن عن ذكر الله وطمأنينة القلب؟\n[19-31] يقول الله تعالى: «ٱلَّذِينَ ءَامَنُواْ وَتَطۡمَئِنُّ قُلُوبُهُم بِذِكۡرِ ٱللَّهِۗ أَلَا بِذِكۡرِ ٱللَّهِ تَطۡمَئِنُّ ٱلۡقُلُوبُ»\n[31-38] يوضح التفسير أن طاعة الله وذكره مما تسكن به القلوب وتأنس؛ والآية لا تقارن مباشرةً بالموسيقى.\n[38-45] جرّب أن تخصّص للقرآن وقتاً يومياً لثلاثة أيام، ولاحظ أثره عليك. وفي حكم الموسيقى، اسأل أهل العلم.",
+    "cta": "خصّص للقرآن وقتاً يومياً لثلاثة أيام، ولاحظ أثره عليك."
+   }
+  }
+ },
+ {
+  "label": "إنجليزي: الصلاة",
+  "idea": "The Ultimate Daily Reset",
+  "level": "B",
+  "evidence": [
+   "Q1"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 15.3,
+    "title": "The Ultimate Daily Reset",
+    "hook": "Feeling constantly overwhelmed? Here is why Muslims intentionally pause their day five times.",
+    "level": "B",
+    "scenes": 7,
+    "words": 107,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [
+     "المشهد 6: المقطع الذي يسند الشرح لم يوجد بنصه في التفسير أو الشرح المعتمد."
+    ],
+    "grounded": [
+     false
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-5] Feeling constantly overwhelmed? Here is why Muslims intentionally pause their day five times.\n[5-11] Modern life can keep you busy, connected, and distracted all at once.\n[11-17] So Muslims stop, five times a day, to step away from work, noise, and screens.\n[17-23] It is a moment to stand, focus, and speak directly to God.\n[23-31] The Quran says: «Those who have believed and whose hearts are assured by the remembrance of Allāh. Unquestionably, by the remembrance of Allāh hearts are assured.\"»\n[31-38] In Islam, remembering God brings the heart real calm, not just a quick break.\n[38-45] That practice is called salah, the Islamic prayer: a spiritual anchor and a daily reset.",
+    "cta": "What part of salah would you like explained next?"
+   },
+   "gpt-6.1-sol": {
+    "seconds": 51.4,
+    "title": "More Than a Daily Reset",
+    "hook": "Feeling overwhelmed? Here’s why Muslims pause their day five times.",
+    "level": "B",
+    "scenes": 7,
+    "words": 84,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-7] Feeling overwhelmed? Here’s why Muslims pause their day five times.\n[7-14] They step away from distractions to worship God directly, with words and movements.\n[14-21] This is salah, the Islamic prayer: a daily spiritual anchor, not just a break.\n[21-25] The Quran, Islam’s scripture, describes remembrance of God:\n[25-37] «Those who have believed and whose hearts are assured by the remembrance of Allāh. Unquestionably, by the remembrance of Allāh hearts are assured.\"»\n[37-41] Remembering and obeying God can bring inner reassurance.\n[41-45] What would you like to know about prayer?",
+    "cta": "What would you like to know about prayer?"
+   },
+   "gpt-6-luna": {
+    "seconds": 24.3,
+    "title": "A Daily Pause, Five Times",
+    "hook": "Overwhelmed? Muslims build five prayer pauses into the day.",
+    "level": "B",
+    "scenes": 5,
+    "words": 95,
+    "quoted": [
+     [
+      "Q1",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-7] Overwhelmed? Muslims build five prayer pauses into the day.\n[7-15] The point isn't just to put your phone down. It's to turn your attention toward God.\n[15-22] This practice is called salah, the Islamic prayer. Muslims pray at set times across the day.\n[22-34] The Quran says: «Those who have believed and whose hearts are assured by the remembrance of Allāh. Unquestionably, by the remembrance of Allāh hearts are assured.\"»\n[34-45] Its commentary explains that hearts find calm through obeying and remembering God. Prayer can be a spiritual pause, not a promise that stress disappears. What helps you pause?",
+    "cta": "What helps you pause and refocus?"
+   }
+  }
+ },
+ {
+  "label": "توطين: الابتلاء → EN",
+  "idea": "البلاء ليس غضبا",
+  "level": "B",
+  "evidence": [
+   "H1",
+   "H2"
+  ],
+  "models": {
+   "gpt-5.4": {
+    "seconds": 23.4,
+    "title": "البلاء ليس غضبًا",
+    "hook": "تظن أن كل بلاء يعني غضب الله؟ ليس بالضرورة.",
+    "level": "B",
+    "scenes": 6,
+    "words": 79,
+    "quoted": [
+     [
+      "H1",
+      "quoted"
+     ],
+     [
+      "H2",
+      "paraphrased"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] تظن أن كل بلاء يعني غضب الله؟ ليس بالضرورة.\n[6-12] المصائب والتعب والهم قد تكون ابتلاءً، لا علامةَ رفضٍ من الله.\n[12-22] اسمع هذا الحديث: «مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلاَ وَصَبٍ وَلاَ هَمٍّ وَلاَ حُزْنٍ وَلاَ أَذًى وَلاَ غَمٍّ حَتَّى الشَّوْكَةِ يُشَاكُهَا، إِلاَّ كَفَّرَ اللَّهُ بِهَا مِنْ خَطَايَاهُ»\n[22-31] يعني أن ما يصيب المسلم من ألمٍ وهمٍّ وحزن، يكون سببًا في تكفير الخطايا.\n[31-39] فلا تستعجل وتقول: أنا معاقَب. أحيانًا البلاء رحمةٌ وتطهير.\n[39-45] إذا نزل بك البلاء، فاصبر واحتسب، وأحسن الظن بالله.",
+    "cta": "أرسل الفيديو لمن يظن أن كل بلاء عقوبة.",
+    "localized": {
+     "seconds": 50.4,
+     "title": "Hardship Doesn’t Always Mean Anger",
+     "hook": "Does hardship mean God is angry with you? Not necessarily.",
+     "level": "B",
+     "scenes": 5,
+     "words": 90,
+     "quoted": [
+      [
+       "H1",
+       "quoted"
+      ],
+      [
+       "H2",
+       "paraphrased"
+      ]
+     ],
+     "warnings": [
+      "المشهد 2 يشرح نصا له تفسير أو شرح معتمد دون أن يسند شرحه إلى مقطع منه."
+     ],
+     "grounded": [
+      true,
+      false,
+      true
+     ],
+     "blocking": 1,
+     "findings": [
+      {
+       "sev": "blocking",
+       "who": "meaning",
+       "issue": "ادعاء أضيف وليس في الأصل: وصف الحديث بأنه صحيح (authentic hadith).. أضاف النص المترجم الحُكم بصحة الحديث، بينما لم يُذكر ذلك صراحة في النص الأصلي."
+      }
+     ],
+     "claims": [
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved",
+      "added"
+     ],
+     "terms": [
+      "{'term_ar': 'الحديث', 'approved_en': 'Hadith', 'rule': 'ما نقل عن النبي ﷺ من قول"
+     ],
+     "text": "[0-5] Does hardship mean God is angry with you? Not necessarily.\n[5-12] An authentic hadith—a report of Prophet Muhammad’s words—says this. Allah means God.\n[12-30] «No fatigue, nor disease, nor sorrow, nor sadness, nor hurt, nor distress befalls a Muslim, even if it were the prick he receives from a thorn, but that Allah expiates some of his sins for that»\n[30-38] For a Muslim, pain and worry can bring forgiveness of sins: mercy and cleansing, not necessarily rejection.\n[38-45] So be patient, hope for God’s reward, and think well of Him. Share this reminder.",
+     "cta": "Share this with someone who thinks every hardship means punishment."
+    }
+   },
+   "gpt-6.1-sol": {
+    "seconds": 43.7,
+    "title": "البلاء ليس دليل غضب",
+    "hook": "هل تظن أن كل بلاء دليل غضب الله؟ لا تتعجل هذا الحكم.",
+    "level": "B",
+    "scenes": 5,
+    "words": 86,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [],
+    "grounded": [
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] هل تظن أن كل بلاء دليل غضب الله؟ لا تتعجل هذا الحكم.\n[6-11] قال النبي صلى الله عليه وسلم في حديث صحيح رواه البخاري:\n[11-25] «مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلاَ وَصَبٍ وَلاَ هَمٍّ وَلاَ حُزْنٍ وَلاَ أَذًى وَلاَ غَمٍّ حَتَّى الشَّوْكَةِ يُشَاكُهَا، إِلاَّ كَفَّرَ اللَّهُ بِهَا مِنْ خَطَايَاهُ»\n[25-38] التعب والمرض والهم والحزن الذي يصيب المسلم يكفّر الله به من خطاياه، حتى ألم الشوكة. هذا لا يعني أن نحكم على كل مصيبة بأنها علامة غضب.\n[38-45] إذا كنت تمر بوقت صعب، فتذكّر هذا الحديث، وأرسله لمن يحتاج إلى مواساة.",
+    "cta": "أرسل الفيديو لمن يحتاج إلى مواساة.",
+    "localized": {
+     "seconds": 28.6,
+     "title": "Hardship Doesn’t Prove God Is Angry",
+     "hook": "Does every hardship mean God is angry with you? Don’t rush to that conclusion.",
+     "level": "B",
+     "scenes": 5,
+     "words": 108,
+     "quoted": [
+      [
+       "H2",
+       "quoted"
+      ]
+     ],
+     "warnings": [
+      "المشهد 1 يشرح نصا له تفسير أو شرح معتمد دون أن يسند شرحه إلى مقطع منه."
+     ],
+     "grounded": [
+      false,
+      true
+     ],
+     "blocking": 0,
+     "findings": [],
+     "claims": [
+      "preserved",
+      "preserved",
+      "preserved"
+     ],
+     "terms": [
+      "{'term_ar': 'الحديث', 'approved_en': 'Hadith', 'rule': 'ما نقل عن النبي ﷺ من قول"
+     ],
+     "text": "[0-6] Does every hardship mean God is angry with you? Don’t rush to that conclusion.\n[6-11] A hadith—a report of the Prophet Muhammad’s words—recorded in Sahih al-Bukhari says:\n[11-25] «No fatigue, nor disease, nor sorrow, nor sadness, nor hurt, nor distress befalls a Muslim, even if it were the prick he receives from a thorn, but that Allah expiates some of his sins for that»\n[25-38] This hadith says hardship can be a means for Allah (God) to expiate some of a Muslim’s sins—even a thorn’s prick. It doesn’t say every hardship means God is angry.\n[38-45] If you’re having a hard time, remember this hadith. Share it with someone who needs comfort.",
+     "cta": "Share this with someone who could use some comfort."
+    }
+   },
+   "gpt-6-luna": {
+    "seconds": 36.5,
+    "title": "البلاء ليس دليلًا وحده",
+    "hook": "هل كل مصيبة تعني أن الله غاضب عليك؟",
+    "level": "B",
+    "scenes": 5,
+    "words": 92,
+    "quoted": [
+     [
+      "H2",
+      "quoted"
+     ]
+    ],
+    "warnings": [
+     "المشهد 1 يشرح نصا له تفسير أو شرح معتمد دون أن يسند شرحه إلى مقطع منه.",
+     "المشهد 2 يشرح نصا له تفسير أو شرح معتمد دون أن يسند شرحه إلى مقطع منه."
+    ],
+    "grounded": [
+     false,
+     false,
+     true
+    ],
+    "blocking": 0,
+    "findings": [],
+    "claims": null,
+    "terms": null,
+    "text": "[0-6] هل كل مصيبة تعني أن الله غاضب عليك؟ لا نستطيع الحكم من البلاء وحده.\n[6-12] والقول إن كل بلاء علامة حب، أو عقوبة، تعميم لا يدل عليه هذا الحديث.\n[12-29] وفي الحديث يقول النبي ﷺ: «مَا يُصِيبُ الْمُسْلِمَ مِنْ نَصَبٍ وَلاَ وَصَبٍ وَلاَ هَمٍّ وَلاَ حُزْنٍ وَلاَ أَذًى وَلاَ غَمٍّ حَتَّى الشَّوْكَةِ يُشَاكُهَا، إِلاَّ كَفَّرَ اللَّهُ بِهَا مِنْ خَطَايَاهُ»\n[29-39] الحديث يبين أن ما يصيب المسلم من ألم أو هم يكون كفارة لبعض خطاياه، لكنه لا يحدد سبب كل مصيبة بعينها.\n[39-45] فلا تجعل البلاء وحده حكمًا على علاقتك بالله. شارك هذا التذكير مع من يحتاجه.",
+    "cta": "شارك هذا التذكير مع من يحتاجه.",
+    "localized": {
+     "seconds": 31.4,
+     "title": "Hardship Alone Is Not Proof",
+     "hook": "Does every hardship mean God is angry with you?",
+     "level": "B",
+     "scenes": 5,
+     "words": 103,
+     "quoted": [
+      [
+       "H2",
+       "quoted"
+      ]
+     ],
+     "warnings": [],
+     "grounded": [
+      true
+     ],
+     "blocking": 1,
+     "findings": [
+      {
+       "sev": "blocking",
+       "who": "audience",
+       "issue": "لم تُذكر درجة ثبوت الحديث عند الاستدلال به، وذلك مخالف لقاعدة المصطلحات المعتمدة لمصطلح (الحديث) التي تشترط بيان درجة الثبوت."
+      },
+      {
+       "sev": "suggestion",
+       "who": "audience",
+       "issue": "تمت الإشارة إلى الحديث واستخدام مصطلح (hadith) في المشهد الثاني قبل تعريفه وقبل ذكر نصه في المشهد الثالث، وهذا لا يناسب جمهور (new) الذي يتعرف على الإسلام لأول مرة ويحتاج إلى التدرج وعدم استباق المصطلحات قبل بيانها."
+      }
+     ],
+     "claims": [
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved",
+      "preserved"
+     ],
+     "terms": [
+      "{'term_ar': 'الحديث', 'approved_en': 'Hadith', 'rule': 'ما نقل عن النبي ﷺ من قول"
+     ],
+     "text": "[0-6] Does every hardship mean God is angry with you? We can't know from hardship alone.\n[6-11] This hadith doesn't say every hardship is a sign of love—or punishment.\n[11-32] A hadith—a report of the Prophet Muhammad’s words—says: «No fatigue, nor disease, nor sorrow, nor sadness, nor hurt, nor distress befalls a Muslim, even if it were the prick he receives from a thorn, but that Allah expiates some of his sins for that»\n[32-41] It says Allah wipes away some of a Muslim’s sins through pain, worry or distress; it doesn’t tell us why any one hardship happened.\n[41-45] Don’t judge by hardship alone. Share this reminder.",
+     "cta": "Share this reminder with someone who may need it."
+    }
+   }
+  }
+ }
+]
