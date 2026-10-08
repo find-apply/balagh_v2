@@ -80,7 +80,8 @@ async def recitation(i: int) -> Path:
 def trimmed(path: Path) -> Path:
     """The clip without the burst of noise the speech model leaves after the last word: cut at the last quiet
     stretch when what follows it is shorter than a third of a second."""
-    out = DIR / "clean" / f"{path.stem}.wav"
+    lesson_dir = path.parent.parent if path.parent.name == "voice" else path.parent
+    out = lesson_dir / "clean" / f"{path.stem}.wav"
     if out.exists():
         return out
     out.parent.mkdir(exist_ok=True)
