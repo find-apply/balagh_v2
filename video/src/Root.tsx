@@ -11,6 +11,7 @@ import {Geo} from './templates/Geo';
 import {Kids} from './templates/Kids';
 import {Explainer, ExplainerSpec, explainerFrames} from './templates/Explainer';
 import explainerSample from '../samples/explainer.json';
+import kursiSample from '../samples/kursi.json';
 
 // Composition ids match the `composition` field in catalog.json. Content comes in with --props={"spec": ...}.
 const metadata = ({props}: {props: {spec: VideoSpec}}) => ({durationInFrames: totalFrames(props.spec)});
@@ -21,6 +22,7 @@ const teaserMetadata = ({props}: {props: {spec: TeaserSpec}}) => ({durationInFra
 const teaserDefaults = {spec: teaserSample as TeaserSpec};
 const explainerMetadata = ({props}: {props: {spec: ExplainerSpec}}) => ({durationInFrames: explainerFrames(props.spec)});
 const explainerDefaults = {spec: explainerSample as ExplainerSpec};
+const kursiDefaults = {spec: kursiSample as ExplainerSpec};
 
 export const Root: React.FC = () => (
   <>
@@ -36,5 +38,7 @@ export const Root: React.FC = () => (
       defaultProps={teaserDefaults} calculateMetadata={teaserMetadata} />
     <Composition id="Explainer" component={Explainer} fps={FPS} width={1920} height={1080} durationInFrames={1}
       defaultProps={explainerDefaults} calculateMetadata={explainerMetadata} />
+    <Composition id="Kursi" component={Explainer} fps={FPS} width={1920} height={1080} durationInFrames={1}
+      defaultProps={kursiDefaults} calculateMetadata={explainerMetadata} />
   </>
 );
