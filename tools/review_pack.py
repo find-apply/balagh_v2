@@ -12,6 +12,7 @@ localized version, a children's story, and one older version where the automatic
 problems, to see whether the scholar agrees with them.
 """
 import os
+import time
 from pathlib import Path
 
 import httpx
@@ -59,6 +60,7 @@ def main() -> None:
         token = httpx.post(f"{SITE}/api/admin/projects/{pid}/invites", params={"role": "scholar"}, timeout=60,
                            headers={"Authorization": f"Bearer {os.environ['ADMIN_TOKEN']}"}).raise_for_status().json()["token"]
         url = f"{SITE}/#/review/{pid}/{sid}/scholar/{token}"
+        time.sleep(3.5)  # the site accepts 20 writes a minute
         lines.append(f"{n}. {why}\n   {url}")
         rows.append(f"| {n} | {s['title']} | {s['content_level']} | {s['target']['language']} | {why} | {url} |")
     message = MESSAGE.format(n=len(SAMPLE), links="\n".join(lines))
