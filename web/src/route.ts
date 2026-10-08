@@ -4,7 +4,7 @@ export type Route =
   | { view: 'new' }
   | { view: 'admin'; path: string[] }
   | { view: 'project'; id: string; script: string | null }
-  | { view: 'review'; id: string; script: string; role: string | null }
+  | { view: 'review'; id: string; script: string; role: string | null; invite: string | null }
 
 /** Routes live in the hash: #/new, #/p/<project>, #/p/<project>/<script>, where <script> may be "new" while one is being written. */
 export function parseRoute(): Route {
@@ -14,8 +14,8 @@ export function parseRoute(): Route {
   const hash = location.hash
   if (hash === '#/admin' || hash.startsWith('#/admin/')) return { view: 'admin', path: hash.slice(8).split('/').filter(Boolean) }
   if (hash.startsWith('#/review/')) {
-    const [id, script, role] = hash.slice(9).split('/')
-    if (id && script) return { view: 'review', id, script, role: role || null }
+    const [id, script, role, invite] = hash.slice(9).split('/')
+    if (id && script) return { view: 'review', id, script, role: role || null, invite: invite || null }
   }
   if (hash.startsWith('#/p/')) {
     const [id, script] = hash.slice(4).split('/')
@@ -34,6 +34,8 @@ export function go(hash: string, replace = false) {
   dispatchEvent(new PopStateEvent('popstate'))
 }
 
-export const reviewHash = (projectId: string, scriptId: string, role?: string | null) => `#/review/${projectId}/${scriptId}${role ? `/${role}` : ''}`
+/** A reviewer's link; the invitation token after the role is what lets them sign in that role. */
+export const reviewHash = (projectId: string, scriptId: string, role?: string | null, invite?: string | null) =>
+  `#/review/${projectId}/${scriptId}${role ? `/${role}` : ''}${role && invite ? `/${invite}` : ''}`
 
 export const projectHash = (id: string, script?: string | null) => `#/p/${id}${script ? `/${script}` : ''}`

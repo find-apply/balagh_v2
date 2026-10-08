@@ -117,6 +117,7 @@ class ApproveIn(BaseModel):
     role: ReviewRole
     name: str = Field(min_length=2, max_length=80, description="Who is approving, in their own name.")
     note: Optional[str] = Field(default=None, max_length=1000, description="Optional remark recorded with the signature.")
+    invite: Optional[str] = Field(default=None, max_length=64, description="The invitation token from the reviewer's link; required for every role but the creator's.")
 
 
 class ReviseIn(BaseModel):
@@ -423,6 +424,16 @@ class ChangeRequestIn(BaseModel):
     role: ReviewRole
     name: str = Field(min_length=2, max_length=80)
     note: str = Field(min_length=3, max_length=2000, description="What must change before this reviewer signs.")
+    invite: Optional[str] = Field(default=None, max_length=64, description="The invitation token from the reviewer's link; required for every role but the creator's.")
+
+
+class InviteIn(BaseModel):
+    role: ReviewRole
+
+
+class InviteOut(BaseModel):
+    role: ReviewRole
+    token: str
 
 
 class RequiredApproval(BaseModel):

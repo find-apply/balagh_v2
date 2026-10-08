@@ -16,7 +16,7 @@ const ROLE_HELP: Record<ReviewRole, string> = {
 
 /** One page for a reviewer who arrives from a link: the preview, the texts with their commentary, the script,
  * what the automatic review found, and one decision: approve or ask for changes. No workspace around it. */
-export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId: string; scriptId: string; role: string | null }) {
+export function ReviewPage({ projectId, scriptId, role: roleHint, invite }: { projectId: string; scriptId: string; role: string | null; invite: string | null }) {
   const [project, setProject] = useState<Project | null>(null)
   const [video, setVideo] = useState<Video | null | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
@@ -49,6 +49,8 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
   const already = script.approvals.find((a) => a.role === role)
   const requested = script.change_requests.find((c) => c.role === role)
   const source = script.localized_from ? (project.scripts[script.localized_from] ?? null) : null
+  // Every role but the creator's signs only from an invitation link; without one the page is for reading.
+  const canSign = role === 'creator' || !!invite
 
   const act = async (kind: 'approve' | 'changes', e: FormEvent) => {
     e.preventDefault()
@@ -56,8 +58,8 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
     setError(null)
     try {
       const updated = kind === 'approve'
-        ? await api.approve(projectId, scriptId, role, name.trim(), note.trim() || undefined)
-        : await api.requestChanges(projectId, scriptId, role, name.trim(), note.trim())
+        ? await api.approve(projectId, scriptId, role, name.trim(), note.trim() || undefined, invite)
+        : await api.requestChanges(projectId, scriptId, role, name.trim(), note.trim(), invite)
       setProject({ ...project, scripts: { ...project.scripts, [scriptId]: updated } })
       setDone(kind === 'approve' ? 'approved' : 'changes')
     } catch (err) {
@@ -227,7 +229,14 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
         {requested && !done && (
           <p className="notice warn">طلب {requested.name} تعديلا على هذه النسخة: «{requested.note}». تُصحَّح في نسخة جديدة.</p>
         )}
-        {!done && !already && !requested && !decisionSeen && (
+        {!done && !already && !requested && !canSign && (
+          <p className="notice warn">
+            {role === 'scholar'
+              ? 'هذا الرابط للاطلاع فقط. التوقيع بصفة المراجع الشرعي يكون من رابط دعوة تصدره المنصة لأحد مختصيها.'
+              : 'هذا الرابط للاطلاع فقط. التوقيع بهذه الصفة يكون من رابط الدعوة الذي يرسله صانع المحتوى.'}
+          </p>
+        )}
+        {!done && !already && !requested && canSign && (
           <form className="rv-form" onSubmit={(e) => act('approve', e)}>
             <label className="field">
               <span>اسمك وصفتك (يُسجَّلان مع القرار)</span>
@@ -254,7 +263,7 @@ export function ReviewPage({ projectId, scriptId, role: roleHint }: { projectId:
       <p className="disclosure">
         أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
       </p>
-      {!done && !already && !requested && (
+      {!done && !already && !requested && canSign && !decisionSeen && (
         <a className="rv-jump" href="#decision" onClick={(e) => { e.preventDefault(); document.getElementById('decision')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}>
           قرارك في آخر الصفحة: أعتمد أو أطلب تعديلا ↓
         </a>

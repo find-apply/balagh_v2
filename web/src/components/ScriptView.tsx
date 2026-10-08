@@ -243,13 +243,20 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
                   {done.note && <span className="muted"> · {done.note}</span>}
                 </p>
               )}
-              {!done && r.role !== 'creator' && editable && (
+              {!done && r.role === 'scholar' && (
+                <p className="small">تُسنَد هذه النسخة إلى مختص من مختصي المنصة، ويوقّع من رابط دعوة تصدره المنصة له؛ صانع المحتوى لا يوقّع مكانه.</p>
+              )}
+              {!done && r.role === 'language' && editable && (
                 <button
                   type="button"
                   className="small-button"
-                  onClick={() => navigator.clipboard.writeText(`${location.origin}${location.pathname}${reviewHash(projectId, script.id, r.role)}`).then(() => setCopied(true))}
+                  onClick={async () => {
+                    const { token } = await api.invite(projectId, 'language')
+                    await navigator.clipboard.writeText(`${location.origin}${location.pathname}${reviewHash(projectId, script.id, 'language', token)}`)
+                    setCopied(true)
+                  }}
                 >
-                  {copied ? 'نُسخ' : `انسخ رابط صفحة ${ROLES[r.role]}`}
+                  {copied ? 'نُسخ رابط الدعوة' : 'انسخ رابط دعوة المراجع اللغوي'}
                 </button>
               )}
             </li>

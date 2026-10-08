@@ -13,7 +13,7 @@ from google.genai import errors as genai_errors
 
 from . import admin, flow_settings, generator, inspiration, screen, store
 from .schemas import (
-    Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, HistoryEntry, LocalizeIn, Project, ReviewReport, ReviseIn, Script, ScriptIn, StoryIn,
+    Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, HistoryEntry, InviteIn, InviteOut, LocalizeIn, Project, ReviewReport, ReviewRole, ReviseIn, Script, ScriptIn, StoryIn,
     SourceInfo, TemplateIn, Video, VideoIn, VideoTemplate,
 )
 from .video import catalog, render, story
@@ -261,12 +261,34 @@ async def revise_script(project_id: str, script_id: str, body: ReviseIn) -> Scri
     return revised
 
 
+def _check_invite(project_id: str, role: ReviewRole, token: Optional[str]) -> None:
+    """The creator signs in their own workspace; every other role signs only from an invitation link for this
+    project and role. The scholar's invitations are issued by the platform, never by the creator, so whoever
+    wrote the script cannot sign it in the scholar's place."""
+    if role == ReviewRole.creator:
+        return
+    if not store.invite_valid(token or "", project_id, role.value):
+        raise HTTPException(status_code=403, detail="التوقيع بهذه الصفة يحتاج رابط دعوة صالحا لهذا المشروع. "
+                            + ("روابط المراجع الشرعي تصدرها المنصة لمختصيها." if role == ReviewRole.scholar else "اطلب من صانع المحتوى رابط الدعوة."))
+
+
+@app.post("/projects/{project_id}/invites", response_model=InviteOut, status_code=201)
+async def invite(project_id: str, body: InviteIn) -> InviteOut:
+    """The creator invites the language reviewer they chose. The scholar's invitation is not theirs to issue:
+    the platform assigns one of its specialists (admin)."""
+    _get_project(project_id)
+    if body.role != ReviewRole.language:
+        raise HTTPException(status_code=403, detail="روابط المراجع الشرعي تصدرها المنصة لمختصيها؛ النسخة تظهر لهم في قائمة الانتظار.")
+    return InviteOut(role=body.role, token=store.add_invite(project_id, body.role.value, "creator"))
+
+
 @app.post("/projects/{project_id}/scripts/{script_id}/approve", response_model=Script)
 async def approve_script(project_id: str, script_id: str, body: ApproveIn) -> Script:
     """Step 6: a named human signs off on this exact version in one role. Export opens once every
     role the version requires has signed off."""
     project = _get_project(project_id)
     script = _get_script(project, script_id)
+    _check_invite(project_id, body.role, body.invite)
     if any(c.role == body.role for c in script.change_requests):
         raise HTTPException(status_code=409, detail="هذا الدور طلب تعديلا على هذه النسخة؛ يُصحَّح في نسخة جديدة ثم يُراجع من جديد.")
     script.approvals = [a for a in script.approvals if a.role != body.role]
@@ -293,6 +315,7 @@ async def request_changes(project_id: str, script_id: str, body: ChangeRequestIn
     the creator corrects it in a new version (the note feeds the correction) and the reviewer signs that one."""
     project = _get_project(project_id)
     script = _get_script(project, script_id)
+    _check_invite(project_id, body.role, body.invite)
     script.change_requests = [c for c in script.change_requests if c.role != body.role]
     script.change_requests.append(ChangeRequest(role=body.role, name=body.name.strip(), note=body.note.strip(), at=datetime.now(timezone.utc)))
     script.approvals = [a for a in script.approvals if a.role != body.role]

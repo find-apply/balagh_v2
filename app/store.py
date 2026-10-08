@@ -1,5 +1,6 @@
 """Project storage. SQLite file by default; set DATABASE_URL to a Postgres URL for hosts with an ephemeral disk."""
 import json
+import secrets
 import statistics
 import os
 from pathlib import Path
@@ -64,6 +65,15 @@ videos = Table(
     Column("id", String(32), primary_key=True),
     Column("script_id", String(32), nullable=False, index=True),
     Column("data", Text, nullable=False),
+)
+# Reviewer invitations: a signature in a reviewer's role needs the token of an invitation for that project and role.
+invites = Table(
+    "invites", metadata,
+    Column("token", String(64), primary_key=True),
+    Column("project_id", String(32), nullable=False, index=True),
+    Column("role", String(20), nullable=False),
+    Column("issued_by", String(20), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
 )
 metadata.create_all(engine)
 # Databases created before projects had a date get the column added in place.
@@ -236,6 +246,7 @@ def delete_project(project_id: str) -> bool:
     with engine.begin() as conn:
         removed = conn.execute(delete(projects).where(projects.c.id == project_id)).rowcount
         conn.execute(delete(history).where(history.c.project_id == project_id))
+        conn.execute(delete(invites).where(invites.c.project_id == project_id))
     return bool(removed)
 
 
@@ -287,3 +298,19 @@ def put_settings(values: dict) -> None:
         for key, value in values.items():
             conn.execute(delete(settings).where(settings.c.key == key))
             conn.execute(insert(settings).values(key=key, value=json.dumps(value, ensure_ascii=False)))
+
+
+def add_invite(project_id: str, role: str, issued_by: str) -> str:
+    token = secrets.token_urlsafe(24)
+    with engine.begin() as conn:
+        conn.execute(insert(invites).values(token=token, project_id=project_id, role=role, issued_by=issued_by,
+                                            created_at=datetime.now(timezone.utc)))
+    return token
+
+
+def invite_valid(token: str, project_id: str, role: str) -> bool:
+    if not token:
+        return False
+    with engine.connect() as conn:
+        row = conn.execute(select(invites.c.project_id, invites.c.role).where(invites.c.token == token)).first()
+    return row is not None and row[0] == project_id and row[1] == role

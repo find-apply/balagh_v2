@@ -177,6 +177,21 @@ async def approvals() -> list[PendingApproval]:
     return out
 
 
+class InviteRow(BaseModel):
+    role: ReviewRole
+    token: str
+
+
+@router.post("/projects/{project_id}/invites", response_model=InviteRow, status_code=201)
+async def invite(project_id: str, role: ReviewRole = Query(ReviewRole.scholar)) -> InviteRow:
+    """An invitation link for one of the platform's reviewers, in any role but the creator's."""
+    if store.load(project_id) is None:
+        raise HTTPException(status_code=404, detail="المشروع غير موجود.")
+    if role == ReviewRole.creator:
+        raise HTTPException(status_code=400, detail="صانع المحتوى يوقّع من مساحة عمله دون دعوة.")
+    return InviteRow(role=role, token=store.add_invite(project_id, role.value, "admin"))
+
+
 @router.get("/runs", response_model=list[RunRow])
 async def runs(limit: int = Query(100, ge=1, le=500), failed: bool = False) -> list[RunRow]:
     return [RunRow(**r) for r in store.recent_runs(limit, failed)]

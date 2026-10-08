@@ -116,7 +116,10 @@ def run_scripts() -> None:
             steps.append(dict(kind="story", scenes=len(script["story"]["scenes"])))
             log(ex["id"], f"story written: {script['story']['title']} ({len(script['story']['scenes'])} scenes)")
         for role in [r["role"] for r in script["required_approvals"]]:
-            script = api("POST", f"/projects/{pid}/scripts/{script['id']}/approve", {"role": role, "name": SIGNER if role == "creator" else "مراجع لغوي (تجريبي)"})
+            # Every role but the creator's signs from an invitation; the creator invites the language reviewer.
+            invite = None if role == "creator" else api("POST", f"/projects/{pid}/invites", {"role": role})["token"]
+            script = api("POST", f"/projects/{pid}/scripts/{script['id']}/approve",
+                         {"role": role, "name": SIGNER if role == "creator" else "مراجع لغوي (تجريبي)", "invite": invite})
         steps.append(dict(kind="approve", roles=[a["role"] for a in script["approvals"]]))
         log(ex["id"], f"approved: {script['approved']} (v{script['version']})")
         run[ex["id"]] = dict(project=pid, first_id=first_id, source_id=source_approved["id"], localized_first=localized_first,

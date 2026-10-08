@@ -119,6 +119,7 @@ export const adminApi = {
   project: (id: string) => call<Project>('GET', `/projects/${id}`),
   deleteProject: (id: string) => call<void>('DELETE', `/projects/${id}?confirm=true`),
   approvals: () => call<PendingApproval[]>('GET', '/approvals'),
+  invite: (projectId: string, role = 'scholar') => call<{ role: string; token: string }>('POST', `/projects/${projectId}/invites?role=${role}`),
   runs: (failed: boolean) => call<Run[]>('GET', `/runs?limit=200&failed=${failed}`),
   settings: () => call<FlowSettings>('GET', '/settings'),
   saveSettings: (s: FlowSettings) => call<FlowSettings>('PUT', '/settings', s),

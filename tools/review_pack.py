@@ -2,13 +2,16 @@
 message to send with them. Each link opens the reviewer page in the scholar's role; the decision (sign, or ask
 for changes with a note) is recorded on that version with the reviewer's name.
 
-    uv run python tools/review_pack.py            # prints the message and the links, writes eval/review_pack.md
+    ADMIN_TOKEN=… uv run python tools/review_pack.py   # prints the message and the links, writes eval/review_pack.md
+
+Each link carries a scholar's invitation issued by the admin: without it the page is for reading only. Running
+the pack again issues new invitations; the earlier links keep working.
 
 The sample mixes what a scholar should see: plain topics (levels A and B), two disputed matters (level C), a
 localized version, a children's story, and one older version where the automatic reviewers found real
 problems, to see whether the scholar agrees with them.
 """
-import json
+import os
 from pathlib import Path
 
 import httpx
@@ -53,12 +56,14 @@ def main() -> None:
     for n, (pid, sid, why) in enumerate(SAMPLE, start=1):
         p = httpx.get(f"{SITE}/api/projects/{pid}", timeout=60).json()
         s = p["scripts"][sid]
-        url = f"{SITE}/#/review/{pid}/{sid}/scholar"
+        token = httpx.post(f"{SITE}/api/admin/projects/{pid}/invites", params={"role": "scholar"}, timeout=60,
+                           headers={"Authorization": f"Bearer {os.environ['ADMIN_TOKEN']}"}).raise_for_status().json()["token"]
+        url = f"{SITE}/#/review/{pid}/{sid}/scholar/{token}"
         lines.append(f"{n}. {why}\n   {url}")
         rows.append(f"| {n} | {s['title']} | {s['content_level']} | {s['target']['language']} | {why} | {url} |")
     message = MESSAGE.format(n=len(SAMPLE), links="\n".join(lines))
     print(message)
-    OUT.write_text("# حزمة المراجعة الشرعية\n\nالعينة المرسلة للمختصين الشرعيين، بروابط صفحة المراجع بدور «مراجع شرعي». القرارات تُسجَّل على النسخ نفسها؛ `tools/review_report.py` يجمعها.\n\n| # | السيناريو | المستوى | اللغة | لماذا في العينة | الرابط |\n|---|---|---|---|---|---|\n" + "\n".join(rows) + "\n\n## الرسالة\n\n" + message + "\n")
+    OUT.write_text("# حزمة المراجعة الشرعية\n\nالعينة المرسلة للمختصين الشرعيين، بروابط صفحة المراجع بدور «مراجع شرعي». القرارات تُسجَّل على النسخ نفسها؛ كل رابط يحمل دعوة مراجع شرعي تصدرها الإدارة، وبدونها تكون الصفحة للاطلاع فقط. `tools/review_report.py` يجمعها.\n\n| # | السيناريو | المستوى | اللغة | لماذا في العينة | الرابط |\n|---|---|---|---|---|---|\n" + "\n".join(rows) + "\n\n## الرسالة\n\n" + message + "\n")
     print(f"\n→ {OUT.relative_to(ROOT)}")
 
 

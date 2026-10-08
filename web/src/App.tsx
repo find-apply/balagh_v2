@@ -200,7 +200,7 @@ export default function App() {
 
   if (route.view === 'admin') return <AdminApp path={route.path} />
   if (route.view === 'examples') return <Showcase onStart={() => go('#/new')} />
-  if (route.view === 'review') return <ReviewPage projectId={route.id} scriptId={route.script} role={route.role} />
+  if (route.view === 'review') return <ReviewPage projectId={route.id} scriptId={route.script} role={route.role} invite={route.invite} />
   if (route.view === 'landing') return <Landing onStart={() => go('#/new')} resume={history.length > 0} />
 
   const project = loaded ?? null
