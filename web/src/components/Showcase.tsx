@@ -66,7 +66,59 @@ interface Feedback {
   items: { name: string; role: string; text: string; done?: string }[]
 }
 
-const data = raw as { examples: Example[]; guards: Guard[]; stats: { value: string; label: string }[]; feedback: Feedback }
+/** A tafsir lesson made with the lesson builder: served from the site itself, not from the API. */
+interface Lesson {
+  id: string
+  title: string
+  url: string
+  poster: string
+  seconds: number
+  hook: string
+  sources: string[]
+  steps: string[]
+  notes: string[]
+}
+
+const data = raw as { examples: Example[]; guards: Guard[]; stats: { value: string; label: string }[]; feedback: Feedback; lessons: Lesson[] }
+
+const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`
+
+function LessonCard({ l }: { l: Lesson }) {
+  return (
+    <article className="card lesson" id={`lesson-${l.id}`}>
+      <video controls preload="none" poster={l.poster} src={l.url} playsInline />
+      <h3>
+        {l.title} <span className="muted small">{mmss(l.seconds)}</span>
+      </h3>
+      <p className="hook">{l.hook}</p>
+      <div className="badges">
+        {l.sources.map((s) => (
+          <span className="badge ok" key={s}>
+            {s}
+          </span>
+        ))}
+      </div>
+      <ul className="plain lesson-steps">
+        {l.steps.map((s) => (
+          <li key={s}>{s}</li>
+        ))}
+      </ul>
+      {l.notes.length > 0 && (
+        <div className="notice warn small">
+          <strong>قرارات تحريرية تنتظر المراجع الشرعي</strong>
+          <ul>
+            {l.notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <a className="button" href={l.url} target="_blank" rel="noreferrer">
+        افتح الفيديو مباشرة
+      </a>
+    </article>
+  )
+}
 
 function Brief({ b }: { b: Example['brief'] }) {
   return (
@@ -482,6 +534,24 @@ export function Showcase({ onStart }: { onStart: () => void }) {
           <ReelStrip videos={reels} />
           <h3 className="strip-title">حلقات أفقية (16:9) · YouTube</h3>
           <ReelStrip videos={episodes} />
+        </div>
+      </section>
+
+      <section className="section" id="lessons">
+        <div className="section-inner">
+          <Reveal>
+            <span className="eyebrow">دروس تفسير</span>
+            <h2>آية تُتلى، ثم تُشرح من التفسير</h2>
+          </Reveal>
+          <p className="lead">
+            درسان مشروحان: القرآن بصوت قارئ لا بصوت مولَّد، والشرح من تفسير الميسر، والحديث من صحيح مسلم. يكتب النموذج خطة الدرس،
+            ثم تتحقق الشيفرة من كل سطر فيها وترفض ما لا تجده في المصدر.
+          </p>
+          <div className="show-grid">
+            {data.lessons.map((l) => (
+              <LessonCard l={l} key={l.id} />
+            ))}
+          </div>
         </div>
       </section>
 

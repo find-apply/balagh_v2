@@ -4122,3 +4122,44 @@ a.logo:hover {
 .source-digest li + li {
   margin-top: 4px;
 }
+
+/* ---- Tafsir lessons on the examples page ---- */
+
+.lesson {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lesson video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  background: #0f1512;
+}
+
+.lesson h3 {
+  margin: 0;
+}
+
+.lesson .hook {
+  margin: 0;
+  font-weight: 600;
+}
+
+.lesson-steps li {
+  padding-inline-start: 14px;
+  position: relative;
+  line-height: 1.7;
+}
+
+.lesson-steps li::before {
+  content: '✓';
+  position: absolute;
+  inset-inline-start: -4px;
+  color: var(--brand);
+}
+
+.lesson .button {
+  align-self: flex-start;
+}
