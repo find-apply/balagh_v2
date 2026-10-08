@@ -76,7 +76,6 @@ interface Lesson {
   hook: string
   sources: string[]
   steps: string[]
-  notes: string[]
 }
 
 const data = raw as { examples: Example[]; guards: Guard[]; stats: { value: string; label: string }[]; feedback: Feedback; lessons: Lesson[] }
@@ -103,16 +102,6 @@ function LessonCard({ l }: { l: Lesson }) {
           <li key={s}>{s}</li>
         ))}
       </ul>
-      {l.notes.length > 0 && (
-        <div className="notice warn small">
-          <strong>قرارات تحريرية تنتظر المراجع الشرعي</strong>
-          <ul>
-            {l.notes.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
-        </div>
-      )}
       <a className="button" href={l.url} target="_blank" rel="noreferrer">
         افتح الفيديو مباشرة
       </a>
