@@ -4103,3 +4103,22 @@ a.logo:hover {
   align-items: center;
   gap: 10px;
 }
+
+/* what was read from the inspiration source, folded under the source line */
+.source-digest {
+  margin: 6px 0 0;
+}
+
+.source-digest > summary {
+  cursor: pointer;
+  color: var(--brand);
+}
+
+.source-digest ul {
+  margin: 8px 0;
+  padding-inline-start: 18px;
+}
+
+.source-digest li + li {
+  margin-top: 4px;
+}

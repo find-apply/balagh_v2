@@ -153,6 +153,28 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
               {project.source.summary && <> · {project.source.summary}</>}
             </p>
           )}
+          {project.source?.digest && (
+            <details className="muted small source-digest">
+              <summary>ما قُرئ من المصدر ({project.source.digest.examples.length} أمثلة، {project.source.digest.citations.length} نصوص يستشهد بها)</summary>
+              <ul>
+                {project.source.digest.argument.map((a, i) => (
+                  <li key={i} dir="auto">{a}</li>
+                ))}
+              </ul>
+              {project.source.digest.examples.length > 0 && (
+                <ul>
+                  {project.source.digest.examples.map((e, i) => (
+                    <li key={i} dir="auto"><span className="badge" dir="ltr">{e.locus}</span> {e.text}</li>
+                  ))}
+                </ul>
+              )}
+              {project.source.digest.citations.length > 0 && (
+                <p dir="auto">
+                  نصوص يستشهد بها المصدر كما وردت فيه، ولا يوثّقها وروده: {project.source.digest.citations.map((c) => `«${c.text}» (${c.attributed_to}، ${c.locus})`).join('؛ ')}
+                </p>
+              )}
+            </details>
+          )}
         </div>
         {actions && (
         <div className="ws-tools">

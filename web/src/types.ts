@@ -38,6 +38,7 @@ export interface SourceInfo {
   label: string
   url: string | null
   summary: string
+  digest: { summary: string; argument: string[]; examples: { locus: string; text: string }[]; citations: { locus: string; text: string; attributed_to: string }[]; language: string } | null
 }
 
 export interface LocalizeRequest extends AudienceSpec {
