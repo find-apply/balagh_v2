@@ -8,7 +8,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "space.balagh.app"
+      "bundleIdentifier": "space.balagh.app",
+      "infoPlist": {
+        "ExpoLocalization_forcesRTL": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -41,6 +44,16 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "eb1ba512-406e-4473-960f-c5ce8f53dcfa"
+      }
+    },
+    "owner": "mab1998",
+    "updates": {
+      "url": "https://u.expo.dev/eb1ba512-406e-4473-960f-c5ce8f53dcfa"
     }
   }
 }
