@@ -459,3 +459,31 @@ async def showcase() -> PublicShowcase:
         if item:
             shown.append(item)
     return PublicShowcase(ratings=ratings, projects=shown)
+
+
+class LibraryItem(BaseModel):
+    video: Video
+    project_id: str
+    script_id: str
+    title: str
+    audience: str
+    approved: bool
+
+
+@app.get("/library", response_model=list[LibraryItem])
+async def library(x_client_id: Optional[str] = Header(default=None), limit: int = 60) -> list[LibraryItem]:
+    """The finished videos of the calling client's projects, newest first: the app's video library."""
+    if not x_client_id:
+        return []
+    items: list[LibraryItem] = []
+    for entry in store.list_history(x_client_id[:64]):
+        project = store.load(entry.id)
+        if project is None:
+            continue
+        for script in project.scripts.values():
+            for v in store.videos_for(script.id):
+                if v.status == VideoStatus.done and v.url:
+                    items.append(LibraryItem(video=v, project_id=project.id, script_id=script.id, title=script.title,
+                                             audience=project.brief.audience, approved=script.approved))
+    items.sort(key=lambda i: i.video.created_at, reverse=True)
+    return items[:max(1, min(limit, 200))]

@@ -51,3 +51,17 @@ def test_the_admin_sees_each_templates_average(client, monkeypatch):
     assert by["chalk"]["by_role"] == {"scholar": 1, "student": 1}
     assert by["teaser"]["average"] == 2
     assert by["kids"]["ratings"] == 0 and by["kids"]["average"] is None
+
+
+def test_the_library_lists_this_clients_finished_videos_newest_first(client):
+    from datetime import timedelta
+    store.remember("lib-client", "p1", shared=False)
+    now = datetime.now(timezone.utc)
+    for vid, status, age in (("lib-old", VideoStatus.done, 2), ("lib-new", VideoStatus.done, 1), ("lib-running", VideoStatus.rendering, 0)):
+        store.save_video(Video(id=vid, project_id="p1", script_id="s1", template="captions", status=status,
+                               url=f"/media/{vid}.mp4", created_at=now - timedelta(hours=age)))
+    rows = client.get("/library", headers={"X-Client-Id": "lib-client"}).json()
+    ids = [r["video"]["id"] for r in rows]
+    assert ids.index("lib-new") < ids.index("lib-old") and "lib-running" not in ids
+    assert client.get("/library").json() == []
+    assert client.get("/library", headers={"X-Client-Id": "someone-else"}).json() == []
