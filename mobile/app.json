@@ -53,7 +53,10 @@
     },
     "owner": "mab1998",
     "updates": {
-      "url": "https://u.expo.dev/eb1ba512-406e-4473-960f-c5ce8f53dcfa"
+      "url": "https://u.expo.dev/eb1ba512-406e-4473-960f-c5ce8f53dcfa",
+      "requestHeaders": {
+        "expo-channel-name": "preview"
+      }
     }
   }
 }
