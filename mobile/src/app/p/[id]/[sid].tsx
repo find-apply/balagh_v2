@@ -271,7 +271,7 @@ function VideoPart({ projectId, script, onChanged }: { projectId: string; script
           {latest.error && <Notice tone="bad">{latest.error}</Notice>}
           {latest.status === 'done' && latest.url && (
             <>
-              <VideoPlayer uri={BASE + latest.url} tall={tall} />
+              <VideoPlayer uri={BASE + latest.url} poster={latest.frames[0] ? BASE + latest.frames[0] : null} tall={tall} seconds={latest.duration_seconds} />
               <Button title="شارك الفيديو" kind="ghost" onPress={() => void Share.share({ message: `${script.title}\n${BASE + latest.url}` })} />
             </>
           )}
