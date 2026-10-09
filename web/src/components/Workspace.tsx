@@ -280,9 +280,12 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
       {active && actions && (() => {
         const next = nextStep(active)
         const prev = Number(selected) - 1
+        const target = next.action.kind === 'findings' ? 'review' : next.action.kind
+        // Already on the tab the bar points to: its own button does the step, so the bar only says what it is.
+        const onTarget = next.action.kind !== 'review' && tab === target
         const run = () => {
           if (next.action.kind === 'review') return actions.onReview(active.id)
-          openTab(next.action.kind === 'findings' ? 'review' : next.action.kind)
+          openTab(target)
         }
         return (
           <div className={`flowbar ${next.tone}`}>
@@ -293,9 +296,11 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
               <strong>{next.title}</strong>
               <span className="muted small">{next.hint}</span>
             </div>
-            <button type="button" className="primary" disabled={busy !== null} onClick={run}>
-              {next.action.label} ←
-            </button>
+            {!onTarget && (
+              <button type="button" className="primary" disabled={busy !== null} onClick={run}>
+                {next.action.label} ←
+              </button>
+            )}
           </div>
         )
       })()}
