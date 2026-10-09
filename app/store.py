@@ -89,6 +89,18 @@ feedback = Table(
     Column("comment", Text),
     Column("created_at", DateTime(timezone=True), nullable=False),
     Column("featured", Boolean, nullable=False, default=False),
+    Column("user_id", String(128)),
+)
+# Accounts, as Firebase identifies them: the profile is refreshed from the token at each sign-in.
+users = Table(
+    "users", metadata,
+    Column("uid", String(128), primary_key=True),
+    Column("email", String(320)),
+    Column("name", String(200)),
+    Column("picture", Text),
+    Column("provider", String(40)),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("last_seen", DateTime(timezone=True), nullable=False),
 )
 # Projects the admin has made public: they are listed on the landing page and open read-only.
 published = Table(
@@ -101,6 +113,10 @@ metadata.create_all(engine)
 if "featured" not in {c["name"] for c in inspect(engine).get_columns("feedback")}:
     with engine.begin() as _conn:
         _conn.execute(text("ALTER TABLE feedback ADD COLUMN featured BOOLEAN NOT NULL DEFAULT FALSE"))
+# Ratings given while signed in carry the account, so one account rates a video once.
+if "user_id" not in {c["name"] for c in inspect(engine).get_columns("feedback")}:
+    with engine.begin() as _conn:
+        _conn.execute(text("ALTER TABLE feedback ADD COLUMN user_id VARCHAR(128)"))
 # Databases created before projects had a date get the column added in place.
 if "created_at" not in {c["name"] for c in inspect(engine).get_columns("projects")}:
     with engine.begin() as _conn:
@@ -218,6 +234,37 @@ def remember(client_id: str, project_id: str, shared: bool) -> None:
                 ))
         except IntegrityError:
             pass
+
+
+def move_history(from_key: str, to_key: str) -> int:
+    """Carries a device's history over to an account at its first sign-in there; projects already in the
+    account's history keep their entry. Returns how many projects were added."""
+    moved = 0
+    with engine.begin() as conn:
+        mine = {r[0] for r in conn.execute(select(history.c.project_id).where(history.c.client_id == to_key))}
+        for pid, shared, created in conn.execute(
+                select(history.c.project_id, history.c.shared, history.c.created_at).where(history.c.client_id == from_key)).all():
+            if pid not in mine:
+                conn.execute(insert(history).values(client_id=to_key, project_id=pid, shared=shared, created_at=created))
+                moved += 1
+        conn.execute(delete(history).where(history.c.client_id == from_key))
+    return moved
+
+
+def save_user(uid: str, email: Optional[str], name: Optional[str], picture: Optional[str], provider: Optional[str]) -> bool:
+    """Records a signed-in account, or refreshes its profile. True the first time the account is seen."""
+    now = datetime.now(timezone.utc)
+    values = dict(email=email, name=name, picture=picture, provider=provider, last_seen=now)
+    with engine.begin() as conn:
+        if conn.execute(update(users).where(users.c.uid == uid).values(**values)).rowcount:
+            return False
+        conn.execute(insert(users).values(uid=uid, created_at=now, **values))
+        return True
+
+
+def count_users() -> int:
+    with engine.connect() as conn:
+        return conn.execute(select(func.count()).select_from(users)).scalar_one()
 
 
 def forget(client_id: str, project_id: str) -> None:
@@ -343,11 +390,15 @@ def invite_valid(token: str, project_id: str, role: str) -> bool:
     return row is not None and row[0] == project_id and row[1] == role
 
 
-def add_feedback(video: Video, body: FeedbackIn) -> Feedback:
+def add_feedback(video: Video, body: FeedbackIn, user_id: Optional[str] = None) -> Feedback:
     row = dict(video_id=video.id, project_id=video.project_id, script_id=video.script_id, template=video.template,
-               created_at=datetime.now(timezone.utc), featured=False, **body.model_dump(mode="json"))
+               created_at=datetime.now(timezone.utc), featured=False, user_id=user_id, **body.model_dump(mode="json"))
     with engine.begin() as conn:
+        # An account rates a video once: rating it again replaces its earlier rating.
+        if user_id:
+            conn.execute(delete(feedback).where(feedback.c.video_id == video.id, feedback.c.user_id == user_id))
         row["id"] = conn.execute(insert(feedback).values(**row)).inserted_primary_key[0]
+    row.pop("user_id")
     return Feedback(**row)
 
 
@@ -358,7 +409,7 @@ def feedback_for(video_id: Optional[str] = None, limit: int = 500, featured: boo
     if featured:
         q = q.where(feedback.c.featured.is_(True))
     with engine.connect() as conn:
-        return [Feedback(**r._mapping) for r in conn.execute(q)]
+        return [Feedback(**{k: v for k, v in r._mapping.items() if k != "user_id"}) for r in conn.execute(q)]
 
 
 def set_featured(feedback_id: int, on: bool) -> bool:

@@ -12,7 +12,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from google.genai import errors as genai_errors
 
-from . import admin, flow_settings, generator, inspiration, screen, store
+from . import admin, auth, flow_settings, generator, inspiration, screen, store
+from .auth import User, current_user, owner_key
 from .schemas import (
     Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, Feedback, FeedbackIn, HistoryEntry, InviteIn, InviteOut, LocalizeIn, Project, ReviewReport, ReviewRole, ReviseIn, Script, ScriptIn, StoryIn,
     SourceInfo, TemplateIn, Video, VideoIn, VideoStatus, VideoTemplate,
@@ -139,7 +140,8 @@ async def list_templates() -> list[dict]:
 
 
 @app.post("/projects", response_model=Project, status_code=201, dependencies=[Depends(generation_open)])
-async def create_project(brief: BriefIn, x_client_id: Optional[str] = Header(default=None)) -> Project:
+async def create_project(brief: BriefIn, x_client_id: Optional[str] = Header(default=None),
+                         user: Optional[User] = Depends(current_user)) -> Project:
     """Step 1: submit the brief, get back 3 video ideas with their verified evidence. With `source_url` or
     `source_file`, the ideas take their angles from that source; the texts are verified all the same."""
     try:
@@ -154,8 +156,8 @@ async def create_project(brief: BriefIn, x_client_id: Optional[str] = Header(def
     info = SourceInfo(kind=source.kind, label=source.label, url=source.url, summary=summary or (digest.summary if digest else ""), digest=digest) if source else None
     project = Project(id=uuid4().hex, brief=brief.model_copy(update={"source_file": None}), ideas=ideas, source=info)
     store.save(project)
-    if x_client_id:
-        store.remember(x_client_id[:64], project.id, shared=False)
+    if key := owner_key(user, x_client_id):
+        store.remember(key, project.id, shared=False)
     return project
 
 
@@ -172,9 +174,12 @@ async def upload_source(file: UploadFile) -> dict:
 
 
 @app.get("/projects", response_model=list[HistoryEntry])
-async def list_projects(x_client_id: Optional[str] = Header(default=None)) -> list[HistoryEntry]:
-    """The calling client's history, newest first: projects it created or opened from a review link."""
-    return store.list_history(x_client_id[:64]) if x_client_id else []
+async def list_projects(x_client_id: Optional[str] = Header(default=None),
+                        user: Optional[User] = Depends(current_user)) -> list[HistoryEntry]:
+    """The caller's history, newest first: projects created or opened from a review link. A signed-in user's
+    history is their account's, the same on every device; a visitor's is this device's."""
+    key = owner_key(user, x_client_id)
+    return store.list_history(key) if key else []
 
 
 @app.get("/projects/{project_id}", response_model=Project)
@@ -183,20 +188,22 @@ async def get_project(project_id: str) -> Project:
 
 
 @app.post("/projects/{project_id}/open", response_model=Project)
-async def open_project(project_id: str, shared: bool = False, x_client_id: Optional[str] = Header(default=None)) -> Project:
+async def open_project(project_id: str, shared: bool = False, x_client_id: Optional[str] = Header(default=None),
+                       user: Optional[User] = Depends(current_user)) -> Project:
     """Adds the project to the calling client's history: its own project (registered from an earlier browser
     history) or, with shared=true, one that arrived through someone's review link. Reading never records."""
     project = _get_project(project_id)
-    if x_client_id:
-        store.remember(x_client_id[:64], project_id, shared=shared)
+    if key := owner_key(user, x_client_id):
+        store.remember(key, project_id, shared=shared)
     return project
 
 
 @app.delete("/projects/{project_id}", status_code=204)
-async def hide_project(project_id: str, x_client_id: Optional[str] = Header(default=None)) -> Response:
+async def hide_project(project_id: str, x_client_id: Optional[str] = Header(default=None),
+                       user: Optional[User] = Depends(current_user)) -> Response:
     """Removes a project from the client's history only; the project and its review link keep working."""
-    if x_client_id:
-        store.forget(x_client_id[:64], project_id)
+    if key := owner_key(user, x_client_id):
+        store.forget(key, project_id)
     return Response(status_code=204)
 
 
@@ -385,7 +392,7 @@ async def get_video(video_id: str) -> Video:
 
 
 @app.post("/videos/{video_id}/feedback", response_model=Feedback, status_code=201)
-async def rate_video(video_id: str, body: FeedbackIn) -> Feedback:
+async def rate_video(video_id: str, body: FeedbackIn, user: Optional[User] = Depends(current_user)) -> Feedback:
     """Rate a finished video: one to five stars, the rater's standing (student of knowledge, scholar, sheikh,
     or viewer) and name, and an optional remark. Kept with the video's template so templates can be compared."""
     video = store.load_video(video_id)
@@ -393,7 +400,7 @@ async def rate_video(video_id: str, body: FeedbackIn) -> Feedback:
         raise HTTPException(status_code=404, detail="Video not found")
     if video.status != VideoStatus.done:
         raise HTTPException(status_code=409, detail="يُقيَّم الفيديو بعد اكتماله.")
-    return store.add_feedback(video, body)
+    return store.add_feedback(video, body, user.uid if user else None)
 
 
 @app.get("/videos/{video_id}/feedback", response_model=list[Feedback])
@@ -471,12 +478,14 @@ class LibraryItem(BaseModel):
 
 
 @app.get("/library", response_model=list[LibraryItem])
-async def library(x_client_id: Optional[str] = Header(default=None), limit: int = 60) -> list[LibraryItem]:
-    """The finished videos of the calling client's projects, newest first: the app's video library."""
-    if not x_client_id:
+async def library(x_client_id: Optional[str] = Header(default=None), limit: int = 60,
+                  user: Optional[User] = Depends(current_user)) -> list[LibraryItem]:
+    """The finished videos of the caller's projects (the account's, or this device's), newest first."""
+    key = owner_key(user, x_client_id)
+    if not key:
         return []
     items: list[LibraryItem] = []
-    for entry in store.list_history(x_client_id[:64]):
+    for entry in store.list_history(key):
         project = store.load(entry.id)
         if project is None:
             continue
@@ -487,3 +496,23 @@ async def library(x_client_id: Optional[str] = Header(default=None), limit: int 
                                              audience=project.brief.audience, approved=script.approved))
     items.sort(key=lambda i: i.video.created_at, reverse=True)
     return items[:max(1, min(limit, 200))]
+
+
+class Me(BaseModel):
+    uid: str
+    email: Optional[str]
+    name: Optional[str]
+    picture: Optional[str]
+    provider: Optional[str]
+    moved: int = 0
+
+
+@app.post("/me", response_model=Me)
+async def sign_in(user: Optional[User] = Depends(current_user), x_client_id: Optional[str] = Header(default=None)) -> Me:
+    """Called after signing in: records the account, and carries this device's history over to it, so what was
+    made before signing in is not lost. Safe to call at every launch."""
+    if user is None:
+        raise HTTPException(status_code=401, detail="سجّل الدخول أولا.")
+    store.save_user(user.uid, user.email, user.name, user.picture, user.provider)
+    moved = store.move_history(x_client_id[:64], owner_key(user, None)) if x_client_id else 0
+    return Me(**user.model_dump(), moved=moved)

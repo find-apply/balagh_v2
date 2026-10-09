@@ -62,7 +62,9 @@ fastar==0.12.0
     #   fastapi
     #   fastapi-cloud-cli
 google-auth==2.59.1
-    # via google-genai
+    # via
+    #   google-genai
+    #   reels-gen
 google-genai==2.28.0
     # via reels-gen
 googleapis-common-protos==1.75.5
@@ -193,6 +195,7 @@ requests==2.34.2
     #   google-auth
     #   google-genai
     #   internetarchive
+    #   reels-gen
 rich==15.0.0
     # via
     #   rich-toolkit

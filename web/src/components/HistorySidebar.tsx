@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import type { User } from 'firebase/auth'
+import { signOutNow } from '../account'
 import { BASE } from '../api'
+import { AccountDialog } from './AccountDialog'
 import type { HistoryEntry } from '../history'
 import { LANGUAGES } from '../labels'
 import { adminToken } from '../admin/adminApi'
@@ -15,6 +18,8 @@ interface Props {
   onOpen: (id: string) => void
   onHide: (id: string) => void
   onHome: () => void
+  /** The signed-in account; null for a visitor, undefined while the session is being restored. */
+  user?: User | null
 }
 
 const DAY = 24 * 60 * 60 * 1000
@@ -28,8 +33,9 @@ function group(at: string): string {
   return 'أقدم'
 }
 
-export function HistorySidebar({ entries, activeId, busyId, composing, onNew, onOpen, onHide, onHome }: Props) {
+export function HistorySidebar({ entries, activeId, busyId, composing, onNew, onOpen, onHide, onHome, user }: Props) {
   const [query, setQuery] = useState('')
+  const [signing, setSigning] = useState(false)
   const q = query.trim()
   const shown = q ? entries.filter((e) => `${e.title} ${e.audience}`.includes(q)) : entries
   const groups = new Map<string, HistoryEntry[]>()
@@ -85,6 +91,28 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
           </div>
         ))}
       </nav>
+
+      {user !== undefined && (
+        <div className="rail-account">
+          {user ? (
+            <>
+              {user.photoURL ? <img src={user.photoURL} alt="" className="avatar" referrerPolicy="no-referrer" /> : <span className="avatar">{(user.displayName || user.email || '؟').slice(0, 1)}</span>}
+              <span className="rail-account-name">
+                <strong dir="auto">{user.displayName || user.email}</strong>
+                {user.displayName && <small dir="ltr">{user.email}</small>}
+              </span>
+              <button type="button" className="link small" onClick={() => void signOutNow()}>
+                خروج
+              </button>
+            </>
+          ) : (
+            <button type="button" className="block-button" onClick={() => setSigning(true)}>
+              <Icon name="lock" size={16} /> تسجيل الدخول
+            </button>
+          )}
+        </div>
+      )}
+      {signing && <AccountDialog onClose={() => setSigning(false)} />}
 
       <RailFoot
         items={[

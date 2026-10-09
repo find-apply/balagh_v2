@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useAccount } from './account'
 import { api, ApiError } from './api'
 import { AdminApp } from './admin/AdminApp'
 import { BriefForm } from './components/BriefForm'
@@ -68,10 +69,22 @@ export default function App() {
   )
   useEffect(() => saveHistory(entries), [entries])
 
-  // The server keeps the authoritative history for this browser; the local copy is the offline fallback.
-  // Entries only known locally (from before server history existed) are registered by opening them once.
+  // The server keeps the authoritative history: the account's when signed in, else this browser's; the local
+  // copy is the offline fallback. Entries only known locally (from before server history existed) are
+  // registered by opening them once. It reloads when the account changes.
+  const user = useAccount()
+  const lastUid = useRef<string | null>(null)
   useEffect(() => {
-    api.listProjects().then(
+    if (user === undefined) return
+    const uid = user?.uid ?? null
+    const signedOut = lastUid.current !== null && uid === null
+    lastUid.current = uid
+    if (signedOut) {
+      // the account's projects are not this browser's: signing out leaves them with the account
+      saveHistory([])
+      setHistory([])
+    }
+    ;(uid ? api.me().catch(() => null) : Promise.resolve(null)).then(() => api.listProjects()).then(
       (remote) => {
         const known = new Set(remote.map((r) => r.id))
         const local = loadHistory().filter((e) => !known.has(e.id))
@@ -86,7 +99,8 @@ export default function App() {
       },
       () => {},
     )
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid, user === undefined])
 
   const openId = route.view === 'project' ? route.id : null
   const loaded = openId ? projects[openId] : undefined
@@ -224,6 +238,7 @@ export default function App() {
           onOpen={(id) => go(projectHash(id))}
           onHide={hide}
           onHome={() => go('')}
+          user={user}
         />
       }
     >

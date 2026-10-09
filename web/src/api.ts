@@ -1,3 +1,4 @@
+import { idToken } from './account'
 import type { HistoryEntry } from './history'
 import type { Brief, Feedback, FeedbackIn, PublicShowcase, LocalizeRequest, Project, ReviewReport, ReviewRole, Script, Video, VideoTemplate } from './types'
 
@@ -31,12 +32,15 @@ function clientId(): string {
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   let response: Response
+  // Signed in, the request carries the account's token and the history is the account's on every device.
+  const token = await idToken().catch(() => null)
   try {
     response = await fetch(BASE + path, {
       method,
       headers: {
         ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
         ...(clientId() ? { 'X-Client-Id': clientId() } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     })
@@ -71,6 +75,8 @@ export const api = {
     return response.json()
   },
   listProjects: () => request<HistoryEntry[]>('GET', '/projects'),
+  /** After signing in: records the account and moves this browser's history to it. */
+  me: () => request<{ uid: string; email: string | null; name: string | null; moved: number }>('POST', '/me'),
   hideProject: (id: string) => request<void>('DELETE', `/projects/${id}`),
   getProject: (id: string) => request<Project>('GET', `/projects/${id}`),
   /** Adds the project to this browser's server-side history; shared marks one opened from a review link. */
