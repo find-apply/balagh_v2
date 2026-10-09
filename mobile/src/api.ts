@@ -18,6 +18,16 @@ export interface HistoryEntry {
   shared: boolean
 }
 
+/** A finished video in this device's library, with the version it was made from. */
+export interface LibraryItem {
+  video: Video
+  project_id: string
+  script_id: string
+  title: string
+  audience: string
+  approved: boolean
+}
+
 export class ApiError extends Error {
   status: number
   referral: boolean
@@ -85,6 +95,7 @@ export const api = {
   videos: (projectId: string, scriptId: string) => request<Video[]>('GET', `/projects/${projectId}/scripts/${scriptId}/videos`),
   video: (id: string) => request<Video>('GET', `/videos/${id}`),
   showcase: () => request<PublicShowcase>('GET', '/showcase'),
+  library: () => request<LibraryItem[]>('GET', '/library'),
   feedback: (videoId: string) => request<Feedback[]>('GET', `/videos/${videoId}/feedback`),
   rate: (videoId: string, body: FeedbackIn) => request<Feedback>('POST', `/videos/${videoId}/feedback`, body),
 }

@@ -1,13 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { api } from '../api'
+import { loadPrefs, setPrefs } from '../prefs'
 import type { Feedback as Rating, ViewerRole } from '../shared/types'
 import { Badge, Button, Card, Chip, Field, H3, Notice, P, Row, Stars } from './ui'
 
 export const VIEWER_ROLES: Record<ViewerRole, string> = { student: 'طالب علم', scholar: 'عالم', sheikh: 'شيخ', other: 'مشاهد' }
 const MIN_WORDS = 10
-const KEY = 'balagh.rater'
 const words = (t: string) => t.trim().split(/\s+/).filter(Boolean).length
 
 /** "Give us your opinion" under a finished video: stars, standing, name, and a remark of ten words at least. */
@@ -23,11 +22,10 @@ export function Feedback({ videoId }: { videoId: string }) {
 
   useEffect(() => {
     api.feedback(videoId).then(setList, () => setList([]))
-    AsyncStorage.getItem(KEY).then((v) => {
-      const r = v ? JSON.parse(v) : null
-      if (r?.name) setName(r.name)
-      if (r?.role in VIEWER_ROLES) setRole(r.role)
-    }, () => undefined)
+    void loadPrefs().then((p) => {
+      if (p.raterName) setName(p.raterName)
+      if (p.raterRole) setRole(p.raterRole)
+    })
   }, [videoId])
 
   const count = words(comment)
@@ -42,7 +40,7 @@ export function Feedback({ videoId }: { videoId: string }) {
       setSent(true)
       setStars(0)
       setComment('')
-      void AsyncStorage.setItem(KEY, JSON.stringify({ name: name.trim(), role }))
+      void setPrefs({ raterName: name.trim(), raterRole: role })
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     } finally {

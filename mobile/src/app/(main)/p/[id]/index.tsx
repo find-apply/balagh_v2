@@ -1,12 +1,13 @@
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useState } from 'react'
 import { Pressable, Text } from 'react-native'
-import { api } from '../../../api'
-import { clearJob, run, useJob } from '../../../jobs'
-import { Badge, Button, Card, H2, H3, Notice, P, Progress, Row, Screen, s } from '../../../components/ui'
-import { KNOWLEDGE, LANGUAGES, LEVELS, scriptLabel } from '../../../shared/labels'
-import { TASKS } from '../../../shared/tasks'
-import type { Idea, Project } from '../../../shared/types'
+import { api } from '@/api'
+import { clearJob, run, useJob } from '@/jobs'
+import { loadPrefs } from '@/prefs'
+import { Badge, Button, Card, H2, H3, Notice, P, Progress, Row, Screen, s } from '@/components/ui'
+import { KNOWLEDGE, LANGUAGES, LEVELS, scriptLabel } from '@/shared/labels'
+import { TASKS } from '@/shared/tasks'
+import type { Idea, Project } from '@/shared/types'
 
 /** A project: its versions so far, and the three ideas with the texts each one rests on. */
 export default function ProjectScreen() {
@@ -31,7 +32,10 @@ export default function ProjectScreen() {
 
   const pick = async (idea: Idea) => {
     const script = await run(key, TASKS.script, () => api.createScript(id, idea.id))
-    if (script) router.push({ pathname: '/p/[id]/[sid]', params: { id, sid: script.id } })
+    if (!script) return
+    router.push({ pathname: '/p/[id]/[sid]', params: { id, sid: script.id } })
+    // With automatic review on (Settings), the three reviewers start as soon as the script exists, as on the site.
+    if ((await loadPrefs()).autoReview) void run(`review:${script.id}`, TASKS.review, () => api.review(id, script.id))
   }
 
   if (!project) return <Screen>{error ? <Notice tone="bad">{error}</Notice> : <P muted>يحمّل…</P>}</Screen>

@@ -1,14 +1,14 @@
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useState } from 'react'
 import { Share, View } from 'react-native'
-import { api, BASE, SITE } from '../../../api'
-import { Feedback } from '../../../components/Feedback'
-import { Badge, Button, Card, Chip, Field, H2, H3, Notice, P, Progress, Row, Screen } from '../../../components/ui'
-import { VideoPlayer } from '../../../components/VideoPlayer'
-import { clearJob, run, useJob } from '../../../jobs'
-import { aspectOf, LEVELS, REVIEWERS, ROLES, VIDEO_STATUS, scriptLabel } from '../../../shared/labels'
-import { TASKS } from '../../../shared/tasks'
-import type { Project, Script, Video, VideoTemplate } from '../../../shared/types'
+import { api, BASE, SITE } from '@/api'
+import { Feedback } from '@/components/Feedback'
+import { Badge, Button, Card, Chip, Field, H2, H3, Notice, P, Progress, Row, Screen } from '@/components/ui'
+import { VideoPlayer } from '@/components/VideoPlayer'
+import { clearJob, run, useJob } from '@/jobs'
+import { aspectOf, LEVELS, REVIEWERS, ROLES, VIDEO_STATUS, scriptLabel } from '@/shared/labels'
+import { TASKS } from '@/shared/tasks'
+import type { Project, Script, Video, VideoTemplate } from '@/shared/types'
 
 type Part = 'script' | 'review' | 'video' | 'approve'
 const PARTS: Record<Part, string> = { script: 'السيناريو', review: 'المراجعة', video: 'الفيديو', approve: 'الاعتماد' }
@@ -22,7 +22,7 @@ function partFor(sc: Script): Part {
 }
 
 export default function ScriptScreen() {
-  const { id, sid } = useLocalSearchParams<{ id: string; sid: string }>()
+  const { id, sid, part: asked } = useLocalSearchParams<{ id: string; sid: string; part?: Part }>()
   const [project, setProject] = useState<Project | null>(null)
   const [part, setPart] = useState<Part | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -35,11 +35,11 @@ export default function ScriptScreen() {
     try {
       const p = await api.getProject(id)
       setProject(p)
-      setPart((cur) => cur ?? (p.scripts[sid] ? partFor(p.scripts[sid]) : 'script'))
+      setPart((cur) => cur ?? (asked && asked in PARTS ? asked : p.scripts[sid] ? partFor(p.scripts[sid]) : 'script'))
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
     }
-  }, [id, sid])
+  }, [id, sid, asked])
   useFocusEffect(
     useCallback(() => {
       void load()
