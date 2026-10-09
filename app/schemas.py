@@ -638,6 +638,30 @@ class Video(BaseModel):
     frames: list[str] = Field(default_factory=list, description="Paths of a few stills under the API, for a glance.")
 
 
+class ViewerRole(str, Enum):
+    """Who rates a finished video: their standing in religious knowledge."""
+    student = "student"  # طالب علم
+    scholar = "scholar"  # عالم
+    sheikh = "sheikh"    # شيخ
+    other = "other"      # مشاهد
+
+
+class FeedbackIn(BaseModel):
+    stars: int = Field(ge=1, le=5)
+    role: ViewerRole
+    name: str = Field(min_length=2, max_length=80, description="Who is rating, in their own name.")
+    comment: Optional[str] = Field(default=None, max_length=1000)
+
+
+class Feedback(FeedbackIn):
+    id: int
+    video_id: str
+    project_id: str
+    script_id: str
+    template: str
+    created_at: datetime
+
+
 Script.model_rebuild()
 
 class HistoryEntry(BaseModel):

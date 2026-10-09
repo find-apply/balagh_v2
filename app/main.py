@@ -13,8 +13,8 @@ from google.genai import errors as genai_errors
 
 from . import admin, flow_settings, generator, inspiration, screen, store
 from .schemas import (
-    Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, HistoryEntry, InviteIn, InviteOut, LocalizeIn, Project, ReviewReport, ReviewRole, ReviseIn, Script, ScriptIn, StoryIn,
-    SourceInfo, TemplateIn, Video, VideoIn, VideoTemplate,
+    Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, Feedback, FeedbackIn, HistoryEntry, InviteIn, InviteOut, LocalizeIn, Project, ReviewReport, ReviewRole, ReviseIn, Script, ScriptIn, StoryIn,
+    SourceInfo, TemplateIn, Video, VideoIn, VideoStatus, VideoTemplate,
 )
 from .video import catalog, render, story
 
@@ -380,3 +380,22 @@ async def get_video(video_id: str) -> Video:
     if video is None:
         raise HTTPException(status_code=404, detail="Video not found")
     return video
+
+
+@app.post("/videos/{video_id}/feedback", response_model=Feedback, status_code=201)
+async def rate_video(video_id: str, body: FeedbackIn) -> Feedback:
+    """Rate a finished video: one to five stars, the rater's standing (student of knowledge, scholar, sheikh,
+    or viewer) and name, and an optional remark. Kept with the video's template so templates can be compared."""
+    video = store.load_video(video_id)
+    if video is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+    if video.status != VideoStatus.done:
+        raise HTTPException(status_code=409, detail="يُقيَّم الفيديو بعد اكتماله.")
+    return store.add_feedback(video, body)
+
+
+@app.get("/videos/{video_id}/feedback", response_model=list[Feedback])
+async def video_feedback(video_id: str) -> list[Feedback]:
+    if store.load_video(video_id) is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return store.feedback_for(video_id)

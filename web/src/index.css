@@ -4163,3 +4163,80 @@ a.logo:hover {
 .lesson .button {
   align-self: flex-start;
 }
+
+/* ---- Rating a finished video ---- */
+
+.feedback {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.feedback-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.feedback-head h4 {
+  margin: 0 0 8px;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.feedback-form input,
+.feedback-form textarea {
+  width: 100%;
+  max-width: 420px;
+}
+
+.feedback .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  color: var(--line-strong);
+  line-height: 1;
+}
+
+.stars button {
+  padding: 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 2rem;
+  cursor: pointer;
+  min-height: 0;
+}
+
+.stars.small span {
+  font-size: 0.95rem;
+}
+
+.stars .on {
+  color: var(--gold);
+}
+
+.feedback-list {
+  margin-top: 12px;
+}
+
+.feedback-list li {
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+.feedback-list p {
+  margin: 4px 0 0;
+}

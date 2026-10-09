@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Boolean, cast, Column, DateTime, Float, Integer, MetaData, String, Table, Text, create_engine, delete, func, insert, inspect, select, text, update
 
 from . import sources
-from .schemas import DEFAULT_ART, HistoryEntry, LocalizedDraft, Project, ScriptDraft, Video, VideoStatus
+from .schemas import DEFAULT_ART, Feedback, FeedbackIn, HistoryEntry, LocalizedDraft, Project, ScriptDraft, Video, VideoStatus
 
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
@@ -73,6 +73,20 @@ invites = Table(
     Column("project_id", String(32), nullable=False, index=True),
     Column("role", String(20), nullable=False),
     Column("issued_by", String(20), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+# Ratings of finished videos: stars, the rater's standing and name, kept with the template so templates can be compared.
+feedback = Table(
+    "feedback", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("video_id", String(32), nullable=False, index=True),
+    Column("project_id", String(32), nullable=False, index=True),
+    Column("script_id", String(32), nullable=False),
+    Column("template", String(40), nullable=False),
+    Column("stars", Integer, nullable=False),
+    Column("role", String(20), nullable=False),
+    Column("name", String(80), nullable=False),
+    Column("comment", Text),
     Column("created_at", DateTime(timezone=True), nullable=False),
 )
 metadata.create_all(engine)
@@ -247,6 +261,7 @@ def delete_project(project_id: str) -> bool:
         removed = conn.execute(delete(projects).where(projects.c.id == project_id)).rowcount
         conn.execute(delete(history).where(history.c.project_id == project_id))
         conn.execute(delete(invites).where(invites.c.project_id == project_id))
+        conn.execute(delete(feedback).where(feedback.c.project_id == project_id))
     return bool(removed)
 
 
@@ -314,3 +329,19 @@ def invite_valid(token: str, project_id: str, role: str) -> bool:
     with engine.connect() as conn:
         row = conn.execute(select(invites.c.project_id, invites.c.role).where(invites.c.token == token)).first()
     return row is not None and row[0] == project_id and row[1] == role
+
+
+def add_feedback(video: Video, body: FeedbackIn) -> Feedback:
+    row = dict(video_id=video.id, project_id=video.project_id, script_id=video.script_id, template=video.template,
+               created_at=datetime.now(timezone.utc), **body.model_dump(mode="json"))
+    with engine.begin() as conn:
+        row["id"] = conn.execute(insert(feedback).values(**row)).inserted_primary_key[0]
+    return Feedback(**row)
+
+
+def feedback_for(video_id: Optional[str] = None, limit: int = 500) -> list[Feedback]:
+    q = select(feedback).order_by(feedback.c.id.desc()).limit(limit)
+    if video_id:
+        q = q.where(feedback.c.video_id == video_id)
+    with engine.connect() as conn:
+        return [Feedback(**r._mapping) for r in conn.execute(q)]

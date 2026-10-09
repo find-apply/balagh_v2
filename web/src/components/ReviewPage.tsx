@@ -4,6 +4,7 @@ import { api, ApiError, BASE } from '../api'
 import { Logo } from './Landing'
 import { Scenes } from './ScriptView'
 import { VideoChecks } from './VideoChecks'
+import { VideoFeedback } from './VideoFeedback'
 import { StoryView } from './StoryView'
 import { CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, REVIEWERS, ROLES } from '../labels'
 import type { Project, ReviewRole, Script, Video } from '../types'
@@ -109,6 +110,7 @@ export function ReviewPage({ projectId, scriptId, role: roleHint, invite }: { pr
             </div>
             <video controls preload="metadata" src={BASE + video.url} className="player rv-player" poster={video.frames[0] ? BASE + video.frames[0] : undefined} />
             <VideoChecks video={video} />
+            <VideoFeedback videoId={video.id} />
           </>
         )}
       </section>

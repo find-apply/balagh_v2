@@ -115,6 +115,23 @@ export interface Story {
 
 export type VideoStatus = 'queued' | 'voicing' | 'imaging' | 'rendering' | 'done' | 'failed'
 
+/** Who rates a finished video. */
+export type ViewerRole = 'student' | 'scholar' | 'sheikh' | 'other'
+
+export interface FeedbackIn {
+  stars: number
+  role: ViewerRole
+  name: string
+  comment?: string | null
+}
+
+export interface Feedback extends FeedbackIn {
+  id: number
+  video_id: string
+  template: string
+  created_at: string
+}
+
 export interface Video {
   id: string
   project_id: string

@@ -1,5 +1,5 @@
 import { BASE } from '../api'
-import type { Project } from '../types'
+import type { Feedback, Project } from '../types'
 
 const KEY = 'balagh.admin'
 
@@ -112,7 +112,13 @@ export interface Flow {
   approval_roles: Record<string, string>
 }
 
+export interface FeedbackReport {
+  templates: { template: string; name: string; ratings: number; average: number | null; by_role: Record<string, number> }[]
+  items: Feedback[]
+}
+
 export const adminApi = {
+  feedback: () => call<FeedbackReport>('GET', '/feedback'),
   check: (token: string) => call<{ ok: boolean }>('GET', '/session', undefined, token),
   overview: () => call<Overview>('GET', '/overview'),
   projects: (q: string) => call<ProjectRow[]>('GET', `/projects?limit=200&q=${encodeURIComponent(q)}`),

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, BASE } from '../api'
 import { VIDEO_STATUS } from '../labels'
 import { VideoChecks } from './VideoChecks'
+import { VideoFeedback } from './VideoFeedback'
 import { askToNotify, notifyIfAway } from '../notify'
 import type { Script, Video, VideoTemplate } from '../types'
 
@@ -190,6 +191,7 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
                 <video controls preload="metadata" src={BASE + v.url} className="player" poster={v.frames[0] ? BASE + v.frames[0] : undefined} />
               )}
               <VideoChecks video={v} compact={i > 0} />
+              {v.status === 'done' && i === 0 && <VideoFeedback videoId={v.id} />}
               {v.url && (
                 <a href={BASE + v.url} download>
                   تنزيل MP4

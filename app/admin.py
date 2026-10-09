@@ -11,7 +11,8 @@ from pydantic import BaseModel
 
 from . import flow_settings, generator, sources, store
 from .flow_settings import FlowSettings
-from .schemas import AuthorRole, ContentLevel, Project, ReviewRole
+from .schemas import AuthorRole, ContentLevel, Feedback, Project, ReviewRole
+from .video import catalog
 
 
 def require_admin(authorization: Optional[str] = Header(default=None)) -> None:
@@ -190,6 +191,35 @@ async def invite(project_id: str, role: ReviewRole = Query(ReviewRole.scholar)) 
     if role == ReviewRole.creator:
         raise HTTPException(status_code=400, detail="صانع المحتوى يوقّع من مساحة عمله دون دعوة.")
     return InviteRow(role=role, token=store.add_invite(project_id, role.value, "admin"))
+
+
+class TemplateRating(BaseModel):
+    template: str
+    name: str
+    ratings: int
+    average: Optional[float]
+    by_role: dict[str, int]
+
+
+class FeedbackReport(BaseModel):
+    templates: list[TemplateRating]
+    items: list[Feedback]
+
+
+@router.get("/feedback", response_model=FeedbackReport)
+async def feedback() -> FeedbackReport:
+    """Ratings of finished videos, newest first, with each template's average so templates can be compared."""
+    items = store.feedback_for(limit=500)
+    rows = []
+    for t in catalog.TEMPLATES:
+        mine = [f for f in items if f.template == t["id"]]
+        by_role: dict[str, int] = {}
+        for f in mine:
+            by_role[f.role.value] = by_role.get(f.role.value, 0) + 1
+        rows.append(TemplateRating(template=t["id"], name=t.get("name", t["id"]), ratings=len(mine),
+                                   average=round(sum(f.stars for f in mine) / len(mine), 2) if mine else None, by_role=by_role))
+    rows.sort(key=lambda r: (r.average is None, -(r.average or 0)))
+    return FeedbackReport(templates=rows, items=items)
 
 
 @router.get("/runs", response_model=list[RunRow])
