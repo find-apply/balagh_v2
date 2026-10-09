@@ -19,7 +19,7 @@ const STEP_TAB: Record<number, Tab> = { 2: 'script', 3: 'template', 4: 'video', 
 
 /** The stepper is the navigation too: steps already done are ticked, and clicking any step opens its part.
  * It replaced a second row of tabs that repeated the same names. */
-function Stepper({ progress, selected, onSelect }: { progress: number; selected: number; onSelect: (i: number) => void }) {
+function Stepper({ progress, selected, onSelect, locked }: { progress: number; selected: number; onSelect: (i: number) => void; locked: (i: number) => boolean }) {
   const ref = useRef<HTMLOListElement>(null)
   useEffect(() => {
     ref.current?.querySelector('li.on')?.scrollIntoView({ block: 'nearest', inline: 'center' })
@@ -28,7 +28,7 @@ function Stepper({ progress, selected, onSelect }: { progress: number; selected:
     <ol className="stepper" ref={ref} aria-label="خطوات المشروع">
       {STEPS.map((s, i) => (
         <li key={s} className={`${i < progress ? 'done' : ''}${i === selected ? ' on' : ''}`}>
-          <button type="button" className="step" disabled={i === 0} aria-current={i === selected ? 'step' : undefined} onClick={() => onSelect(i)}>
+          <button type="button" className="step" disabled={i === 0 || locked(i)} aria-current={i === selected ? 'step' : undefined} onClick={() => onSelect(i)}>
             <span className="step-num">{i < progress ? '✓' : i + 1}</span>
             <span className="step-label">{s}</span>
           </button>
@@ -108,6 +108,27 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
   const step = pending && writing ? 2 : !active ? 1 : !active.template ? 3 : !vids?.preview && !vids?.final ? 4 : !active.review ? 5 : !active.approved ? 6 : vids?.final ? 8 : 7
   const brief = project.brief
 
+  // The step the open version is at, and the part its next action opens.
+  const flow = active ? nextStep(active) : null
+  const flowTab: Tab | null = !flow ? null : flow.action.kind === 'review' ? 'script' : flow.action.kind === 'findings' ? 'review' : flow.action.kind
+  const flowStep = !active || !flowTab ? 0 : flowTab === 'video' ? (active.approved ? 7 : 4) : Number(Object.entries(STEP_TAB).find(([, t]) => t === flowTab)?.[0] ?? 0)
+  // Steps behind the one the project is at are closed, except the script (to read it) and the step the next action needs.
+  const current = Math.min(step, STEPS.length - 1)
+  const locked = (i: number) => Boolean(actions) && heads.length > 0 && i < current && i !== 2 && i !== flowStep
+
+  // Opening a project from the list resumes it: its newest version, on the part its next action needs.
+  const resumed = useRef<string | null>(null)
+  const resumeTo = useRef<string | null>(null)
+  const newest = heads.length ? Object.values(project.scripts).filter((s) => heads.includes(s)).pop() ?? null : null
+  useEffect(() => {
+    if (resumed.current === project.id) return
+    resumed.current = project.id
+    if (!actions || scriptId || writing || !newest) return
+    resumeTo.current = newest.id
+    go(hashFor(project.id, newest.id), true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project.id])
+
   // The open part of the script; the stepper shows it as the selected step.
   const [tab, setTab] = useState<Tab>('script')
   const selected = !active ? 1 : tab === 'video' ? (active.approved ? 7 : 4) : (Object.entries(STEP_TAB).find(([, t]) => t === tab)?.[0] ?? '2')
@@ -115,7 +136,13 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
     setTab(t)
     document.getElementById('script-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+  useEffect(() => {
+    if (!active || resumeTo.current !== active.id || !flowTab) return
+    resumeTo.current = null
+    setTab(flowTab)
+  }, [active, flowTab])
   const selectStep = (i: number) => {
+    if (locked(i)) return
     if (i === 1) return go(hashFor(project.id))
     const target = STEP_TAB[i]
     if (!target) return
@@ -190,12 +217,12 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
         )}
       </header>
 
-      <Stepper progress={step} selected={Number(selected)} onSelect={selectStep} />
+      <Stepper progress={step} selected={Number(selected)} onSelect={selectStep} locked={locked} />
 
       {/* One tab per line of work, shown only once there is more than one: an original alone needs no tab. */}
       {(heads.length > 1 || writing) && (
       <nav className="tabs" aria-label="نسخ المشروع" ref={tabsRef}>
-        <button className={!scriptId ? 'tab on' : 'tab'} onClick={() => go(hashFor(project.id))}>
+        <button className={!scriptId ? 'tab on' : 'tab'} disabled={locked(1)} onClick={() => go(hashFor(project.id))}>
           <span>الأفكار</span>
           <small>{project.ideas.length} أفكار</small>
         </button>
@@ -289,7 +316,7 @@ export function Workspace({ project, scriptId, busy = null, templates = null, ac
         }
         return (
           <div className={`flowbar ${next.tone}`}>
-            <button type="button" className="ghost" disabled={prev < 1} onClick={() => selectStep(prev)}>
+            <button type="button" className="ghost" disabled={prev < 1 || locked(prev)} onClick={() => selectStep(prev)}>
               → السابق
             </button>
             <div className="flowbar-text">
