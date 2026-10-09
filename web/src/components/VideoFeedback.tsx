@@ -10,6 +10,9 @@ export const VIEWER_ROLES: Record<ViewerRole, string> = {
 }
 
 const KEY = 'balagh.rater'
+/** The remark is required, and must say something: at least this many words (the API checks it too). */
+const MIN_WORDS = 10
+const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length
 
 /** The rater's name and standing, remembered on this device so a reviewer types them once. */
 function remembered(): { name: string; role: ViewerRole | null } {
@@ -59,13 +62,14 @@ export function VideoFeedback({ videoId }: { videoId: string }) {
     api.feedback(videoId).then(setList, () => setList([]))
   }, [videoId])
 
-  const ready = stars > 0 && role !== null && name.trim().length >= 2
+  const count = words(comment)
+  const ready = stars > 0 && role !== null && name.trim().length >= 2 && count >= MIN_WORDS
   const send = async () => {
     if (!ready || !role) return
     setSending(true)
     setError(null)
     try {
-      const f = await api.rate(videoId, { stars, role, name: name.trim(), comment: comment.trim() || null })
+      const f = await api.rate(videoId, { stars, role, name: name.trim(), comment: comment.trim() })
       setList((l) => [f, ...(l ?? [])])
       setSent(true)
       setStars(0)
@@ -119,7 +123,19 @@ export function VideoFeedback({ videoId }: { videoId: string }) {
             ))}
           </div>
           <input type="text" placeholder="اسمك" value={name} maxLength={80} onChange={(e) => setName(e.target.value)} aria-label="الاسم" />
-          <textarea placeholder="ملاحظتك (اختياري)" value={comment} maxLength={1000} rows={2} onChange={(e) => setComment(e.target.value)} aria-label="الملاحظة" />
+          <textarea
+            placeholder={`ملاحظتك: ما الذي أعجبك، وما الذي يحتاج تحسينا؟ (${MIN_WORDS} كلمات على الأقل)`}
+            value={comment}
+            maxLength={1000}
+            rows={3}
+            required
+            onChange={(e) => setComment(e.target.value)}
+            aria-label="الملاحظة"
+            aria-describedby="feedback-words"
+          />
+          <span id="feedback-words" className={`small ${count >= MIN_WORDS ? 'ok-text' : 'muted'}`}>
+            {count >= MIN_WORDS ? `✓ ${count} كلمة` : `${count} من ${MIN_WORDS} كلمات على الأقل`}
+          </span>
           {error && <p className="notice bad small">{error}</p>}
           <button type="submit" className="primary" disabled={!ready || sending}>
             {sending ? 'يُرسل…' : 'أرسل التقييم'}

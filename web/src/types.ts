@@ -122,7 +122,7 @@ export interface FeedbackIn {
   stars: number
   role: ViewerRole
   name: string
-  comment?: string | null
+  comment: string
 }
 
 export interface Feedback extends FeedbackIn {

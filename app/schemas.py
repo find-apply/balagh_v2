@@ -638,6 +638,9 @@ class Video(BaseModel):
     frames: list[str] = Field(default_factory=list, description="Paths of a few stills under the API, for a glance.")
 
 
+MIN_FEEDBACK_WORDS = 10
+
+
 class ViewerRole(str, Enum):
     """Who rates a finished video: their standing in religious knowledge."""
     student = "student"  # طالب علم
@@ -650,7 +653,14 @@ class FeedbackIn(BaseModel):
     stars: int = Field(ge=1, le=5)
     role: ViewerRole
     name: str = Field(min_length=2, max_length=80, description="Who is rating, in their own name.")
-    comment: Optional[str] = Field(default=None, max_length=1000)
+    comment: str = Field(max_length=1000, description=f"What the rater thinks, in at least {MIN_FEEDBACK_WORDS} words.")
+
+    @field_validator("comment")
+    @classmethod
+    def _enough_words(cls, v: str) -> str:
+        if len(v.split()) < MIN_FEEDBACK_WORDS:
+            raise ValueError(f"اكتب ملاحظتك في {MIN_FEEDBACK_WORDS} كلمات على الأقل.")
+        return v.strip()
 
 
 class Feedback(FeedbackIn):

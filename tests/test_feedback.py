@@ -1,8 +1,10 @@
-"""A finished video can be rated with stars, the rater's standing and name; the admin sees each template's average."""
+"""A finished video can be rated with stars, the rater's standing and name, and a remark of ten words or more; the admin sees each template's average."""
 from datetime import datetime, timezone
 
 from app import store
 from app.schemas import Video, VideoStatus
+
+NOTE = "الفيديو واضح والتلاوة جميلة والشرح مناسب للشباب لكن الخط صغير قليلا"
 
 
 def _video(vid: str, status=VideoStatus.done, template="captions") -> Video:
@@ -13,7 +15,7 @@ def _video(vid: str, status=VideoStatus.done, template="captions") -> Video:
 
 def test_a_finished_video_takes_a_rating(client):
     _video("v1")
-    r = client.post("/videos/v1/feedback", json={"stars": 5, "role": "sheikh", "name": "الشيخ أحمد", "comment": "نافع"})
+    r = client.post("/videos/v1/feedback", json={"stars": 5, "role": "sheikh", "name": "الشيخ أحمد", "comment": NOTE})
     assert r.status_code == 201
     assert r.json()["template"] == "captions"
     rows = client.get("/videos/v1/feedback").json()
@@ -22,14 +24,15 @@ def test_a_finished_video_takes_a_rating(client):
 
 def test_a_rating_needs_valid_stars_role_and_name(client):
     _video("v1")
-    for bad in ({"stars": 0, "role": "student", "name": "علي"}, {"stars": 6, "role": "student", "name": "علي"},
-                {"stars": 3, "role": "mufti", "name": "علي"}, {"stars": 3, "role": "student", "name": ""}):
+    for bad in ({"stars": 0, "role": "student", "name": "علي", "comment": NOTE}, {"stars": 6, "role": "student", "name": "علي", "comment": NOTE},
+                {"stars": 3, "role": "mufti", "name": "علي", "comment": NOTE}, {"stars": 3, "role": "student", "name": "", "comment": NOTE},
+                {"stars": 3, "role": "student", "name": "علي"}, {"stars": 3, "role": "student", "name": "علي", "comment": "جيد جدا بارك الله فيكم"}):
         assert client.post("/videos/v1/feedback", json=bad).status_code == 422
 
 
 def test_an_unfinished_or_missing_video_cannot_be_rated(client):
     _video("v2", status=VideoStatus.rendering)
-    body = {"stars": 4, "role": "student", "name": "علي"}
+    body = {"stars": 4, "role": "student", "name": "علي", "comment": NOTE}
     assert client.post("/videos/v2/feedback", json=body).status_code == 409
     assert client.post("/videos/nope/feedback", json=body).status_code == 404
 
@@ -40,8 +43,8 @@ def test_the_admin_sees_each_templates_average(client, monkeypatch):
     _video("fa", template="chalk")
     _video("fb", template="teaser")
     for stars, role in ((5, "scholar"), (3, "student")):
-        client.post("/videos/fa/feedback", json={"stars": stars, "role": role, "name": "فلان"})
-    client.post("/videos/fb/feedback", json={"stars": 2, "role": "other", "name": "فلان"})
+        client.post("/videos/fa/feedback", json={"stars": stars, "role": role, "name": "فلان", "comment": NOTE})
+    client.post("/videos/fb/feedback", json={"stars": 2, "role": "other", "name": "فلان", "comment": NOTE})
     report = client.get("/admin/feedback", headers={"Authorization": "Bearer t"}).json()
     by = {t["template"]: t for t in report["templates"]}
     assert by["chalk"]["average"] == 4 and by["chalk"]["ratings"] == 2

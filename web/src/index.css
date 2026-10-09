@@ -4240,3 +4240,7 @@ a.logo:hover {
 .feedback-list p {
   margin: 4px 0 0;
 }
+
+.feedback .ok-text {
+  color: var(--ok);
+}
