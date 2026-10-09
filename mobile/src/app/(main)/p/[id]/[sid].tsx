@@ -22,7 +22,7 @@ function partFor(sc: Script): Part {
 }
 
 export default function ScriptScreen() {
-  const { id, sid, part: asked } = useLocalSearchParams<{ id: string; sid: string; part?: Part }>()
+  const { id, sid, part: asked, video: focus } = useLocalSearchParams<{ id: string; sid: string; part?: Part; video?: string }>()
   const [project, setProject] = useState<Project | null>(null)
   const [part, setPart] = useState<Part | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -86,7 +86,7 @@ export default function ScriptScreen() {
           }}
         />
       )}
-      {part === 'video' && <VideoPart projectId={id} script={script} onChanged={load} />}
+      {part === 'video' && <VideoPart projectId={id} script={script} focus={focus} onChanged={load} />}
       {part === 'approve' && <ApprovePart projectId={id} script={script} onSigned={load} />}
 
       {part === 'script' && !script.review && !reviewJob && (
@@ -193,7 +193,9 @@ function ReviewPart({ script, reviewing, revising, onReview, onRevise, onClear }
   )
 }
 
-function VideoPart({ projectId, script, onChanged }: { projectId: string; script: Script; onChanged: () => Promise<void> }) {
+function VideoPart({ projectId, script, focus, onChanged }: { projectId: string; script: Script; focus?: string; onChanged: () => Promise<void> }) {
+  // The video shown: the one opened from the library, else the newest; a version with several lists them to switch.
+  const [shownId, setShownId] = useState<string | null>(focus ?? null)
   const [templates, setTemplates] = useState<VideoTemplate[] | null>(null)
   const [videos, setVideos] = useState<Video[] | null>(null)
   const [busy, setBusy] = useState(false)
@@ -228,7 +230,10 @@ function VideoPart({ projectId, script, onChanged }: { projectId: string; script
       setBusy(false)
     }
   }
-  const latest = videos?.[0]
+  const newest = videos?.[0]
+  // A new render takes the screen over: it is what the user just asked for.
+  const latest = newest && ACTIVE.has(newest.status) ? newest : (videos?.find((v) => v.id === shownId) ?? newest)
+  const done = (videos ?? []).filter((v) => v.status === 'done')
   const chosen = templates?.find((t) => t.id === script.template)
 
   return (
@@ -260,8 +265,20 @@ function VideoPart({ projectId, script, onChanged }: { projectId: string; script
           })}
         />
       )}
+      {done.length > 1 && (
+        <Row>
+          {done.map((v) => (
+            <Chip
+              key={v.id}
+              label={`${templates?.find((t) => t.id === v.template)?.name ?? v.template}${v.preview ? ' · معاينة' : ''}`}
+              on={v.id === latest?.id}
+              onPress={() => setShownId(v.id)}
+            />
+          ))}
+        </Row>
+      )}
       {latest && (
-        <Card>
+        <Card key={latest.id}>
           <Row>
             <Badge tone={latest.status === 'done' ? 'ok' : latest.status === 'failed' ? 'bad' : 'info'}>{VIDEO_STATUS[latest.status]}</Badge>
             <Badge tone={latest.preview ? 'warn' : 'ok'}>{latest.preview ? 'معاينة بعلامة مائية' : 'الفيديو النهائي'}</Badge>
@@ -271,7 +288,12 @@ function VideoPart({ projectId, script, onChanged }: { projectId: string; script
           {latest.error && <Notice tone="bad">{latest.error}</Notice>}
           {latest.status === 'done' && latest.url && (
             <>
-              <VideoPlayer uri={BASE + latest.url} poster={latest.frames[0] ? BASE + latest.frames[0] : null} tall={tall} seconds={latest.duration_seconds} />
+              <VideoPlayer
+                uri={BASE + latest.url}
+                poster={latest.frames[0] ? BASE + latest.frames[0] : null}
+                tall={(templates?.find((t) => t.id === latest.template)?.aspect ?? (tall ? '9:16' : '16:9')) !== '16:9'}
+                seconds={latest.duration_seconds}
+              />
               <Button title="شارك الفيديو" kind="ghost" onPress={() => void Share.share({ message: `${script.title}\n${BASE + latest.url}` })} />
             </>
           )}
