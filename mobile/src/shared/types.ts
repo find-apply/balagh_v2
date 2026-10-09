@@ -1,0 +1,311 @@
+// Copied from web/src/types.ts by scripts/sync-shared.mjs: edit it there, then run npm run sync.
+// Mirrors the API's app/schemas.py.
+
+export type Language = 'ar' | 'en'
+export type AudienceKnowledge = 'familiar' | 'basic' | 'new'
+/** Who is making the content: a religious specialist approves their own versions; a creator's versions go to a specialist. */
+export type AuthorRole = 'creator' | 'specialist'
+export type ContentLevel = 'A' | 'B' | 'C' | 'D'
+export type Platform =
+  | 'tiktok'
+  | 'instagram_reels'
+  | 'youtube_shorts'
+  | 'facebook_reels'
+  | 'snapchat'
+  | 'youtube'
+  | 'linkedin'
+  | 'x'
+
+export interface AudienceSpec {
+  audience: string
+  language: Language
+  dialect: string | null
+  audience_knowledge: AudienceKnowledge
+  tone: string | null
+}
+
+export interface Brief extends AudienceSpec {
+  author: AuthorRole
+  idea: string | null
+  platforms: Platform[]
+  duration_seconds: number | null
+  /** Optional source the ideas take their angles from: a public YouTube link, or an upload id. */
+  source_url?: string | null
+  source_file?: string | null
+}
+
+export interface SourceInfo {
+  kind: 'youtube' | 'file'
+  label: string
+  url: string | null
+  summary: string
+  digest: { summary: string; argument: string[]; examples: { locus: string; text: string }[]; citations: { locus: string; text: string; attributed_to: string }[]; language: string } | null
+}
+
+export interface LocalizeRequest extends AudienceSpec {
+  platforms: Platform[] | null
+  duration_seconds: number | null
+  notes: string | null
+}
+
+export interface Evidence {
+  id: string
+  kind: 'quran' | 'hadith'
+  text: string
+  source: string
+  translation_en: string | null
+  translation_source: string | null
+}
+
+export interface Idea {
+  id: string
+  title: string
+  hook: string
+  concept: string
+  why_it_works: string
+  duration_seconds: number
+  duration_reason: string
+  content_level: ContentLevel
+  level_reason: string
+  needs_specialist_review: boolean
+  evidence: Evidence[]
+  unverified: string[]
+  /** For ideas drawn from a source: about where in it. */
+  source_locus: string
+  /** Texts the source cites that are outside the verified sources: shown, never used. */
+  source_mentions: string[]
+}
+
+export interface VideoTemplate {
+  id: string
+  name: string
+  description: string
+  aspect: string
+  uses_images: boolean
+  story: boolean
+  ready: boolean
+  /** Median job time of this template's recent renders; null until one finished. */
+  typical_seconds: number | null
+}
+
+export interface StoryLine {
+  who: string
+  text: string
+}
+
+export interface StoryScene {
+  kind: 'story' | 'text' | 'words' | 'quiz' | 'outro'
+  lines: StoryLine[]
+  image_prompt: string
+  present: string[]
+  evidence_id: string
+  cards: { word: string; meaning: string }[]
+  question: string
+  choices: string[]
+  quote: string
+  source: string
+  quote_kind: 'quran' | 'hadith' | null
+}
+
+export interface Story {
+  title: string
+  scenes: StoryScene[]
+  review_note: string
+  ai_disclosure: string
+}
+
+export type VideoStatus = 'queued' | 'voicing' | 'imaging' | 'rendering' | 'done' | 'failed'
+
+/** What the admin chose to show on the landing page. */
+export interface PublicShowcase {
+  ratings: { stars: number; role: ViewerRole; name: string; comment: string; template: string }[]
+  projects: {
+    project_id: string
+    script_id: string
+    title: string
+    hook: string
+    audience: string
+    language: string
+    approved: boolean
+    video_url: string | null
+    poster: string | null
+    preview: boolean
+  }[]
+}
+
+/** Who rates a finished video. */
+export type ViewerRole = 'student' | 'scholar' | 'sheikh' | 'other'
+
+export interface FeedbackIn {
+  stars: number
+  role: ViewerRole
+  name: string
+  comment: string
+}
+
+export interface Feedback extends FeedbackIn {
+  id: number
+  video_id: string
+  template: string
+  created_at: string
+  /** Chosen by the admin for the landing page. */
+  featured: boolean
+}
+
+export interface Video {
+  id: string
+  project_id: string
+  script_id: string
+  template: string
+  preview: boolean
+  status: VideoStatus
+  url: string | null
+  error: string | null
+  duration_seconds: number | null
+  new_images: number
+  new_clips: number
+  notes: string[]
+  created_at: string
+  /** Automatic checks on the finished file: loudness, unintended silence, black frames, length. */
+  checks: { name: string; ok: boolean; detail: string }[]
+  loudness_lufs: number | null
+  /** A few stills under the API, for a glance without playing. */
+  frames: string[]
+}
+
+export interface SceneArt {
+  kind: string
+  keyword: string
+  detail: string
+  emoji: string
+  image_prompt: string
+}
+
+export interface Scene {
+  start_second: number
+  end_second: number
+  visual: string
+  art: SceneArt
+  voiceover: string
+  on_screen_text: string
+  evidence_ids: string[]
+  grounding: string
+  grounded: boolean | null
+}
+
+export interface Tafsir {
+  text: string
+  source: string
+}
+
+export interface Sharh {
+  text: string
+  grade: string
+  attribution: string
+  source: string
+}
+
+export interface Reference {
+  evidence_id: string
+  kind: 'quran' | 'hadith'
+  usage: 'quoted' | 'paraphrased'
+  text: string
+  arabic: string
+  source: string
+  translation_source: string | null
+  tafsir: Tafsir[]
+  sharh: Sharh | null
+}
+
+export interface PlatformPost {
+  platform: Platform
+  caption: string
+  hashtags: string[]
+}
+
+export interface TermCheck {
+  term_ar: string
+  approved_en: string
+  rule: string
+  status: 'used' | 'missing'
+}
+
+export interface Finding {
+  reviewer: 'scholarly' | 'audience' | 'meaning'
+  scene: number
+  severity: 'blocking' | 'suggestion'
+  issue: string
+  fix: string
+}
+
+export interface ClaimCheck {
+  claim: string
+  status: 'preserved' | 'altered' | 'dropped' | 'added'
+  note: string
+}
+
+export interface ReviewReport {
+  findings: Finding[]
+  claims: ClaimCheck[]
+  blocking: number
+  note: string
+}
+
+export type ReviewRole = 'creator' | 'scholar' | 'language'
+
+export interface Approval {
+  role: ReviewRole
+  name: string
+  at: string
+  note: string
+}
+
+export interface ChangeRequest {
+  role: ReviewRole
+  name: string
+  note: string
+  at: string
+}
+
+export interface Script {
+  id: string
+  idea_id: string
+  version: number
+  localized_from: string | null
+  revised_from: string | null
+  target: AudienceSpec
+  platforms: Platform[]
+  title: string
+  duration_seconds: number
+  hook: string
+  scenes: Scene[]
+  call_to_action: string
+  audio: string
+  references: Reference[]
+  content_level: ContentLevel
+  needs_specialist_review: boolean
+  review_note: string
+  warnings: string[]
+  unverified_claims: string[]
+  posts: PlatformPost[]
+  adaptation_notes: { change: string; reason: string }[]
+  terminology: TermCheck[]
+  review: ReviewReport | null
+  approvals: Approval[]
+  change_requests: ChangeRequest[]
+  author: AuthorRole
+  must_recheck: ReviewRole[]
+  required_approvals: { role: ReviewRole; reason: string }[]
+  approved: boolean
+  template: string | null
+  story: Story | null
+  ai_disclosure: string
+}
+
+export interface Project {
+  id: string
+  brief: Brief
+  ideas: Idea[]
+  scripts: Record<string, Script>
+  source: SourceInfo | null
+}
