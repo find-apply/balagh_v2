@@ -1,5 +1,6 @@
 import type React from 'react'
 import { BASE } from '../api'
+import { PublicPicks } from './PublicPicks'
 import { CountUp, Reveal } from './reveal'
 
 const STEPS = [
@@ -217,6 +218,8 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
           </p>
         </div>
       </section>
+
+      <PublicPicks />
 
       <section className="cta-band">
         <Reveal className="section-inner">

@@ -61,7 +61,8 @@ export function AdminApp({ path }: { path: string[] }) {
 }
 
 function Login({ onDone }: { onDone: () => void }) {
-  const [token, setToken] = useState('')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -70,8 +71,8 @@ function Login({ onDone }: { onDone: () => void }) {
     setBusy(true)
     setError(null)
     try {
-      await adminApi.check(token.trim())
-      adminToken.set(token.trim())
+      const { token } = await adminApi.login(username.trim(), password)
+      adminToken.set(token)
       onDone()
       go('#/admin', true)
     } catch (err) {
@@ -87,11 +88,15 @@ function Login({ onDone }: { onDone: () => void }) {
         <Logo />
         <h1><Icon name="lock" size={20} /> دخول الإدارة</h1>
         <label className="field">
-          <span>رمز الإدارة</span>
-          <input type="password" autoFocus autoComplete="current-password" dir="ltr" value={token} onChange={(e) => setToken(e.target.value)} />
+          <span>اسم المستخدم</span>
+          <input type="text" autoFocus autoComplete="username" dir="ltr" value={username} onChange={(e) => setUsername(e.target.value)} />
+        </label>
+        <label className="field">
+          <span>كلمة المرور</span>
+          <input type="password" autoComplete="current-password" dir="ltr" value={password} onChange={(e) => setPassword(e.target.value)} />
         </label>
         {error && <Notice tone="bad" icon="alert">{error}</Notice>}
-        <button className="primary" disabled={!token.trim() || busy}>{busy ? 'جارٍ التحقق…' : 'دخول'}</button>
+        <button className="primary" disabled={!username.trim() || !password || busy}>{busy ? 'جارٍ التحقق…' : 'دخول'}</button>
       </form>
     </div>
   )

@@ -9,6 +9,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from google.genai import errors as genai_errors
 
 from . import admin, flow_settings, generator, inspiration, screen, store
@@ -42,6 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(admin.public)
 app.include_router(admin.router)
 
 
@@ -399,3 +401,61 @@ async def video_feedback(video_id: str) -> list[Feedback]:
     if store.load_video(video_id) is None:
         raise HTTPException(status_code=404, detail="Video not found")
     return store.feedback_for(video_id)
+
+
+class PublicRating(BaseModel):
+    stars: int
+    role: str
+    name: str
+    comment: str
+    template: str
+
+
+class PublicProject(BaseModel):
+    project_id: str
+    script_id: str
+    title: str
+    hook: str
+    audience: str
+    language: str
+    approved: bool
+    video_url: Optional[str] = None
+    poster: Optional[str] = None
+    preview: bool = False
+
+
+class PublicShowcase(BaseModel):
+    ratings: list[PublicRating]
+    projects: list[PublicProject]
+
+
+def _public_project(project: Project) -> Optional[PublicProject]:
+    """A published project as the landing page shows it: its newest approved version (or newest version), and that
+    version's best finished video, final before preview."""
+    scripts = list(project.scripts.values())
+    if not scripts:
+        return None
+    approved = [s for s in scripts if s.approved]
+    script = (approved or scripts)[-1]
+    done = [v for v in store.videos_for(script.id) if v.status == VideoStatus.done and v.url]
+    video = next((v for v in done if not v.preview), done[0] if done else None)
+    return PublicProject(
+        project_id=project.id, script_id=script.id, title=script.title, hook=script.hook,
+        audience=project.brief.audience, language=project.brief.language.value, approved=script.approved,
+        video_url=video.url if video else None, poster=video.frames[0] if video and video.frames else None,
+        preview=bool(video and video.preview),
+    )
+
+
+@app.get("/showcase", response_model=PublicShowcase)
+async def showcase() -> PublicShowcase:
+    """What the admin chose to show the public: featured ratings and published projects."""
+    ratings = [PublicRating(stars=f.stars, role=f.role.value, name=f.name, comment=f.comment, template=f.template)
+               for f in store.feedback_for(limit=24, featured=True)]
+    shown = []
+    for pid in store.published_ids()[:24]:
+        project = store.load(pid)
+        item = _public_project(project) if project else None
+        if item:
+            shown.append(item)
+    return PublicShowcase(ratings=ratings, projects=shown)

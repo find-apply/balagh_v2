@@ -4244,3 +4244,70 @@ a.logo:hover {
 .feedback .ok-text {
   color: var(--ok);
 }
+
+.small-button.on {
+  background: var(--ok-bg);
+  border-color: rgba(23, 96, 63, 0.3);
+  color: var(--ok);
+}
+
+.adm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+}
+
+.adm-form .primary {
+  align-self: flex-start;
+}
+
+/* ---- Landing: what the admin published ---- */
+
+.pub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.pub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.pub-card video,
+.pub-novideo {
+  width: 100%;
+  max-height: 420px;
+  border-radius: 10px;
+  background: #0f1512;
+}
+
+.pub-novideo {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  color: var(--brand-ink);
+  background: var(--brand);
+  font-weight: 700;
+}
+
+.pub-card h3 {
+  margin: 0;
+}
+
+.pub-card p {
+  margin: 0;
+}
+
+.pub-stars {
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+.pub-stars span {
+  color: var(--line-strong);
+}

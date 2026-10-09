@@ -88,8 +88,19 @@ feedback = Table(
     Column("name", String(80), nullable=False),
     Column("comment", Text),
     Column("created_at", DateTime(timezone=True), nullable=False),
+    Column("featured", Boolean, nullable=False, default=False),
+)
+# Projects the admin has made public: they are listed on the landing page and open read-only.
+published = Table(
+    "published", metadata,
+    Column("project_id", String(32), primary_key=True),
+    Column("at", DateTime(timezone=True), nullable=False),
 )
 metadata.create_all(engine)
+# Ratings stored before the admin could feature them get the column added in place.
+if "featured" not in {c["name"] for c in inspect(engine).get_columns("feedback")}:
+    with engine.begin() as _conn:
+        _conn.execute(text("ALTER TABLE feedback ADD COLUMN featured BOOLEAN NOT NULL DEFAULT FALSE"))
 # Databases created before projects had a date get the column added in place.
 if "created_at" not in {c["name"] for c in inspect(engine).get_columns("projects")}:
     with engine.begin() as _conn:
@@ -262,6 +273,7 @@ def delete_project(project_id: str) -> bool:
         conn.execute(delete(history).where(history.c.project_id == project_id))
         conn.execute(delete(invites).where(invites.c.project_id == project_id))
         conn.execute(delete(feedback).where(feedback.c.project_id == project_id))
+        conn.execute(delete(published).where(published.c.project_id == project_id))
     return bool(removed)
 
 
@@ -333,15 +345,35 @@ def invite_valid(token: str, project_id: str, role: str) -> bool:
 
 def add_feedback(video: Video, body: FeedbackIn) -> Feedback:
     row = dict(video_id=video.id, project_id=video.project_id, script_id=video.script_id, template=video.template,
-               created_at=datetime.now(timezone.utc), **body.model_dump(mode="json"))
+               created_at=datetime.now(timezone.utc), featured=False, **body.model_dump(mode="json"))
     with engine.begin() as conn:
         row["id"] = conn.execute(insert(feedback).values(**row)).inserted_primary_key[0]
     return Feedback(**row)
 
 
-def feedback_for(video_id: Optional[str] = None, limit: int = 500) -> list[Feedback]:
+def feedback_for(video_id: Optional[str] = None, limit: int = 500, featured: bool = False) -> list[Feedback]:
     q = select(feedback).order_by(feedback.c.id.desc()).limit(limit)
     if video_id:
         q = q.where(feedback.c.video_id == video_id)
+    if featured:
+        q = q.where(feedback.c.featured.is_(True))
     with engine.connect() as conn:
         return [Feedback(**r._mapping) for r in conn.execute(q)]
+
+
+def set_featured(feedback_id: int, on: bool) -> bool:
+    with engine.begin() as conn:
+        return conn.execute(update(feedback).where(feedback.c.id == feedback_id).values(featured=on)).rowcount > 0
+
+
+def set_published(project_id: str, on: bool) -> None:
+    with engine.begin() as conn:
+        conn.execute(delete(published).where(published.c.project_id == project_id))
+        if on:
+            conn.execute(insert(published).values(project_id=project_id, at=datetime.now(timezone.utc)))
+
+
+def published_ids() -> list[str]:
+    """Published projects, most recently published first."""
+    with engine.connect() as conn:
+        return [r[0] for r in conn.execute(select(published.c.project_id).order_by(published.c.at.desc()))]

@@ -1,5 +1,5 @@
 import type { HistoryEntry } from './history'
-import type { Brief, Feedback, FeedbackIn, LocalizeRequest, Project, ReviewReport, ReviewRole, Script, Video, VideoTemplate } from './types'
+import type { Brief, Feedback, FeedbackIn, PublicShowcase, LocalizeRequest, Project, ReviewReport, ReviewRole, Script, Video, VideoTemplate } from './types'
 
 export const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8010').replace(/\/$/, '')
 
@@ -99,6 +99,7 @@ export const api = {
     request<Video>('POST', `/projects/${projectId}/scripts/${scriptId}/videos`, { template }),
   videos: (projectId: string, scriptId: string) => request<Video[]>('GET', `/projects/${projectId}/scripts/${scriptId}/videos`),
   video: (id: string) => request<Video>('GET', `/videos/${id}`),
+  showcase: () => request<PublicShowcase>('GET', '/showcase'),
   feedback: (videoId: string) => request<Feedback[]>('GET', `/videos/${videoId}/feedback`),
   rate: (videoId: string, body: FeedbackIn) => request<Feedback>('POST', `/videos/${videoId}/feedback`, body),
 }

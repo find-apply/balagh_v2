@@ -1,13 +1,16 @@
 """Admin API: oversight of projects, approvals and model runs, plus the flow settings.
 Protected by the ADMIN_TOKEN environment variable; without it the admin is disabled."""
+import base64
+import hashlib
+import hmac
 import os
 import time
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
+from pydantic import BaseModel, Field
 
 from . import flow_settings, generator, sources, store
 from .flow_settings import FlowSettings
@@ -15,16 +18,111 @@ from .schemas import AuthorRole, ContentLevel, Feedback, Project, ReviewRole
 from .video import catalog
 
 
-def require_admin(authorization: Optional[str] = Header(default=None)) -> None:
+# The admin signs in with a username and password; the API answers with a session token signed with
+# ADMIN_TOKEN. ADMIN_TOKEN itself still works as a bearer token for scripts (tools/review_pack.py).
+ACCOUNT_KEY = "admin_account"
+SESSION_HOURS = 12
+_ITERATIONS = 200_000
+
+
+def _server_key() -> bytes:
     token = os.getenv("ADMIN_TOKEN", "")
     if not token:
         raise HTTPException(status_code=503, detail="الإدارة غير مفعّلة: عرّف ADMIN_TOKEN على الخادم.")
+    return token.encode()
+
+
+def _hash(password: str, salt: str) -> str:
+    return hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), _ITERATIONS).hex()
+
+
+def _sign(payload: str) -> str:
+    return hmac.new(_server_key(), payload.encode(), hashlib.sha256).hexdigest()
+
+
+def issue_session(username: str) -> str:
+    # The password's salt is part of what is signed, so changing the password ends every open session.
+    salt = store.get_settings().get(ACCOUNT_KEY, {}).get("salt", "")
+    payload = f"{username}|{int(time.time()) + SESSION_HOURS * 3600}|{salt}"
+    return base64.urlsafe_b64encode(payload.encode()).decode() + "." + _sign(payload)
+
+
+def _session_user(token: str) -> Optional[str]:
+    try:
+        body, sig = token.split(".", 1)
+        payload = base64.urlsafe_b64decode(body.encode()).decode()
+        username, expires, salt = payload.split("|", 2)
+    except ValueError:
+        return None
+    if not hmac.compare_digest(sig, _sign(payload)) or int(expires) < time.time():
+        return None
+    account = store.get_settings().get(ACCOUNT_KEY)
+    if not account or account.get("username") != username or account.get("salt") != salt:
+        return None
+    return username
+
+
+def require_admin(authorization: Optional[str] = Header(default=None)) -> None:
+    key = _server_key()
     given = authorization[7:] if authorization and authorization.lower().startswith("bearer ") else ""
-    if not secrets.compare_digest(given.encode(), token.encode()):
-        raise HTTPException(status_code=401, detail="رمز الإدارة غير صحيح.")
+    if given and secrets.compare_digest(given.encode(), key):
+        return
+    if given and _session_user(given):
+        return
+    raise HTTPException(status_code=401, detail="انتهت الجلسة أو بيانات الدخول غير صحيحة.")
+
+
+class LoginIn(BaseModel):
+    username: str = Field(min_length=1, max_length=60)
+    password: str = Field(min_length=1, max_length=200)
+
+
+class AccountIn(BaseModel):
+    username: str = Field(min_length=3, max_length=60)
+    password: str = Field(min_length=10, max_length=200, description="Ten characters at least.")
+
+
+# Failed sign-ins per client address: five in fifteen minutes lock that address out for the rest of the window.
+_failures: dict[str, list[float]] = {}
+_WINDOW, _MAX_FAILURES = 15 * 60, 5
+
+public = APIRouter(prefix="/admin", tags=["admin"])
+
+
+@public.post("/login")
+async def login(body: LoginIn, request: Request) -> dict:
+    """Sign in with the admin's username and password; returns a session token valid for twelve hours."""
+    _server_key()
+    ip = request.headers.get("x-real-ip") or (request.client.host if request.client else "?")
+    now = time.time()
+    recent = [t for t in _failures.get(ip, []) if now - t < _WINDOW]
+    if len(recent) >= _MAX_FAILURES:
+        raise HTTPException(status_code=429, detail="محاولات كثيرة خاطئة. أعد المحاولة بعد ربع ساعة.")
+    account = store.get_settings().get(ACCOUNT_KEY)
+    ok = bool(account) and hmac.compare_digest(body.username, account["username"]) and hmac.compare_digest(
+        _hash(body.password, account["salt"]), account["hash"])
+    if not ok:
+        _failures[ip] = recent + [now]
+        raise HTTPException(status_code=401, detail="اسم المستخدم أو كلمة المرور غير صحيحة.")
+    _failures.pop(ip, None)
+    return {"token": issue_session(account["username"]), "username": account["username"], "hours": SESSION_HOURS}
 
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
+
+
+@router.get("/account")
+async def account() -> dict:
+    found = store.get_settings().get(ACCOUNT_KEY)
+    return {"username": found["username"] if found else None}
+
+
+@router.put("/account")
+async def set_account(body: AccountIn) -> dict:
+    """Sets the admin's username and password. Every session opened with the old password ends."""
+    salt = secrets.token_hex(16)
+    store.put_settings({ACCOUNT_KEY: {"username": body.username.strip(), "salt": salt, "hash": _hash(body.password, salt)}})
+    return {"username": body.username.strip(), "token": issue_session(body.username.strip())}
 
 
 class ProjectRow(BaseModel):
@@ -38,6 +136,7 @@ class ProjectRow(BaseModel):
     approved: int
     awaiting: int
     levels: list[str]
+    published: bool = False
 
 
 class PendingApproval(BaseModel):
@@ -134,7 +233,8 @@ async def overview() -> dict:
 
 @router.get("/projects", response_model=list[ProjectRow])
 async def projects(q: str = "", limit: int = Query(50, ge=1, le=200), offset: int = Query(0, ge=0)) -> list[ProjectRow]:
-    rows = [_row(p, c) for p, c in _all_projects()]
+    shown = set(store.published_ids())
+    rows = [_row(p, c).model_copy(update={"published": p.id in shown}) for p, c in _all_projects()]
     needle = q.strip().lower()
     if needle:
         rows = [r for r in rows if needle in f"{r.title} {r.audience} {r.id}".lower()]
@@ -191,6 +291,33 @@ async def invite(project_id: str, role: ReviewRole = Query(ReviewRole.scholar)) 
     if role == ReviewRole.creator:
         raise HTTPException(status_code=400, detail="صانع المحتوى يوقّع من مساحة عمله دون دعوة.")
     return InviteRow(role=role, token=store.add_invite(project_id, role.value, "admin"))
+
+
+class FeatureIn(BaseModel):
+    featured: bool
+
+
+@router.put("/feedback/{feedback_id}/featured")
+async def feature(feedback_id: int, body: FeatureIn) -> dict:
+    """Shows a rating on the landing page, or takes it off."""
+    if not store.set_featured(feedback_id, body.featured):
+        raise HTTPException(status_code=404, detail="التقييم غير موجود.")
+    return {"id": feedback_id, "featured": body.featured}
+
+
+class PublishIn(BaseModel):
+    published: bool
+
+
+@router.put("/projects/{project_id}/published")
+async def publish(project_id: str, body: PublishIn) -> dict:
+    """Makes a project public: it is listed on the landing page and opens read-only. Or takes it off."""
+    global _projects_cache
+    if store.load(project_id) is None:
+        raise HTTPException(status_code=404, detail="المشروع غير موجود.")
+    store.set_published(project_id, body.published)
+    _projects_cache = None
+    return {"id": project_id, "published": body.published}
 
 
 class TemplateRating(BaseModel):

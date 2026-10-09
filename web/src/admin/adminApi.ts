@@ -73,6 +73,8 @@ export interface ProjectRow {
   approved: number
   awaiting: number
   levels: string[]
+  /** Listed on the landing page and open to everyone, read-only. */
+  published: boolean
 }
 
 export interface PendingApproval {
@@ -120,6 +122,11 @@ export interface FeedbackReport {
 export const adminApi = {
   feedback: () => call<FeedbackReport>('GET', '/feedback'),
   check: (token: string) => call<{ ok: boolean }>('GET', '/session', undefined, token),
+  login: (username: string, password: string) => call<{ token: string; username: string; hours: number }>('POST', '/login', { username, password }, ''),
+  account: () => call<{ username: string | null }>('GET', '/account'),
+  saveAccount: (username: string, password: string) => call<{ username: string; token: string }>('PUT', '/account', { username, password }),
+  feature: (id: number, featured: boolean) => call<{ featured: boolean }>('PUT', `/feedback/${id}/featured`, { featured }),
+  publish: (projectId: string, published: boolean) => call<{ published: boolean }>('PUT', `/projects/${projectId}/published`, { published }),
   overview: () => call<Overview>('GET', '/overview'),
   projects: (q: string) => call<ProjectRow[]>('GET', `/projects?limit=200&q=${encodeURIComponent(q)}`),
   project: (id: string) => call<Project>('GET', `/projects/${id}`),

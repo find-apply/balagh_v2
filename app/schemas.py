@@ -670,6 +670,7 @@ class Feedback(FeedbackIn):
     script_id: str
     template: str
     created_at: datetime
+    featured: bool = Field(default=False, description="Chosen by the admin to be shown on the landing page.")
 
 
 Script.model_rebuild()

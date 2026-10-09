@@ -115,6 +115,23 @@ export interface Story {
 
 export type VideoStatus = 'queued' | 'voicing' | 'imaging' | 'rendering' | 'done' | 'failed'
 
+/** What the admin chose to show on the landing page. */
+export interface PublicShowcase {
+  ratings: { stars: number; role: ViewerRole; name: string; comment: string; template: string }[]
+  projects: {
+    project_id: string
+    script_id: string
+    title: string
+    hook: string
+    audience: string
+    language: string
+    approved: boolean
+    video_url: string | null
+    poster: string | null
+    preview: boolean
+  }[]
+}
+
 /** Who rates a finished video. */
 export type ViewerRole = 'student' | 'scholar' | 'sheikh' | 'other'
 
@@ -130,6 +147,8 @@ export interface Feedback extends FeedbackIn {
   video_id: string
   template: string
   created_at: string
+  /** Chosen by the admin for the landing page. */
+  featured: boolean
 }
 
 export interface Video {

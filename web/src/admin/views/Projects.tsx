@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type React from 'react'
 import { Workspace } from '../../components/Workspace'
 import { go } from '../../route'
 import { adminApi } from '../adminApi'
@@ -10,6 +11,28 @@ import { useLoad } from '../useLoad'
 import { Icon } from '../../components/Icon'
 
 const adminHash = (projectId: string, scriptId?: string | null) => `#/admin/projects/${projectId}${scriptId ? `/${scriptId}` : ''}`
+
+/** Publish or withdraw a project from the landing page, from its row or from its page. */
+function PublishButton({ id, published, onChange }: { id: string; published: boolean; onChange?: (on: boolean) => void }) {
+  const [on, setOn] = useState(published)
+  const [busy, setBusy] = useState(false)
+  const flip = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setBusy(true)
+    try {
+      const r = await adminApi.publish(id, !on)
+      setOn(r.published)
+      onChange?.(r.published)
+    } finally {
+      setBusy(false)
+    }
+  }
+  return (
+    <button type="button" className={on ? 'small-button on' : 'small-button'} aria-pressed={on} disabled={busy} onClick={flip}>
+      {on ? '✓ منشور · اسحبه' : 'انشره للناس'}
+    </button>
+  )
+}
 
 const COLUMNS: Column<ProjectRow>[] = [
   { header: 'المشروع', cell: (p) => <Cell title={p.title || '—'} sub={p.id.slice(0, 8)} /> },
@@ -26,6 +49,7 @@ const COLUMNS: Column<ProjectRow>[] = [
       </>
     ),
   },
+  { header: 'للناس', cell: (p) => (p.scripts > 0 ? <PublishButton id={p.id} published={p.published} /> : <span className="muted small">لا سيناريو</span>) },
 ]
 
 export function Projects({ path }: { path: string[] }) {
