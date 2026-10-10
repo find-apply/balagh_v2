@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons'
 import Constants from 'expo-constants'
 import { isLoaded } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
@@ -94,7 +93,7 @@ export function Splash() {
         style={[st.body, { opacity: rise, transform: [{ translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}
       >
         <View style={st.logo}>
-          <Ionicons name="book-outline" size={48} color="#fff" />
+          <Text style={[st.mark, font(F.bold)]} accessible={false}>ب</Text>
         </View>
         <Text style={[st.title, font(F.bold)]}>بلاغ</Text>
         <Text style={[st.tagline, font(F.regular)]}>صناعة محتوى دعوي موثَّق، بمراجعة بشرية قبل النشر.</Text>
@@ -123,6 +122,8 @@ const st = StyleSheet.create({
     position: 'absolute', width: 420, height: 420, borderRadius: 210, backgroundColor: 'rgba(255,255,255,0.06)',
   },
   body: { alignItems: 'center', gap: 18, paddingHorizontal: 32 },
+  // The site's mark: the letter ب, as on the app icon.
+  mark: { fontSize: 52, lineHeight: 72, color: '#fff', fontWeight: '700', includeFontPadding: false },
   logo: {
     width: 96, height: 96, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.14)', borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center',
