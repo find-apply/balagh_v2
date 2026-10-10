@@ -8,6 +8,7 @@ import { Notice, P, Progress, Screen } from '@/components/ui'
 import { clearJob, run, useJob } from '@/jobs'
 import { GROUPS } from '@/shared/audiences'
 import { LANGUAGES } from '@/shared/labels'
+import { loadPrefs } from '@/prefs'
 import { TASKS } from '@/shared/tasks'
 import type { Language, Script } from '@/shared/types'
 
@@ -41,7 +42,10 @@ export default function Localize() {
     const next = await run(key, TASKS.localize, () =>
       api.localize(id, sid, { audience: g.label, audience_knowledge: g.knowledge, language, dialect: null, tone: null }),
     )
-    if (next) router.replace({ pathname: '/p/[id]/[sid]', params: { id, sid: next.id } })
+    if (!next) return
+    router.replace({ pathname: '/p/[id]/[sid]', params: { id, sid: next.id } })
+    // As after a new script: with automatic review on, the reviewers start on the localized version at once.
+    if ((await loadPrefs()).autoReview) void run(`review:${next.id}`, TASKS.review, () => api.review(id, next.id))
   }
 
   const header = script && (

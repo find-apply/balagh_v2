@@ -89,7 +89,8 @@ export default function Rate() {
         <View style={st.sent}>
           <Text style={st.sentText} accessibilityRole="alert">شكرا، سُجّل تقييمك.</Text>
           <Pressable accessibilityRole="button" onPress={() => setSent(false)} style={({ pressed }) => [st.again, pressed && { opacity: 0.8 }]}>
-            <Text style={st.againText}>أضف تقييما آخر</Text>
+            {/* An account has one rating per video: sending again replaces it. */}
+            <Text style={st.againText}>عدّل تقييمك</Text>
           </Pressable>
         </View>
       ) : (

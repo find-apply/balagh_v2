@@ -118,7 +118,8 @@ export default function ProjectScreen() {
   if (!latest) return <Choose project={project} header={header} failed={failed} onWrite={(i) => void write(i)} onMore={() => void moreIdeas()} />
 
   // Versions are numbered in the order they were made; the latest is the one to continue.
-  const number = (sid: string) => scripts.findIndex((sc) => sc.id === sid) + 1
+  // The version's own number, as the site shows it: a revision counts up from the script it corrects.
+  const number = (sid: string) => project.scripts[sid]?.version ?? 1
   const plan = planFor(latest, hasVideo, !!reviewJob && !reviewJob.error)
   const request = !latest.approved ? latest.change_requests[latest.change_requests.length - 1] : undefined
   const earlier = scripts.slice(0, -1).reverse()

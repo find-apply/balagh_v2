@@ -1,5 +1,5 @@
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/api'
 import { useAccount } from '@/account'
 import { HeaderTitle, Stepper } from '@/components/kit'
@@ -12,6 +12,7 @@ import { ReviewPart } from '@/components/version/ReviewPart'
 import { ScriptPart } from '@/components/version/ScriptPart'
 import { VideoPart } from '@/components/version/VideoPart'
 import { clearJob, run, useJob } from '@/jobs'
+import { loadPrefs } from '@/prefs'
 import { TASKS } from '@/shared/tasks'
 import type { Project, Script, Video, VideoTemplate } from '@/shared/types'
 
@@ -55,6 +56,13 @@ export default function VersionScreen() {
   useEffect(() => {
     api.templates().then(setTemplates, () => setTemplates([]))
   }, [])
+  // The automatic review is started by the screen that wrote the script; once it ends, its report is loaded here.
+  const reviewing = !!reviewJob && !reviewJob.error
+  const wasReviewing = useRef(reviewing)
+  useEffect(() => {
+    if (wasReviewing.current && !reviewing) void load()
+    wasReviewing.current = reviewing
+  }, [reviewing, load])
   // A render takes minutes: the list is polled while one runs.
   const running = videos?.some((v) => ACTIVE.has(v.status)) ?? false
   useEffect(() => {
@@ -71,7 +79,9 @@ export default function VersionScreen() {
   }
   const revise = async () => {
     const next = await run(reviseKey, TASKS.revise, () => api.revise(id, sid))
-    if (next) router.replace({ pathname: '/p/[id]/[sid]', params: { id, sid: next.id } })
+    if (!next) return
+    router.replace({ pathname: '/p/[id]/[sid]', params: { id, sid: next.id } })
+    if ((await loadPrefs()).autoReview) void run(`review:${next.id}`, TASKS.review, () => api.review(id, next.id))
   }
   const clearJobs = () => {
     clearJob(reviewKey)

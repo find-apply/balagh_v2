@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useEffect, useState } from 'react'
 import type { ReactElement, ReactNode } from 'react'
-import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import type { RefreshControlProps, StyleProp, TextInputProps, ViewStyle } from 'react-native'
+import { AccessibilityInfo, ActivityIndicator, Animated, Easing, I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import type { RefreshControlProps, StyleProp, TextInputProps, TextStyle, ViewStyle } from 'react-native'
 import { C, F, R, isQuranic, shownQuran } from '../theme'
 import type { Task } from '../shared/tasks'
 
@@ -21,10 +21,14 @@ export function Card({ children, style, tone }: { children: ReactNode; style?: S
 export const H1 = ({ children }: { children: ReactNode }) => <Text style={s.h1}>{children}</Text>
 export const H2 = ({ children }: { children: ReactNode }) => <Text style={s.h2}>{children}</Text>
 export const H3 = ({ children }: { children: ReactNode }) => <Text style={s.h3}>{children}</Text>
-export const P = ({ children, muted, small, strong }: { children: ReactNode; muted?: boolean; small?: boolean; strong?: boolean }) => {
+/** Text in a left-to-right language (an English version) inside the right-to-left app. Android flips left and
+ * right when RTL is forced, so its visual left is 'right'. */
+export const ltrText: TextStyle = { textAlign: Platform.OS === 'android' && I18nManager.isRTL ? 'right' : 'left', writingDirection: 'ltr' }
+
+export const P = ({ children, muted, small, strong, ltr }: { children: ReactNode; muted?: boolean; small?: boolean; strong?: boolean; ltr?: boolean }) => {
   const quran = Array.isArray(children) ? children.some(isQuranic) : isQuranic(children)
   const shown = quran ? (Array.isArray(children) ? children.map((c) => (typeof c === 'string' ? shownQuran(c) : c)) : typeof children === 'string' ? shownQuran(children) : children) : children
-  return <Text style={[s.p, muted && s.muted, small && s.small, strong && s.strong, quran && (small ? s.quranSmall : s.quran)]}>{shown}</Text>
+  return <Text style={[s.p, muted && s.muted, small && s.small, strong && s.strong, quran && (small ? s.quranSmall : s.quran), ltr && ltrText]}>{shown}</Text>
 }
 
 export function Button({ title, onPress, kind = 'primary', disabled, busy }: { title: string; onPress: () => void; kind?: 'primary' | 'ghost' | 'danger'; disabled?: boolean; busy?: boolean }) {

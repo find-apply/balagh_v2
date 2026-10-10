@@ -254,7 +254,7 @@ function ScenesStep({ script, template, templateName, wide, running, busy, error
                   {sc.start_second}–{sc.end_second} ث
                 </Badge>
               </View>
-              <P small>{sc.voiceover}</P>
+              <P small ltr={script.target.language === 'en'}>{sc.voiceover}</P>
               {ref ? (
                 <Text style={st.refSource}>✓ {ref.source}</Text>
               ) : (

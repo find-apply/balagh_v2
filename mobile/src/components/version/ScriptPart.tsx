@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { StyleSheet, Text, View } from 'react-native'
-import { Badge, Button, Notice, P } from '@/components/ui'
+import { Badge, Button, ltrText, Notice, P } from '@/components/ui'
 import type { Job } from '@/jobs'
 import { C, F } from '@/theme'
 import type { Reference, Script } from '@/shared/types'
@@ -22,10 +22,11 @@ export function ScriptPart({ script, reviewing, onNext, onReview }: {
   onNext: () => void
   onReview: () => void
 }) {
+  const ltr = script.target.language === 'en'
   return (
     <>
       <View style={st.article}>
-        <Text style={st.hook} accessibilityRole="header">{script.hook}</Text>
+        <Text style={[st.hook, ltr && ltrText]} accessibilityRole="header">{script.hook}</Text>
         {script.scenes.map((sc, i) => {
           const last = i === script.scenes.length - 1
           return (
@@ -35,7 +36,7 @@ export function ScriptPart({ script, reviewing, onNext, onReview }: {
                 {!last && <View style={st.railLine} />}
               </View>
               <View style={[st.sceneText, !last && { paddingBottom: 18 }]}>
-                <P>{sc.voiceover || sc.on_screen_text}</P>
+                <P ltr={ltr}>{sc.voiceover || sc.on_screen_text}</P>
               </View>
             </View>
           )
