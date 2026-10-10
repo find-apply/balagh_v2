@@ -46,7 +46,16 @@
       ],
       "expo-video",
       "expo-font",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0C5A4A",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 96,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "scheme": "balagh",
     "experiments": {

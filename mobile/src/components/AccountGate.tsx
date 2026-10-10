@@ -442,7 +442,7 @@ function SignIn() {
         <View style={{ paddingHorizontal: 28, paddingTop: 52, gap: 10 }}>
           <View style={sh.brandRow}>
             <View style={sh.logo}>
-              <Ionicons name="book-outline" size={24} color="#fff" />
+              <Text style={sh.logoMark} accessible={false}>ب</Text>
             </View>
             <Text style={[sh.bandTitle, { fontSize: 40, lineHeight: 52 }]} accessibilityRole="header">بلاغ</Text>
             <BetaPill />
@@ -715,6 +715,7 @@ const pat = StyleSheet.create({
 })
 
 const sh = StyleSheet.create({
+  logoMark: { fontFamily: F.bold, fontSize: 26, lineHeight: 36, color: '#fff', includeFontPadding: false },
   band: { overflow: 'hidden' },
   card: {
     marginHorizontal: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 24,
