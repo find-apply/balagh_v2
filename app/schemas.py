@@ -409,6 +409,7 @@ class Approval(BaseModel):
     name: str
     at: datetime
     note: str = Field(default="", description="What the reviewer wanted noted when signing. Empty if nothing.")
+    uid: Optional[str] = Field(default=None, description="The account that signed, when signed in; its name is removed if the account is deleted.")
 
 
 class ChangeRequest(BaseModel):
@@ -418,6 +419,7 @@ class ChangeRequest(BaseModel):
     name: str
     note: str
     at: datetime
+    uid: Optional[str] = None
 
 
 class ChangeRequestIn(BaseModel):

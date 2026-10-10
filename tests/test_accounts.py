@@ -1,28 +1,59 @@
 """Signing in: a valid Firebase token makes the history the account's, the device's history moves over at the
-first sign-in, an invalid token is a visitor, and an account rates a video once."""
+first sign-in, an invalid token is a visitor, and an account rates a video once. A new account waits for the
+admin: until approved its token opens nothing but /me."""
 from datetime import datetime, timezone
 
 import pytest
 
-from app import auth, store
+from app import auth, firebase, main, store
 from app.schemas import Video, VideoStatus
 
 NOTE = "الفيديو واضح والتلاوة جميلة والشرح مناسب للشباب لكن الخط صغير قليلا"
+PROFILE = {"full_name": "أحمد بن علي", "specialization": "علوم شرعية", "phone": "+213 555 12 34 56"}
+ROOT = {"Authorization": "Bearer root"}
+
+USERS = {"tok-a": auth.User(uid="uid-a", email="a@example.com", name="أ", provider="google.com"),
+         "tok-b": auth.User(uid="uid-b", email="b@example.com", name="ب", provider="password"),
+         "tok-c": auth.User(uid="uid-c", email="c@example.com", name="ج", provider="password"),
+         "tok-new": auth.User(uid="uid-new", email="new@example.com", name="جديد", provider="google.com")}
+
+
+def _approve(uid: str) -> None:
+    u = next(u for u in USERS.values() if u.uid == uid)
+    store.save_user(u.uid, u.email, u.name, u.picture, u.provider)
+    store.set_user_status(uid, "approved")
 
 
 @pytest.fixture
 def signed(monkeypatch):
-    users = {"tok-a": auth.User(uid="uid-a", email="a@example.com", name="أ", provider="google.com"),
-             "tok-b": auth.User(uid="uid-b", email="b@example.com", name="ب", provider="password"),
-             "tok-c": auth.User(uid="uid-c", email="c@example.com", name="ج", provider="password")}
-    monkeypatch.setattr(auth, "verify", lambda token: users.get(token))
+    """Accounts a, b and c are already approved; `tok-new` belongs to an account that has not signed up yet."""
+    monkeypatch.setattr(auth, "verify", lambda token: USERS.get(token))
+    for uid in ("uid-a", "uid-b", "uid-c"):
+        _approve(uid)
+    with store.engine.begin() as conn:
+        conn.execute(store.users.delete().where(store.users.c.uid == "uid-new"))
     return lambda token: {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def disabled(monkeypatch):
+    """Firebase is never called from tests: the calls are recorded instead."""
+    calls = []
+    monkeypatch.setattr(firebase, "set_disabled", lambda uid, off: calls.append((uid, off)) or True)
+    return calls
+
+
+@pytest.fixture
+def admin_headers(monkeypatch):
+    monkeypatch.setenv("ADMIN_TOKEN", "root")
+    return ROOT
 
 
 def test_signing_in_moves_the_devices_history_to_the_account(client, signed):
     store.remember("phone-1", "p1", shared=False)
     r = client.post("/me", headers={**signed("tok-a"), "X-Client-Id": "phone-1"})
     assert r.status_code == 200 and r.json()["moved"] == 1 and r.json()["email"] == "a@example.com"
+    assert r.json()["status"] == "approved"
     # the account's history is the same on another device, and the first device's own list is now empty
     assert [p["id"] for p in client.get("/projects", headers={**signed("tok-a"), "X-Client-Id": "laptop"}).json()] == ["p1"]
     assert client.get("/projects", headers={"X-Client-Id": "phone-1"}).json() == []
@@ -49,3 +80,105 @@ def test_an_account_rates_a_video_once(client, signed):
         client.post("/videos/acc-v/feedback", headers=signed("tok-a"), json={"stars": stars, "role": "student", "name": "أحمد", "comment": NOTE})
     client.post("/videos/acc-v/feedback", json={"stars": 3, "role": "other", "name": "زائر", "comment": NOTE})
     assert sorted(f["stars"] for f in client.get("/videos/acc-v/feedback").json()) == [3, 5]
+
+
+def test_a_new_account_signs_up_and_waits_for_review(client, signed):
+    store.remember("phone-new", "p1", shared=False)
+    r = client.post("/me", headers={**signed("tok-new"), "X-Client-Id": "phone-new"}, json={"profile": PROFILE})
+    assert r.status_code == 200
+    me = r.json()
+    assert me["status"] == "pending" and me["moved"] == 0
+    assert (me["full_name"], me["specialization"], me["phone"]) == (PROFILE["full_name"], PROFILE["specialization"], PROFILE["phone"])
+    # the token opens nothing else, and the device keeps its own history
+    blocked = client.get("/projects", headers={**signed("tok-new"), "X-Client-Id": "phone-new"})
+    assert blocked.status_code == 403 and "المراجعة" in blocked.json()["detail"]
+    assert [p["id"] for p in client.get("/projects", headers={"X-Client-Id": "phone-new"}).json()] == ["p1"]
+    # signing in again later neither forgets the details nor lets the account in
+    again = client.post("/me", headers=signed("tok-new")).json()
+    assert again["status"] == "pending" and again["phone"] == PROFILE["phone"]
+
+
+def test_a_token_of_an_account_that_never_signed_up_is_refused(client, signed):
+    assert client.get("/projects", headers=signed("tok-new")).status_code == 403
+
+
+def test_sign_up_details_are_checked(client, signed):
+    bad = {**PROFILE, "phone": "call me"}
+    assert client.post("/me", headers=signed("tok-new"), json={"profile": bad}).status_code == 422
+    assert client.post("/me", headers=signed("tok-new"), json={"profile": {**PROFILE, "full_name": ""}}).status_code == 422
+
+
+def test_the_admin_approves_an_account_and_its_history_moves_over(client, signed, disabled, admin_headers):
+    store.remember("phone-ok", "p1", shared=False)
+    client.post("/me", headers=signed("tok-new"), json={"profile": PROFILE})
+    waiting = client.get("/admin/accounts?status=pending", headers=admin_headers).json()
+    assert [a["uid"] for a in waiting] == ["uid-new"] and waiting[0]["specialization"] == PROFILE["specialization"]
+    refused = client.put("/admin/accounts/uid-new/status", headers=admin_headers, json={"status": "approved"})
+    assert refused.status_code == 400 and "الصفة" in refused.json()["detail"]
+    r = client.put("/admin/accounts/uid-new/status", headers=admin_headers, json={"status": "approved", "role": "creator"})
+    assert r.status_code == 200 and r.json()["status"] == "approved" and r.json()["role"] == "creator"
+    assert disabled[-1] == ("uid-new", False)
+    assert client.post("/me", headers={**signed("tok-new"), "X-Client-Id": "phone-ok"}).json()["moved"] == 1
+    assert client.get("/projects", headers=signed("tok-new")).status_code == 200
+
+
+def test_the_admin_rejects_an_account(client, signed, disabled, admin_headers):
+    client.post("/me", headers=signed("tok-new"), json={"profile": PROFILE})
+    assert client.put("/admin/accounts/uid-new/status", headers=admin_headers, json={"status": "rejected"}).status_code == 200
+    assert disabled == [("uid-new", True)]
+    assert client.post("/me", headers=signed("tok-new")).json()["status"] == "rejected"
+    r = client.get("/projects", headers=signed("tok-new"))
+    assert r.status_code == 403 and r.json()["detail"] == auth.NOT_APPROVED["rejected"]
+    assert client.put("/admin/accounts/nobody/status", headers=admin_headers, json={"status": "approved"}).status_code == 404
+    assert client.get("/admin/accounts").status_code == 401
+
+
+BRIEF = {"idea": "الصدق", "audience": "شباب", "language": "ar", "dialect": None, "audience_knowledge": "familiar",
+         "tone": None, "platforms": ["tiktok"], "duration_seconds": 45, "author": "specialist"}
+
+
+def test_the_role_comes_from_the_account_not_the_form(client, signed, monkeypatch, admin_headers, disabled):
+    seen = []
+
+    async def fake_ideas(brief, digest):
+        seen.append(brief.author.value); return ([], "")
+
+    monkeypatch.setattr(main.generator, "generate_ideas_from", fake_ideas)
+    client.post("/me", headers=signed("tok-new"), json={"profile": PROFILE})
+    client.put("/admin/accounts/uid-new/status", headers=admin_headers, json={"status": "approved", "role": "creator"})
+    r = client.post("/projects", headers=signed("tok-new"), json=BRIEF)
+    assert r.status_code == 201 and r.json()["brief"]["author"] == "creator" and seen == ["creator"]
+    client.put("/admin/accounts/uid-new/status", headers=admin_headers, json={"status": "approved", "role": "specialist"})
+    assert client.post("/me", headers=signed("tok-new")).json()["role"] == "specialist"
+    assert client.post("/projects", headers=signed("tok-new"), json={**BRIEF, "author": "creator"}).json()["brief"]["author"] == "specialist"
+
+
+def test_editing_the_profile_flags_a_new_specialization(client, signed):
+    r = client.put("/me/profile", headers=signed("tok-a"), json=PROFILE)
+    assert r.status_code == 200 and r.json()["specialization_changed"] is True
+    again = client.put("/me/profile", headers=signed("tok-a"), json={**PROFILE, "phone": "+213 666 00 00 00"})
+    assert again.json()["phone"] == "+213 666 00 00 00"
+    assert client.put("/me/profile", headers=signed("tok-a"), json={**PROFILE, "phone": "x"}).status_code == 422
+    assert client.put("/me/profile", json=PROFILE).status_code == 401
+
+
+def test_deleting_an_account_keeps_its_published_signatures_without_the_name(client, signed, monkeypatch):
+    removed = []
+    monkeypatch.setattr(firebase, "delete_user", lambda uid: removed.append(uid) or True)
+    store.save_user("uid-c", "c@example.com", "ج", None, "password", {**PROFILE, "full_name": "جميل"})
+    client.post("/projects/p1/open", headers=signed("tok-c"))
+    signed_r = client.post("/projects/p1/scripts/s1/approve", headers=signed("tok-c"), json={"role": "creator", "name": "جميل"})
+    assert signed_r.status_code == 200
+    assert client.delete("/me", headers=signed("tok-c")).status_code == 204
+    assert removed == ["uid-c"] and store.get_user("uid-c") is None
+    approvals = client.get("/projects/p1").json()["scripts"]["s1"]["approvals"]
+    assert [(a["name"], a["uid"]) for a in approvals if a["role"] == "creator"] == [(store.ANONYMOUS_CREATOR, None)]
+    assert store.list_history("u:uid-c") == []
+
+
+def test_the_app_can_ask_whether_generation_is_paused(client, monkeypatch):
+    from app import flow_settings
+    assert client.get("/status").json()["paused"] is False
+    real = flow_settings.current()
+    monkeypatch.setattr(flow_settings, "current", lambda: real.model_copy(update={"paused": True, "paused_message": "صيانة"}))
+    assert client.get("/status").json() == {"paused": True, "message": "صيانة"}

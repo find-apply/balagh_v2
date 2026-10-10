@@ -101,7 +101,17 @@ users = Table(
     Column("provider", String(40)),
     Column("created_at", DateTime(timezone=True), nullable=False),
     Column("last_seen", DateTime(timezone=True), nullable=False),
+    # What the person gave when signing up, and whether the admin has let the account in.
+    Column("full_name", String(200)),
+    Column("specialization", String(120)),
+    Column("phone", String(40)),
+    Column("status", String(20), nullable=False, default="pending"),
+    # Set by the admin after checking who the person is: it decides who signs their content.
+    Column("role", String(20)),
+    Column("specialization_changed", Boolean, nullable=False, default=False),
 )
+USER_STATUSES = ("pending", "approved", "rejected")
+USER_ROLES = ("specialist", "creator")
 # Projects the admin has made public: they are listed on the landing page and open read-only.
 published = Table(
     "published", metadata,
@@ -122,6 +132,18 @@ if "created_at" not in {c["name"] for c in inspect(engine).get_columns("projects
     with engine.begin() as _conn:
         tz = "TIMESTAMP WITH TIME ZONE" if engine.dialect.name == "postgresql" else "TIMESTAMP"
         _conn.execute(text(f"ALTER TABLE projects ADD COLUMN created_at {tz}"))
+# Accounts from before sign-ups were reviewed get the profile columns; they were already in, so they stay approved.
+_user_cols = {c["name"] for c in inspect(engine).get_columns("users")}
+with engine.begin() as _conn:
+    for _name, _type in (("full_name", "VARCHAR(200)"), ("specialization", "VARCHAR(120)"), ("phone", "VARCHAR(40)")):
+        if _name not in _user_cols:
+            _conn.execute(text(f"ALTER TABLE users ADD COLUMN {_name} {_type}"))
+    if "status" not in _user_cols:
+        _conn.execute(text("ALTER TABLE users ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'approved'"))
+    if "role" not in _user_cols:
+        _conn.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(20)"))
+    if "specialization_changed" not in _user_cols:
+        _conn.execute(text("ALTER TABLE users ADD COLUMN specialization_changed BOOLEAN NOT NULL DEFAULT FALSE"))
 
 
 def save(project: Project) -> None:
@@ -251,15 +273,99 @@ def move_history(from_key: str, to_key: str) -> int:
     return moved
 
 
-def save_user(uid: str, email: Optional[str], name: Optional[str], picture: Optional[str], provider: Optional[str]) -> bool:
-    """Records a signed-in account, or refreshes its profile. True the first time the account is seen."""
+def save_user(uid: str, email: Optional[str], name: Optional[str], picture: Optional[str], provider: Optional[str],
+              profile: Optional[dict] = None) -> bool:
+    """Records a signed-in account, or refreshes its profile. A new account waits for the admin's approval.
+    `profile` (full_name, specialization, phone) fills in the sign-up details; it never changes the status.
+    True the first time the account is seen."""
     now = datetime.now(timezone.utc)
-    values = dict(email=email, name=name, picture=picture, provider=provider, last_seen=now)
+    values = dict(email=email, name=name, picture=picture, provider=provider, last_seen=now, **(profile or {}))
     with engine.begin() as conn:
         if conn.execute(update(users).where(users.c.uid == uid).values(**values)).rowcount:
             return False
-        conn.execute(insert(users).values(uid=uid, created_at=now, **values))
+        conn.execute(insert(users).values(uid=uid, created_at=now, status="pending", **values))
         return True
+
+
+_ACCOUNT_COLS = (users.c.uid, users.c.email, users.c.name, users.c.picture, users.c.provider, users.c.full_name,
+                 users.c.specialization, users.c.phone, users.c.status, users.c.role, users.c.specialization_changed,
+                 users.c.created_at, users.c.last_seen)
+
+
+def _account(row) -> dict:
+    return dict(row._mapping, created_at=_aware(row.created_at), last_seen=_aware(row.last_seen))
+
+
+def get_user(uid: str) -> Optional[dict]:
+    with engine.connect() as conn:
+        row = conn.execute(select(*_ACCOUNT_COLS).where(users.c.uid == uid)).first()
+    return _account(row) if row else None
+
+
+def user_status(uid: str) -> Optional[str]:
+    """The account's review status, or None when the account has never called /me."""
+    with engine.connect() as conn:
+        return conn.execute(select(users.c.status).where(users.c.uid == uid)).scalar()
+
+
+def list_users(status: Optional[str] = None) -> list[dict]:
+    """Accounts, newest first; only those with `status` when given."""
+    q = select(*_ACCOUNT_COLS).order_by(users.c.created_at.desc())
+    if status:
+        q = q.where(users.c.status == status)
+    with engine.connect() as conn:
+        return [_account(r) for r in conn.execute(q)]
+
+
+def user_role(uid: str) -> Optional[str]:
+    with engine.connect() as conn:
+        return conn.execute(select(users.c.role).where(users.c.uid == uid)).scalar()
+
+
+def set_user_status(uid: str, status: str, role: Optional[str] = None) -> bool:
+    """The admin's decision. A role given with it is the one the admin settled on after checking the person;
+    a reviewed account no longer carries a pending change of specialization."""
+    values: dict = dict(status=status, specialization_changed=False)
+    if role:
+        values["role"] = role
+    with engine.begin() as conn:
+        return conn.execute(update(users).where(users.c.uid == uid).values(**values)).rowcount > 0
+
+
+def update_profile(uid: str, full_name: str, phone: str, specialization: str) -> Optional[dict]:
+    """The person corrects their details. A new specialization is flagged for the admin, who may change the
+    role; the account stays open meanwhile."""
+    with engine.begin() as conn:
+        old = conn.execute(select(users.c.specialization, users.c.specialization_changed).where(users.c.uid == uid)).first()
+        if old is None:
+            return None
+        changed = bool(old.specialization_changed) or (old.specialization or "") != specialization
+        conn.execute(update(users).where(users.c.uid == uid).values(
+            full_name=full_name, phone=phone, specialization=specialization, specialization_changed=changed))
+    return get_user(uid)
+
+
+ANONYMOUS_CREATOR = "صانع محتوى"
+
+
+def delete_user(uid: str) -> bool:
+    """Deletes an account and its personal data. Its history and its ratings' names go; what it signed on
+    published versions stays, signed «صانع محتوى» without a name."""
+    with engine.begin() as conn:
+        removed = conn.execute(delete(users).where(users.c.uid == uid)).rowcount
+        conn.execute(delete(history).where(history.c.client_id == f"u:{uid}"))
+        conn.execute(update(feedback).where(feedback.c.user_id == uid).values(name="مشاهد", user_id=None))
+        for pid, data in conn.execute(select(projects.c.id, projects.c.data)).all():
+            stored = json.loads(data)
+            touched = False
+            for script in stored["project"]["scripts"].values():
+                for entry in script.get("approvals", []) + script.get("change_requests", []):
+                    if entry.get("uid") == uid:
+                        entry["name"], entry["uid"] = ANONYMOUS_CREATOR, None
+                        touched = True
+            if touched:
+                conn.execute(update(projects).where(projects.c.id == pid).values(data=json.dumps(stored, ensure_ascii=False)))
+    return bool(removed)
 
 
 def count_users() -> int:

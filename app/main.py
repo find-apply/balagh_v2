@@ -9,13 +9,13 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from google.genai import errors as genai_errors
 
-from . import admin, auth, flow_settings, generator, inspiration, screen, store
+from . import admin, auth, firebase, flow_settings, generator, inspiration, screen, store
 from .auth import User, current_user, owner_key
 from .schemas import (
-    Approval, ApproveIn, BriefIn, ChangeRequest, ChangeRequestIn, Feedback, FeedbackIn, HistoryEntry, InviteIn, InviteOut, LocalizeIn, Project, ReviewReport, ReviewRole, ReviseIn, Script, ScriptIn, StoryIn,
+    Approval, ApproveIn, AuthorRole, BriefIn, ChangeRequest, ChangeRequestIn, Feedback, FeedbackIn, HistoryEntry, InviteIn, InviteOut, LocalizeIn, Project, ReviewReport, ReviewRole, ReviseIn, Script, ScriptIn, StoryIn,
     SourceInfo, TemplateIn, Video, VideoIn, VideoStatus, VideoTemplate,
 )
 from .video import catalog, render, story
@@ -152,6 +152,10 @@ async def create_project(brief: BriefIn, x_client_id: Optional[str] = Header(def
         digest = await inspiration.digest(source, "Arabic" if brief.language == "ar" else "English") if source else None
     finally:
         inspiration.discard(source)  # read once; the digest is what is kept
+    if user:
+        # A signed-in person's standing is the one the admin set on their account, not what the form says.
+        role = AuthorRole.specialist if store.user_role(user.uid) == "specialist" else AuthorRole.creator
+        brief = brief.model_copy(update={"author": role})
     ideas, summary = await generator.generate_ideas_from(brief, digest)
     info = SourceInfo(kind=source.kind, label=source.label, url=source.url, summary=summary or (digest.summary if digest else ""), digest=digest) if source else None
     project = Project(id=uuid4().hex, brief=brief.model_copy(update={"source_file": None}), ideas=ideas, source=info)
@@ -292,7 +296,7 @@ async def invite(project_id: str, body: InviteIn) -> InviteOut:
 
 
 @app.post("/projects/{project_id}/scripts/{script_id}/approve", response_model=Script)
-async def approve_script(project_id: str, script_id: str, body: ApproveIn) -> Script:
+async def approve_script(project_id: str, script_id: str, body: ApproveIn, user: Optional[User] = Depends(current_user)) -> Script:
     """Step 6: a named human signs off on this exact version in one role. Export opens once every
     role the version requires has signed off."""
     project = _get_project(project_id)
@@ -301,7 +305,8 @@ async def approve_script(project_id: str, script_id: str, body: ApproveIn) -> Sc
     if any(c.role == body.role for c in script.change_requests):
         raise HTTPException(status_code=409, detail="هذا الدور طلب تعديلا على هذه النسخة؛ يُصحَّح في نسخة جديدة ثم يُراجع من جديد.")
     script.approvals = [a for a in script.approvals if a.role != body.role]
-    script.approvals.append(Approval(role=body.role, name=body.name.strip(), at=datetime.now(timezone.utc), note=(body.note or "").strip()))
+    script.approvals.append(Approval(role=body.role, name=body.name.strip(), at=datetime.now(timezone.utc), note=(body.note or "").strip(),
+                                     uid=user.uid if user else None))
     store.save(project)
     return script
 
@@ -319,14 +324,15 @@ async def export_script(project_id: str, script_id: str) -> Script:
 
 
 @app.post("/projects/{project_id}/scripts/{script_id}/request-changes", response_model=Script)
-async def request_changes(project_id: str, script_id: str, body: ChangeRequestIn) -> Script:
+async def request_changes(project_id: str, script_id: str, body: ChangeRequestIn, user: Optional[User] = Depends(current_user)) -> Script:
     """A reviewer declines this version and says what must change. The version cannot be approved any more:
     the creator corrects it in a new version (the note feeds the correction) and the reviewer signs that one."""
     project = _get_project(project_id)
     script = _get_script(project, script_id)
     _check_invite(project_id, body.role, body.invite)
     script.change_requests = [c for c in script.change_requests if c.role != body.role]
-    script.change_requests.append(ChangeRequest(role=body.role, name=body.name.strip(), note=body.note.strip(), at=datetime.now(timezone.utc)))
+    script.change_requests.append(ChangeRequest(role=body.role, name=body.name.strip(), note=body.note.strip(), at=datetime.now(timezone.utc),
+                                                uid=user.uid if user else None))
     script.approvals = [a for a in script.approvals if a.role != body.role]
     store.save(project)
     return script
@@ -498,21 +504,84 @@ async def library(x_client_id: Optional[str] = Header(default=None), limit: int 
     return items[:max(1, min(limit, 200))]
 
 
+class Profile(BaseModel):
+    full_name: str = Field(min_length=2, max_length=200)
+    specialization: str = Field(min_length=2, max_length=120)
+    phone: str = Field(min_length=6, max_length=40, pattern=r"^\+?[0-9 ()-]{6,40}$")
+
+
+class SignIn(BaseModel):
+    profile: Optional[Profile] = None
+
+
 class Me(BaseModel):
     uid: str
     email: Optional[str]
     name: Optional[str]
     picture: Optional[str]
     provider: Optional[str]
+    full_name: Optional[str] = None
+    specialization: Optional[str] = None
+    phone: Optional[str] = None
+    status: str = "pending"
+    role: Optional[str] = Field(default=None, description="specialist or creator, set by the admin when approving.")
+    specialization_changed: bool = False
     moved: int = 0
 
 
-@app.post("/me", response_model=Me)
-async def sign_in(user: Optional[User] = Depends(current_user), x_client_id: Optional[str] = Header(default=None)) -> Me:
-    """Called after signing in: records the account, and carries this device's history over to it, so what was
-    made before signing in is not lost. Safe to call at every launch."""
+def _me(user: User, account: dict, moved: int = 0) -> Me:
+    return Me(**user.model_dump(), full_name=account["full_name"], specialization=account["specialization"],
+              phone=account["phone"], status=account["status"], role=account["role"],
+              specialization_changed=bool(account["specialization_changed"]), moved=moved)
+
+
+@app.put("/me/profile", response_model=Me)
+async def edit_profile(body: Profile, user: Optional[User] = Depends(current_user)) -> Me:
+    """An approved account corrects its details. A new specialization goes to the admin, who may change the
+    role; the account stays open meanwhile. The role itself is never the person's to change."""
     if user is None:
         raise HTTPException(status_code=401, detail="سجّل الدخول أولا.")
-    store.save_user(user.uid, user.email, user.name, user.picture, user.provider)
-    moved = store.move_history(x_client_id[:64], owner_key(user, None)) if x_client_id else 0
-    return Me(**user.model_dump(), moved=moved)
+    account = store.update_profile(user.uid, body.full_name.strip(), body.phone.strip(), body.specialization.strip())
+    if account is None:
+        raise HTTPException(status_code=404, detail="الحساب غير موجود.")
+    return _me(user, account)
+
+
+@app.delete("/me", status_code=204)
+async def delete_me(user: Optional[User] = Depends(auth.signed_in_user)) -> Response:
+    """Deletes the account: its details, its history and its ratings' names. Versions it signed that the
+    platform published stay, signed «صانع محتوى» without a name. Its Firebase sign-in goes too."""
+    if user is None:
+        raise HTTPException(status_code=401, detail="سجّل الدخول أولا.")
+    store.delete_user(user.uid)
+    firebase.delete_user(user.uid)
+    return Response(status_code=204)
+
+
+class Status(BaseModel):
+    paused: bool
+    message: str
+
+
+@app.get("/status", response_model=Status)
+async def status() -> Status:
+    """Whether generation is open, so the app can say so before the person fills in a brief."""
+    cfg = flow_settings.current()
+    return Status(paused=cfg.paused, message=cfg.paused_message or ("التوليد متوقف مؤقتا للصيانة، حاول لاحقا." if cfg.paused else ""))
+
+
+@app.post("/me", response_model=Me)
+async def sign_in(body: Optional[SignIn] = None, user: Optional[User] = Depends(auth.signed_in_user),
+                  x_client_id: Optional[str] = Header(default=None)) -> Me:
+    """Called after signing in, and at every launch: records the account (with the sign-up details when given)
+    and answers its review status. A new account waits for the admin; only an approved one gets this device's
+    history carried over to it."""
+    if user is None:
+        raise HTTPException(status_code=401, detail="سجّل الدخول أولا.")
+    profile = body.profile.model_dump() if body and body.profile else None
+    store.save_user(user.uid, user.email, user.name, user.picture, user.provider, profile)
+    account = store.get_user(user.uid)
+    moved = 0
+    if account["status"] == "approved" and x_client_id:
+        moved = store.move_history(x_client_id[:64], owner_key(user, None))
+    return _me(user, account, moved)

@@ -12,7 +12,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
 
-from . import flow_settings, generator, sources, store
+from . import firebase, flow_settings, generator, sources, store
 from .flow_settings import FlowSettings
 from .schemas import AuthorRole, ContentLevel, Feedback, Project, ReviewRole
 from .video import catalog
@@ -222,6 +222,7 @@ async def overview() -> dict:
             "awaiting": sum(not s.approved for s in scripts),
             "specialist": sum(s.needs_specialist_review for s in scripts),
             "localized": sum(s.localized_from is not None for s in scripts),
+            "pending_accounts": len(store.list_users("pending")),
         },
         "by_language": {l: sum(p.brief.language.value == l for p, _ in projects) for l in ("ar", "en")},
         "by_level": {l.value: sum(s.content_level == l for s in scripts) for l in ContentLevel},
@@ -347,6 +348,48 @@ async def feedback() -> FeedbackReport:
                                    average=round(sum(f.stars for f in mine) / len(mine), 2) if mine else None, by_role=by_role))
     rows.sort(key=lambda r: (r.average is None, -(r.average or 0)))
     return FeedbackReport(templates=rows, items=items)
+
+
+class AccountRow(BaseModel):
+    uid: str
+    email: Optional[str]
+    name: Optional[str]
+    picture: Optional[str]
+    provider: Optional[str]
+    full_name: Optional[str]
+    specialization: Optional[str]
+    phone: Optional[str]
+    status: str
+    role: Optional[str] = None
+    specialization_changed: bool = False
+    created_at: Optional[datetime]
+    last_seen: Optional[datetime]
+
+
+@router.get("/accounts", response_model=list[AccountRow])
+async def accounts(status: Optional[str] = Query(None, pattern="^(pending|approved|rejected)$")) -> list[AccountRow]:
+    """Signed-up accounts, newest first; `status=pending` lists the ones waiting for review."""
+    return [AccountRow(**a) for a in store.list_users(status)]
+
+
+class AccountStatusIn(BaseModel):
+    status: str = Field(pattern="^(approved|rejected|pending)$")
+    role: Optional[str] = Field(default=None, pattern="^(specialist|creator)$",
+                                description="Required to approve an account that has none yet: the admin decides it after checking the person.")
+
+
+@router.put("/accounts/{uid}/status", response_model=AccountRow)
+async def set_account_status(uid: str, body: AccountStatusIn) -> AccountRow:
+    """Lets an account in, with the role the admin settled on, or keeps it out. Rejecting also turns its
+    sign-in off in Firebase when the service-account key is configured; approving turns it back on."""
+    account = store.get_user(uid)
+    if account is None:
+        raise HTTPException(status_code=404, detail="الحساب غير موجود.")
+    if body.status == "approved" and not (body.role or account["role"]):
+        raise HTTPException(status_code=400, detail="حدّد الصفة قبل قبول الحساب: مختص شرعي أو صانع محتوى.")
+    store.set_user_status(uid, body.status, body.role)
+    firebase.set_disabled(uid, body.status == "rejected")
+    return AccountRow(**store.get_user(uid))
 
 
 @router.get("/runs", response_model=list[RunRow])
