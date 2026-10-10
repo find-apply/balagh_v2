@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "969914896972",
+    "firebase_url": "https://balagh-ecb5c-default-rtdb.firebaseio.com",
+    "project_id": "balagh-ecb5c",
+    "storage_bucket": "balagh-ecb5c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969914896972:android:ef296f878f648554d31ae9",
+        "android_client_info": {
+          "package_name": "space.balagh.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "969914896972-rsf98r5mu80q1stu4mosik9ekr862tvg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZrhDpskPxcTTeBxbjqKp9ULJimjvapb0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "969914896972-rsf98r5mu80q1stu4mosik9ekr862tvg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

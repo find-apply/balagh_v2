@@ -1,8 +1,8 @@
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import type { ReactElement, ReactNode } from 'react'
+import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { RefreshControlProps, StyleProp, TextInputProps, ViewStyle } from 'react-native'
-import type { ReactElement } from 'react'
 import { C, F, R, isQuranic, shownQuran } from '../theme'
 import type { Task } from '../shared/tasks'
 
@@ -91,45 +91,102 @@ export function Field({ label, ...props }: TextInputProps & { label: string }) {
 export function Progress({ task, started, error, onRetry }: { task: Task; started: number; error?: string | null; onRetry?: () => void }) {
   const since = () => Math.max(0, Math.floor((Date.now() - started) / 1000))
   const [seconds, setSeconds] = useState(since)
+  const still = useReducedMotion()
+  const [turn] = useState(() => new Animated.Value(0))
+  const [back] = useState(() => new Animated.Value(0))
+  const [pulse] = useState(() => new Animated.Value(0))
   useEffect(() => {
     const t = setInterval(() => setSeconds(since()), 1000)
     return () => clearInterval(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [started])
+  useEffect(() => {
+    if (still || error) return
+    const loops = [
+      Animated.loop(Animated.timing(turn, { toValue: 1, duration: 6000, easing: Easing.linear, useNativeDriver: true })),
+      Animated.loop(Animated.timing(back, { toValue: 1, duration: 9000, easing: Easing.linear, useNativeDriver: true })),
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulse, { toValue: 1, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(pulse, { toValue: 0, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ]),
+      ),
+    ]
+    loops.forEach((l) => l.start())
+    return () => loops.forEach((l) => l.stop())
+  }, [still, error, turn, back, pulse])
+
   if (error)
     return (
-      <Card tone="bad">
-        <H3>تعذّر: {task.title}</H3>
-        <P>{error}</P>
-        {onRetry && <Button title="أعد المحاولة" kind="ghost" onPress={onRetry} />}
-      </Card>
-    )
-  const share = task.expected / Math.max(1, task.stages.length)
-  const current = Math.min(Math.floor(seconds / share), task.stages.length - 1)
-  const percent = Math.round(92 * (1 - Math.exp(-seconds / (task.expected * 0.6))))
-  return (
-    <Card>
-      <Row>
-        <ActivityIndicator color={C.brand} />
-        <View style={{ flex: 1 }}>
-          <H3>{task.title}</H3>
+      <View style={s.progressError} accessibilityRole="alert">
+        <View style={s.progressErrorHead}>
+          <Ionicons name="alert-circle" size={22} color={C.bad} />
+          <Text style={[s.h3, { color: C.bad, flex: 1 }]}>تعذّر: {task.title}</Text>
         </View>
-        <P muted small>
+        <P>{error}</P>
+        {onRetry && <Button title="أعد المحاولة" kind="danger" onPress={onRetry} />}
+      </View>
+    )
+  const stages = task.stages
+  const share = task.expected / Math.max(1, stages.length)
+  const current = Math.min(Math.floor(seconds / share), stages.length - 1)
+  const percent = Math.round(92 * (1 - Math.exp(-seconds / (task.expected * 0.6))))
+  const spin = turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] })
+  const spinBack = back.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '-360deg'] })
+  const glow = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] })
+  return (
+    <View style={s.progress}>
+      <View style={s.progressHero}>
+        <View style={s.star} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+          <Animated.View style={[s.starRing, { transform: [{ rotate: spinBack }] }]} />
+          <Animated.View style={[StyleSheet.absoluteFill, s.center, { transform: [{ rotate: spin }] }]}>
+            <View style={[s.starSquare, { borderColor: C.brand }]} />
+            <View style={[s.starSquare, { borderColor: C.gold, transform: [{ rotate: '45deg' }] }]} />
+          </Animated.View>
+          <View style={s.starDot} />
+        </View>
+        <Text style={s.progressTitle} accessibilityRole="header">{task.title}</Text>
+        <Text style={s.progressTime} accessibilityLiveRegion="polite">
           {seconds} ث من نحو {task.expected < 60 ? `${task.expected} ث` : 'دقيقة'}
-        </P>
-      </Row>
-      <View style={s.bar}>
+        </Text>
+      </View>
+      <View style={s.bar} accessibilityRole="progressbar" accessibilityLabel="التقدم" accessibilityValue={{ min: 0, max: 100, now: percent }}>
         <View style={[s.barFill, { width: `${percent}%` }]} />
       </View>
-      {task.stages.map((stage, i) => (
-        <Text key={stage} style={[s.stage, i < current && s.stageDone, i === current && s.stageNow]}>
-          {i < current ? '✓ ' : i === current ? '◉ ' : '○ '}
-          {stage}
-        </Text>
-      ))}
-      <P muted small>يمكنك الخروج من هذه الشاشة، والعمل يستمر.</P>
-    </Card>
+      {stages.length > 0 && (
+        <View style={s.stages}>
+          {stages.map((stage, i) => {
+            const done = i < current
+            const now = i === current
+            return (
+              <View key={stage} style={s.stageRow} accessibilityLabel={`${stage}${done ? '، تمّ' : now ? '، جارٍ الآن' : ''}`}>
+                <View style={[s.stageDot, (done || now) && { borderColor: C.brand }, done && { backgroundColor: C.brand }]}>
+                  {done && <Ionicons name="checkmark" size={13} color="#fff" />}
+                  {now && <Animated.View style={[s.stagePulse, { opacity: still ? 1 : glow }]} />}
+                </View>
+                <Text style={[s.stage, done && s.stageDone, now && s.stageNow]}>{stage}</Text>
+              </View>
+            )
+          })}
+        </View>
+      )}
+      <View style={s.progressNote}>
+        <Ionicons name="information-circle-outline" size={20} color={C.brand} />
+        <Text style={s.progressNoteText}>يمكنك الخروج من هذه الشاشة، والعمل يستمر.</Text>
+      </View>
+    </View>
   )
+}
+
+/** Whether the system asks for less motion; the progress card then holds still. */
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    void AccessibilityInfo.isReduceMotionEnabled().then(setReduced, () => undefined)
+    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced)
+    return () => sub.remove()
+  }, [])
+  return reduced
 }
 
 export function Stars({ value, onChange, size = 30 }: { value: number; onChange?: (n: number) => void; size?: number }) {
@@ -174,9 +231,26 @@ export const s = StyleSheet.create({
   badgeText: { fontSize: 12, fontFamily: F.semibold },
   notice: { borderRadius: 12, padding: 12 },
   input: { fontFamily: F.regular, borderWidth: 1, borderColor: C.lineStrong, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 16, backgroundColor: C.surface, color: C.ink },
-  bar: { height: 6, borderRadius: 3, backgroundColor: C.line, overflow: 'hidden' },
-  barFill: { height: 6, backgroundColor: C.brand },
-  stage: { fontSize: 14, color: C.muted, lineHeight: 22, fontFamily: F.regular },
-  stageDone: { color: C.ok },
+  bar: { height: 8, borderRadius: 4, backgroundColor: '#ebe8df', overflow: 'hidden' },
+  barFill: { height: 8, borderRadius: 4, backgroundColor: C.brand },
+  stage: { flex: 1, fontSize: 14, color: '#8a938f', lineHeight: 22, fontFamily: F.medium, paddingTop: 1 },
+  stageDone: { color: '#3d4a45' },
   stageNow: { color: C.ink, fontFamily: F.bold },
+  progress: { gap: 20 },
+  progressHero: { alignItems: 'center', gap: 14, paddingTop: 16 },
+  star: { width: 112, height: 112 },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  starRing: { position: 'absolute', top: 4, left: 4, width: 104, height: 104, borderRadius: 52, borderWidth: 2, borderStyle: 'dashed', borderColor: C.line },
+  starSquare: { position: 'absolute', width: 44, height: 44, borderWidth: 2.5 },
+  starDot: { position: 'absolute', top: 50, left: 50, width: 12, height: 12, borderRadius: 6, backgroundColor: C.brand },
+  progressTitle: { fontSize: 20, lineHeight: 30, fontFamily: F.bold, color: C.ink, textAlign: 'center' },
+  progressTime: { fontSize: 14, color: C.muted, fontFamily: F.regular },
+  stages: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 18, padding: 16, gap: 14 },
+  stageRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  stageDot: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: C.lineStrong, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' },
+  stagePulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.brand },
+  progressNote: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: C.brandSoft, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14 },
+  progressNoteText: { flex: 1, fontSize: 13, lineHeight: 22, color: '#0c4a3d', fontFamily: F.regular },
+  progressError: { backgroundColor: C.badBg, borderRadius: 18, padding: 16, gap: 10 },
+  progressErrorHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 })

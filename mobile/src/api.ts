@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import type {
   Brief, Feedback, FeedbackIn, Project, PublicShowcase, ReviewReport, ReviewRole, Script, Video, VideoTemplate,
 } from './shared/types'
+import { idToken } from './firebase'
 
 /** The same API the site uses. Set EXPO_PUBLIC_API_URL to point the app at another server. */
 export const BASE = (process.env.EXPO_PUBLIC_API_URL ?? 'https://balagh.space/api').replace(/\/$/, '')
@@ -38,8 +39,8 @@ export class ApiError extends Error {
   }
 }
 
-// An anonymous per-device id: the server keeps this device's history under it (there are no accounts),
-// exactly as it does for a browser.
+// A per-device id, as a browser has: what this device made before its account was approved is kept under it,
+// and moves to the account once the admin lets it in.
 let client: Promise<string> | null = null
 function clientId(): Promise<string> {
   client ??= (async () => {
@@ -57,10 +58,12 @@ function clientId(): Promise<string> {
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   let response: Response
   try {
+    const token = await idToken()
     response = await fetch(BASE + path, {
       method,
       headers: {
         ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         'X-Client-Id': await clientId(),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -77,8 +80,76 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return response.status === 204 ? (undefined as T) : response.json()
 }
 
+/** What a person gives when signing up; the admin reviews it before the account is let in. */
+export interface Profile {
+  full_name: string
+  specialization: string
+  phone: string
+}
+
+export type AccountStatus = 'pending' | 'approved' | 'rejected'
+
+/** The signed-in account as the server keeps it. */
+export interface Me {
+  uid: string
+  email: string | null
+  name: string | null
+  picture: string | null
+  full_name: string | null
+  specialization: string | null
+  phone: string | null
+  status: AccountStatus
+  /** Set by the admin after checking the person; decides who signs their content. */
+  role: 'specialist' | 'creator' | null
+  /** The person changed their specialization; the admin has not looked at it yet. */
+  specialization_changed: boolean
+  moved: number
+}
+
+/** Whether generation is open; the admin can pause it with a message. */
+export interface FlowStatus {
+  paused: boolean
+  message: string
+}
+
+export interface LocalizeBody {
+  audience: string
+  language: 'ar' | 'en'
+  audience_knowledge: 'familiar' | 'basic' | 'new'
+  dialect: string | null
+  tone: string | null
+}
+
 export const api = {
+  me: (profile?: Profile) => request<Me>('POST', '/me', profile ? { profile } : undefined),
+  updateProfile: (profile: Profile) => request<Me>('PUT', '/me/profile', profile),
+  deleteMe: () => request<void>('DELETE', '/me'),
+  status: () => request<FlowStatus>('GET', '/status'),
+  localize: (projectId: string, scriptId: string, body: LocalizeBody) =>
+    request<Script>('POST', `/projects/${projectId}/scripts/${scriptId}/localize`, body),
   createProject: (brief: Brief) => request<Project>('POST', '/projects', brief),
+  /** A PDF, image or text file to draw the ideas from; the id goes in the brief's source_file. */
+  upload: async (file: { uri: string; name: string; type: string }): Promise<{ id: string; name: string }> => {
+    const form = new FormData()
+    // React Native's FormData takes a file as its uri, name and type.
+    form.append('file', file as unknown as Blob)
+    let response: Response
+    try {
+      const token = await idToken()
+      response = await fetch(BASE + '/uploads', {
+        method: 'POST',
+        body: form,
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'X-Client-Id': await clientId() },
+      })
+    } catch {
+      throw new ApiError(0, 'تعذر رفع الملف. تأكد من اتصالك بالإنترنت.')
+    }
+    if (!response.ok) {
+      const detail = (await response.json().catch(() => null))?.detail
+      throw new ApiError(response.status, typeof detail === 'string' ? detail : `خطأ ${response.status}`)
+    }
+    return response.json()
+  },
   listProjects: () => request<HistoryEntry[]>('GET', '/projects'),
   hideProject: (id: string) => request<void>('DELETE', `/projects/${id}`),
   getProject: (id: string) => request<Project>('GET', `/projects/${id}`),
