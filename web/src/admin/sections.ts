@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import type { IconName } from '../components/Icon'
 import { Account } from './views/Account'
+import { Accounts } from './views/Accounts'
 import { Approvals } from './views/Approvals'
 import { Flow } from './views/Flow'
 import { Overview } from './views/Overview'
@@ -21,6 +22,7 @@ export interface Section {
 export const SECTIONS: Section[] = [
   { key: 'overview', label: 'نظرة عامة', icon: 'dashboard', sub: 'حالة المنصة والمسار في لمحة.', View: Overview },
   { key: 'projects', label: 'المحادثات', icon: 'folder', sub: 'سجل كل ما أُنشئ على المنصة، كما يراه صاحبه. انشر ما تريد أن يراه الناس في الصفحة الرئيسية.', View: Projects },
+  { key: 'accounts', label: 'الحسابات', icon: 'users', sub: 'طلبات التسجيل التي تنتظر القبول، وحالة كل حساب. الحساب الجديد لا يفتح شيئا قبل قبوله.', View: Accounts },
   { key: 'approvals', label: 'الاعتمادات', icon: 'shield', sub: 'النسخ التي لم يكتمل توقيع أدوارها المطلوبة.', View: Approvals },
   { key: 'ratings', label: 'التقييمات', icon: 'users', sub: 'كل ما وصل من تقييمات، ومتوسط كل قالب. اعتمد ما تريد عرضه في الصفحة الرئيسية.', View: Ratings },
   { key: 'runs', label: 'سجل النموذج', icon: 'activity', sub: 'كل استدعاء للنموذج مع زمنه ونتيجته.', View: Runs },

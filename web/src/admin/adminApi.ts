@@ -54,7 +54,7 @@ async function call<T>(method: string, path: string, body?: unknown, token = adm
 }
 
 export interface Overview {
-  totals: { projects: number; scripts: number; approved: number; awaiting: number; specialist: number; localized: number }
+  totals: { projects: number; scripts: number; approved: number; awaiting: number; specialist: number; localized: number; pending_accounts: number }
   by_language: Record<string, number>
   by_level: Record<string, number>
   runs_24h: { total: number; failed: number; by_kind: { kind: string; total: number; failed: number; avg_seconds: number }[] }
@@ -119,7 +119,29 @@ export interface FeedbackReport {
   items: Feedback[]
 }
 
+export type AccountStatus = 'pending' | 'approved' | 'rejected'
+export type AccountRole = 'specialist' | 'creator'
+
+export interface AccountRow {
+  uid: string
+  email: string | null
+  name: string | null
+  picture: string | null
+  provider: string | null
+  full_name: string | null
+  specialization: string | null
+  phone: string | null
+  status: AccountStatus
+  role: AccountRole | null
+  specialization_changed: boolean
+  created_at: string | null
+  last_seen: string | null
+}
+
 export const adminApi = {
+  accounts: (status?: AccountStatus) => call<AccountRow[]>('GET', `/accounts${status ? `?status=${status}` : ''}`),
+  setAccountStatus: (uid: string, status: AccountStatus, role?: AccountRole) =>
+    call<AccountRow>('PUT', `/accounts/${encodeURIComponent(uid)}/status`, { status, role }),
   feedback: () => call<FeedbackReport>('GET', '/feedback'),
   check: (token: string) => call<{ ok: boolean }>('GET', '/session', undefined, token),
   login: (username: string, password: string) => call<{ token: string; username: string; hours: number }>('POST', '/login', { username, password }, ''),
