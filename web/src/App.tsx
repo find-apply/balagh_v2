@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount } from './account'
 import { api, ApiError } from './api'
+import type { Me } from './api'
 import { AdminApp } from './admin/AdminApp'
+import { AccountGate, gated } from './components/AccountGate'
 import { BriefForm } from './components/BriefForm'
 import { HistorySidebar } from './components/HistorySidebar'
 import { Landing } from './components/Landing'
@@ -73,6 +75,7 @@ export default function App() {
   // copy is the offline fallback. Entries only known locally (from before server history existed) are
   // registered by opening them once. It reloads when the account changes.
   const user = useAccount()
+  const [me, setMe] = useState<Me | null>(null)
   const lastUid = useRef<string | null>(null)
   useEffect(() => {
     if (user === undefined) return
@@ -84,7 +87,8 @@ export default function App() {
       saveHistory([])
       setHistory([])
     }
-    ;(uid ? api.me().catch(() => null) : Promise.resolve(null)).then(() => api.listProjects()).then(
+    if (!uid) setMe(null)
+    ;(uid ? api.me().then(setMe, () => null) : Promise.resolve(null)).then(() => api.listProjects()).then(
       (remote) => {
         const known = new Set(remote.map((r) => r.id))
         const local = loadHistory().filter((e) => !known.has(e.id))
@@ -243,6 +247,10 @@ export default function App() {
       }
     >
         <main className="main-inner">
+          {user && me && gated(me) ? (
+            <AccountGate me={me} onChange={setMe} />
+          ) : (
+          <>
           {error && (
             <div className="notice bad" role="alert">
               <strong>تعذر إكمال الطلب</strong>
@@ -324,6 +332,8 @@ export default function App() {
           )}
 
           {(busy?.kind === 'approve' || busy?.kind === 'template') && <Toast label={busy.task.title} />}
+          </>
+          )}
 
           <p className="disclosure">
             أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة

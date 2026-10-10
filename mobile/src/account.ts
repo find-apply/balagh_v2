@@ -136,7 +136,7 @@ export function signInMessage(e: unknown): string | null {
     'auth/operation-not-allowed': 'الدخول بالبريد غير مفعّل في إعدادات Firebase.',
     'auth/network-request-failed': 'تعذر الاتصال. تأكد من اتصالك بالإنترنت.',
     'auth/too-many-requests': 'محاولات كثيرة. انتظر قليلا ثم أعد المحاولة.',
-    'auth/user-disabled': 'هذا الحساب موقوف. تواصل مع الإدارة.',
+    'auth/user-disabled': 'لم يُقبل هذا الحساب أو أُوقف. للاستفسار راسلنا على admin@balagh.space',
   }
   return known[code] ?? (e instanceof Error ? e.message : String(e))
 }

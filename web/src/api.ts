@@ -4,6 +4,27 @@ import type { Brief, Feedback, FeedbackIn, PublicShowcase, LocalizeRequest, Proj
 
 export const BASE = (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8010').replace(/\/$/, '')
 
+/** What a person gives when signing up; the admin reviews it before the account is let in. */
+export interface Profile {
+  full_name: string
+  specialization: string
+  phone: string
+}
+
+/** The signed-in account as the server keeps it. */
+export interface Me {
+  uid: string
+  email: string | null
+  name: string | null
+  provider: string | null
+  full_name: string | null
+  specialization: string | null
+  phone: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  role: 'specialist' | 'creator' | null
+  moved: number
+}
+
 export class ApiError extends Error {
   status: number
   referral: boolean
@@ -75,8 +96,9 @@ export const api = {
     return response.json()
   },
   listProjects: () => request<HistoryEntry[]>('GET', '/projects'),
-  /** After signing in: records the account and moves this browser's history to it. */
-  me: () => request<{ uid: string; email: string | null; name: string | null; moved: number }>('POST', '/me'),
+  /** After signing in: records the account (with its sign-up details, once) and, once the admin approved it,
+   * moves this browser's history to it. */
+  me: (profile?: Profile) => request<Me>('POST', '/me', profile ? { profile } : undefined),
   hideProject: (id: string) => request<void>('DELETE', `/projects/${id}`),
   getProject: (id: string) => request<Project>('GET', `/projects/${id}`),
   /** Adds the project to this browser's server-side history; shared marks one opened from a review link. */

@@ -4432,3 +4432,62 @@ a.logo:hover {
   margin: 0;
   text-align: center;
 }
+
+/* A signed-in account the admin has not approved yet: its details, then the wait or the refusal. */
+.account-gate {
+  max-width: 520px;
+  margin: 24px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-gate h2 {
+  margin: 0;
+}
+
+.account-gate > .badge {
+  align-self: flex-start;
+}
+
+.account-gate form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-details {
+  margin: 0;
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 4px 14px;
+}
+
+.account-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.account-details > div:last-child {
+  border-bottom: 0;
+}
+
+.account-details dt {
+  color: var(--muted);
+}
+
+.account-details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+}

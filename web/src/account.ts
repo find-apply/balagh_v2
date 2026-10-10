@@ -54,6 +54,7 @@ export function authMessage(e: unknown): string {
     'auth/wrong-password': 'كلمة المرور غير صحيحة.',
     'auth/email-already-in-use': 'هذا البريد مسجّل من قبل: سجّل الدخول به.',
     'auth/weak-password': 'كلمة المرور قصيرة: 6 أحرف على الأقل.',
+    'auth/user-disabled': 'لم يُقبل هذا الحساب أو أُوقف. للاستفسار راسلنا على admin@balagh.space',
     'auth/too-many-requests': 'محاولات كثيرة. انتظر قليلا ثم أعد المحاولة.',
     'auth/popup-closed-by-user': 'أُغلقت نافذة Google قبل إتمام الدخول.',
     'auth/popup-blocked': 'المتصفح منع نافذة Google: اسمح بالنوافذ المنبثقة لهذا الموقع.',
