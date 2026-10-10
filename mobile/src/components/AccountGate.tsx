@@ -488,7 +488,8 @@ function SignIn() {
 
 /** The first sign-in with Google: the name comes from Google, the rest is asked here. */
 function CompleteProfile({ me }: { me: Me }) {
-  const fromGoogle = !me.full_name && !!me.name
+  const google = me.provider === 'google.com'
+  const fromGoogle = google && !me.full_name && !!me.name
   const [fullName, setFullName] = useState(me.full_name ?? me.name ?? '')
   const [specialization, setSpecialization] = useState(me.specialization ?? '')
   const [phone, setPhone] = useState(me.phone ?? '')
@@ -528,14 +529,14 @@ function CompleteProfile({ me }: { me: Me }) {
           <Text style={sh.avatarText}>{initial}</Text>
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={sh.chipLabel}>{me.name ? 'دخلت بحساب Google' : 'دخلت بحسابك'}</Text>
+          <Text style={sh.chipLabel}>{google ? 'دخلت بحساب Google' : 'دخلت بالبريد'}</Text>
           {!!me.email && (
             <Text style={sh.chipEmail} numberOfLines={1}>
               {ltr(me.email)}
             </Text>
           )}
         </View>
-        {!!me.name && <Ionicons name="logo-google" size={20} color="#4285F4" />}
+        {google ? <Ionicons name="logo-google" size={20} color="#4285F4" /> : <Ionicons name="mail-outline" size={20} color={C.muted} />}
       </View>
       <ProfileFields
         fullName={fullName}

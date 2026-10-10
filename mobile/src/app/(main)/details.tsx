@@ -11,7 +11,8 @@ import { VideoPlayer } from '@/components/VideoPlayer'
 import { duration } from '@/components/tabs/format'
 import { markVideosSeen } from '@/prefs'
 import { GROUPS } from '@/shared/audiences'
-import { aspectOf, ASPECTS, AUTHORS, LANGUAGES, PLATFORMS, REVIEWERS, ROLES } from '@/shared/labels'
+import { roleLabel } from '@/components/tabs/role'
+import { aspectOf, ASPECTS, LANGUAGES, PLATFORMS, REVIEWERS, ROLES } from '@/shared/labels'
 import type { Language, Platform, Project, Video, VideoTemplate } from '@/shared/types'
 import { C, F } from '@/theme'
 
@@ -196,7 +197,7 @@ export default function Details() {
           </Group>
           <View style={st.kvLine}>
             <Text style={st.groupLabel}>صفة صانع المحتوى</Text>
-            <Text style={st.kvValue}>{AUTHORS[script.author].label}</Text>
+            <Text style={st.kvValue}>{roleLabel(script.author)}</Text>
           </View>
         </Section>
 

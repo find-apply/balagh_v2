@@ -6,12 +6,13 @@ import { api, ApiError } from '@/api'
 import { IconCircle } from '@/components/kit'
 import { BigButton, Choice, Choices, p, Section, SectionTitle } from '@/components/project/parts'
 import { useRole } from '@/components/project/role'
+import { roleLabel } from '@/components/tabs/role'
 import { NO_SOURCE, SourcePicker } from '@/components/project/SourcePicker'
 import type { Source } from '@/components/project/SourcePicker'
-import { Progress, s, Screen } from '@/components/ui'
+import { Notice, Progress, s, Screen } from '@/components/ui'
 import { clearJob, run, useJob } from '@/jobs'
 import { GROUPS } from '@/shared/audiences'
-import { ASPECTS, AUTHORS, aspectOf, LANGUAGES, PLATFORMS } from '@/shared/labels'
+import { ASPECTS, aspectOf, LANGUAGES, PLATFORMS } from '@/shared/labels'
 import { TASKS } from '@/shared/tasks'
 import type { Brief, Language, Platform } from '@/shared/types'
 import { C, F } from '@/theme'
@@ -207,12 +208,12 @@ export default function New() {
           <Text style={p.muted}>الفيديو {ASPECTS[aspect]}.</Text>
         </Section>
 
-        <View style={st.role} accessibilityLabel={`صفتك: ${AUTHORS[role].label}. ${set ? 'حددتها الإدارة بعد التحقق' : 'لم تحددها الإدارة بعد'}`} accessible>
+        <View style={st.role} accessibilityLabel={`صفتك: ${roleLabel(role)}. ${set ? 'حددتها الإدارة بعد التحقق' : 'لم تحددها الإدارة بعد'}`} accessible>
           <View style={st.roleIcon}>
             <Ionicons name="person-outline" size={18} color={C.brand} />
           </View>
           <View style={{ flex: 1, gap: 1 }}>
-            <Text style={st.roleTitle}>صفتك: {AUTHORS[role].label}</Text>
+            <Text style={st.roleTitle}>صفتك: {roleLabel(role)}</Text>
             <Text style={st.roleSub}>
               {set ? 'حددتها الإدارة بعد التحقق. ' : 'لم تحددها الإدارة بعد. '}
               {role === 'specialist' ? 'تعتمد محتواك بنفسك، وتطلب مراجعة غيرك إن شئت.' : 'يراجع كل نسخة مختص شرعي قبل النشر.'}
@@ -222,8 +223,9 @@ export default function New() {
         </View>
       </View>
 
+      {!!sourceError && <Notice tone="bad">{sourceError}</Notice>}
       <BigButton
-        title={uploading ? 'يرفع الملف…' : source.url.trim() || source.file ? 'اقترح ثلاث أفكار من المصدر' : 'اقترح ثلاث أفكار'}
+        title={uploading ? 'يرفع الملف…' : source.url.trim() || source.file ? 'اقترح أفكارا من المصدر' : 'اقترح ثلاث أفكار'}
         onPress={() => void submit()}
         disabled={off || uploading}
       />

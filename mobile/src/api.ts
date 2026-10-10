@@ -95,6 +95,8 @@ export interface Me {
   email: string | null
   name: string | null
   picture: string | null
+  /** How the person signed in: 'google.com' or 'password'. */
+  provider: string | null
   full_name: string | null
   specialization: string | null
   phone: string | null
@@ -131,24 +133,30 @@ export const api = {
   /** A PDF, image or text file to draw the ideas from; the id goes in the brief's source_file. */
   upload: async (file: { uri: string; name: string; type: string }): Promise<{ id: string; name: string }> => {
     const form = new FormData()
-    // React Native's FormData takes a file as its uri, name and type.
+    // React Native's FormData takes a file as its uri, name and type. Expo's fetch does not read such a part,
+    // so the upload goes through XMLHttpRequest, which does.
     form.append('file', file as unknown as Blob)
-    let response: Response
-    try {
-      const token = await idToken()
-      response = await fetch(BASE + '/uploads', {
-        method: 'POST',
-        body: form,
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), 'X-Client-Id': await clientId() },
-      })
-    } catch {
-      throw new ApiError(0, 'تعذر رفع الملف. تأكد من اتصالك بالإنترنت.')
-    }
-    if (!response.ok) {
-      const detail = (await response.json().catch(() => null))?.detail
-      throw new ApiError(response.status, typeof detail === 'string' ? detail : `خطأ ${response.status}`)
-    }
-    return response.json()
+    const token = await idToken()
+    const client = await clientId()
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', BASE + '/uploads')
+      if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      xhr.setRequestHeader('X-Client-Id', client)
+      xhr.timeout = 120_000
+      xhr.onerror = xhr.ontimeout = () => reject(new ApiError(0, 'تعذر رفع الملف. تأكد من اتصالك بالإنترنت.'))
+      xhr.onload = () => {
+        let data: { id?: string; name?: string; detail?: unknown } | null = null
+        try {
+          data = JSON.parse(xhr.responseText)
+        } catch {
+          // Not JSON: the status says what happened.
+        }
+        if (xhr.status >= 200 && xhr.status < 300 && data?.id) resolve({ id: data.id, name: data.name ?? file.name })
+        else reject(new ApiError(xhr.status, typeof data?.detail === 'string' ? data.detail : `خطأ ${xhr.status}`))
+      }
+      xhr.send(form)
+    })
   },
   listProjects: () => request<HistoryEntry[]>('GET', '/projects'),
   hideProject: (id: string) => request<void>('DELETE', `/projects/${id}`),
