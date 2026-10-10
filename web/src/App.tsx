@@ -7,6 +7,7 @@ import { AccountGate, gated } from './components/AccountGate'
 import { BriefForm } from './components/BriefForm'
 import { HistorySidebar } from './components/HistorySidebar'
 import { Landing } from './components/Landing'
+import { DeleteAccountPage, PrivacyPage } from './components/Legal'
 import { Showcase } from './components/Showcase'
 import { ReviewPage } from './components/ReviewPage'
 import { Icon } from './components/Icon'
@@ -218,6 +219,8 @@ export default function App() {
 
   if (route.view === 'admin') return <AdminApp path={route.path} />
   if (route.view === 'examples') return <Showcase onStart={() => go('#/new')} />
+  if (route.view === 'privacy') return <PrivacyPage />
+  if (route.view === 'deleteAccount') return <DeleteAccountPage />
   if (route.view === 'review') return <ReviewPage projectId={route.id} scriptId={route.script} role={route.role} invite={route.invite} />
   if (route.view === 'landing') return <Landing onStart={() => go('#/new')} resume={history.length > 0} />
 

@@ -3,12 +3,12 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
-  ActivityIndicator, AppState, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput,
+  ActivityIndicator, Alert, AppState, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput,
   useWindowDimensions, View,
 } from 'react-native'
 import type { TextInputProps } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { refresh, resetPassword, signInMessage, signInWithEmail, signInWithGoogle, signOutNow, signUpWithEmail } from '@/account'
+import { deleteAccount, refresh, resetPassword, signInMessage, signInWithEmail, signInWithGoogle, signOutNow, signUpWithEmail } from '@/account'
 import type { Account } from '@/account'
 import { ApiError } from '@/api'
 import type { Me, Profile } from '@/api'
@@ -644,8 +644,21 @@ function Pending({ me }: { me: Me }) {
         <Text style={sh.outlineText}>تحقق من حالة الطلب</Text>
       </Pressable>
       <TextButton title="تسجيل الخروج" onPress={() => void signOutNow()} disabled={checking} />
+      <TextButton title="احذف طلبي وحسابي" onPress={confirmDelete} disabled={checking} />
     </Shell>
   )
+}
+
+/** A request waiting for review can be withdrawn: the account and the details it gave are deleted. */
+function confirmDelete() {
+  Alert.alert('حذف الحساب', 'يُحذف حسابك ومعلومات التسجيل نهائيا، ويُلغى طلبك.', [
+    { text: 'إلغاء', style: 'cancel' },
+    {
+      text: 'احذف',
+      style: 'destructive',
+      onPress: () => void deleteAccount().catch((e: unknown) => Alert.alert('تعذر الحذف', e instanceof Error ? e.message : String(e))),
+    },
+  ])
 }
 
 function Rejected({ me }: { me: Me }) {

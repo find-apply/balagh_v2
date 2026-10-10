@@ -15,6 +15,7 @@ import { initial, ltr, roleHint, roleLabel } from '@/components/tabs/role'
 import { Button, Chip, Field, Notice, Row, Screen } from '@/components/ui'
 import { setPrefs, usePrefs } from '@/prefs'
 import type { ViewerRole } from '@/shared/types'
+import { writeToAdmin } from '@/contact'
 import { C, F } from '@/theme'
 
 function Section({ title, sub, children, style }: { title?: string; sub?: string; children: ReactNode; style?: object }) {
@@ -208,6 +209,14 @@ export default function Settings() {
         <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(SITE)} style={st.link}>
           <Text style={st.linkText}>افتح الموقع</Text>
           <Ionicons name="open-outline" size={16} color={C.brand} />
+        </Pressable>
+        <Pressable accessibilityRole="link" onPress={() => void Linking.openURL(`${SITE}/#/privacy`)} style={st.link}>
+          <Text style={st.linkText}>سياسة الخصوصية</Text>
+          <Ionicons name="open-outline" size={16} color={C.brand} />
+        </Pressable>
+        <Pressable accessibilityRole="link" onPress={() => void writeToAdmin()} style={st.link}>
+          <Text style={st.linkText}>تواصل مع الإدارة</Text>
+          <Ionicons name="mail-outline" size={16} color={C.brand} />
         </Pressable>
       </Section>
 

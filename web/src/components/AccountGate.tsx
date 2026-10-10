@@ -129,6 +129,10 @@ function SignOut() {
       <button type="button" className="link" onClick={() => void signOutNow()}>
         الخروج والمتابعة دون حساب
       </button>
+      {' · '}
+      <a className="link" href="#/delete-account">
+        احذف طلبي وحسابي
+      </a>
     </p>
   )
 }

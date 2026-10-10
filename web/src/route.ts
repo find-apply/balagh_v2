@@ -1,6 +1,8 @@
 export type Route =
   | { view: 'landing' }
   | { view: 'examples' }
+  | { view: 'privacy' }
+  | { view: 'deleteAccount' }
   | { view: 'new' }
   | { view: 'admin'; path: string[] }
   | { view: 'project'; id: string; script: string | null }
@@ -24,6 +26,8 @@ export function parseRoute(): Route {
   if (shared && !hash) return { view: 'project', id: shared, script: params.get('script') }
   if (hash === '#/new' || hash === '#studio') return { view: 'new' }
   if (hash === '#/examples') return { view: 'examples' }
+  if (hash === '#/privacy') return { view: 'privacy' }
+  if (hash === '#/delete-account') return { view: 'deleteAccount' }
   return { view: 'landing' }
 }
 

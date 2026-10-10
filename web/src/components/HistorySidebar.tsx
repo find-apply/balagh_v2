@@ -118,6 +118,7 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
         items={[
           { icon: 'book', label: 'عن بلاغ', onClick: onHome },
           { icon: 'cpu', label: 'API', href: `${BASE}/docs`, external: true },
+          { icon: 'shield', label: 'الخصوصية', href: '#/privacy' },
           ...(adminToken.get() ? [{ icon: 'dashboard' as const, label: 'الإدارة', href: '#/admin' }] : []),
         ]}
       />

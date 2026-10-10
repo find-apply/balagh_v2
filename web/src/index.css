@@ -4491,3 +4491,64 @@ a.logo:hover {
   gap: 8px;
   text-decoration: none;
 }
+
+/* The privacy policy and account deletion: plain reading pages the stores link to. */
+.legal-page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 24px 16px 48px;
+}
+
+.legal-head {
+  max-width: 760px;
+  margin: 0 auto 16px;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.legal-body {
+  max-width: 760px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px 28px;
+  line-height: 1.9;
+}
+
+.legal-body h1 {
+  margin-top: 0;
+}
+
+.legal-body h2 {
+  font-size: 1.1rem;
+  margin: 24px 0 6px;
+}
+
+.legal-body ul {
+  padding-inline-start: 20px;
+}
+
+.legal-delete {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+@media (max-width: 600px) {
+  .legal-body {
+    padding: 18px 16px;
+  }
+}
+
+button.danger {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.danger:disabled {
+  opacity: 0.5;
+}

@@ -238,6 +238,9 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
             أداة مدعومة بالذكاء الاصطناعي. النصوص الشرعية تُؤخذ حرفيا من القرآن الكريم والصحيحين، وكل ما عداها صياغة مولَّدة
             يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
           </p>
+          <p className="small">
+            <a href="#/privacy">سياسة الخصوصية</a> · <a href="#/delete-account">حذف الحساب</a>
+          </p>
         </div>
       </footer>
     </div>

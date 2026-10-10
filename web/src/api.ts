@@ -98,6 +98,8 @@ export const api = {
   listProjects: () => request<HistoryEntry[]>('GET', '/projects'),
   /** After signing in: records the account (with its sign-up details, once) and, once the admin approved it,
    * moves this browser's history to it. */
+  /** Deletes the signed-in account for good (see the privacy policy for what stays). */
+  deleteMe: () => request<void>('DELETE', '/me'),
   me: (profile?: Profile) => request<Me>('POST', '/me', profile ? { profile } : undefined),
   hideProject: (id: string) => request<void>('DELETE', `/projects/${id}`),
   getProject: (id: string) => request<Project>('GET', `/projects/${id}`),
