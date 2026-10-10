@@ -7,12 +7,13 @@ import { IconCircle } from '@/components/kit'
 import { BigButton, Choice, Choices, p, Section, SectionTitle } from '@/components/project/parts'
 import { useRole } from '@/components/project/role'
 import { roleLabel } from '@/components/tabs/role'
+import { PlatformPicker } from '@/components/project/PlatformPicker'
 import { NO_SOURCE, SourcePicker } from '@/components/project/SourcePicker'
 import type { Source } from '@/components/project/SourcePicker'
 import { Notice, Progress, s, Screen } from '@/components/ui'
 import { clearJob, run, useJob } from '@/jobs'
 import { GROUPS } from '@/shared/audiences'
-import { ASPECTS, aspectOf, LANGUAGES, PLATFORMS } from '@/shared/labels'
+import { LANGUAGES } from '@/shared/labels'
 import { TASKS } from '@/shared/tasks'
 import type { Brief, Language, Platform } from '@/shared/types'
 import { C, F } from '@/theme'
@@ -129,7 +130,6 @@ export default function New() {
       </Screen>
     )
 
-  const aspect = aspectOf([platform])
   const off = paused !== null
 
   return (
@@ -197,15 +197,14 @@ export default function New() {
               <Choice key={l} radio label={LANGUAGES[l]} on={language === l} onPress={() => setLanguage(l)} disabled={off} />
             ))}
           </Choices>
-          <View style={{ marginTop: 6 }}>
+        </Section>
+
+        <Section>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <SectionTitle>المنصة</SectionTitle>
+            <Text style={p.muted}>اختر واحدة</Text>
           </View>
-          <Choices radio label="المنصة">
-            {(Object.keys(PLATFORMS) as Platform[]).map((pl) => (
-              <Choice key={pl} radio label={PLATFORMS[pl]} on={platform === pl} onPress={() => setPlatform(pl)} disabled={off} />
-            ))}
-          </Choices>
-          <Text style={p.muted}>الفيديو {ASPECTS[aspect]}.</Text>
+          <PlatformPicker value={platform} onChange={setPlatform} disabled={off} />
         </Section>
 
         <View style={st.role} accessibilityLabel={`صفتك: ${roleLabel(role)}. ${set ? 'حددتها الإدارة بعد التحقق' : 'لم تحددها الإدارة بعد'}`} accessible>
