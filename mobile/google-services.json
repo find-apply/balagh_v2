@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "969914896972-tpff0djhaajq7fd2i5218ime3657rhij.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "space.balagh.app",
+            "certificate_hash": "306a361bc56aa91bc245909b33638e08c4149a6c"
+          }
+        },
+        {
           "client_id": "969914896972-v6cfmk2nqq0qjs3vhbr47ddtumvu66k0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
