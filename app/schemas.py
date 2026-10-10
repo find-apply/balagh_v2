@@ -488,7 +488,7 @@ class Script(BaseModel):
         if self.author == AuthorRole.specialist:
             required = [RequiredApproval(role=ReviewRole.creator, reason="مختص شرعي: يراجع محتواه بنفسه ويعتمده. المراجعة الآلية تنبّهه ولا تلزمه.")]
         else:
-            required = [RequiredApproval(role=ReviewRole.creator, reason="صاحب المحتوى يعتمد كل نسخة قبل تصديرها.")]
+            required = [RequiredApproval(role=ReviewRole.creator, reason="صاحب المحتوى يؤكد كل نسخة قبل تصديرها.")]
             if self.content_level == ContentLevel.C:
                 why = "مسألة خلافية أو عالية الحساسية (المستوى ج)."
             elif self.review and self.review.blocking:

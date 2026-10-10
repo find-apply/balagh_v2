@@ -1,10 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Pressable } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { api } from '@/api'
 import { useAccount } from '@/account'
-import { HeaderTitle, Stepper } from '@/components/kit'
+import { HeaderTitle, HomeButton, Stepper } from '@/components/kit'
 import { ReportSheet } from '@/components/ReportSheet'
 import type { Step, StepState } from '@/components/kit'
 import { Notice, P, Screen } from '@/components/ui'
@@ -114,9 +114,12 @@ export default function VersionScreen() {
         options={{
           headerTitle: () => <HeaderTitle title={script.title} sub={versionLine(script)} />,
           headerRight: () => (
-            <Pressable accessibilityRole="button" accessibilityLabel="أبلغ عن مشكلة في هذا المحتوى" onPress={() => setReporting(true)} hitSlop={10} style={{ padding: 6 }}>
-              <Ionicons name="flag-outline" size={21} color={C.muted} />
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <HomeButton />
+              <Pressable accessibilityRole="button" accessibilityLabel="أبلغ عن مشكلة في هذا المحتوى" onPress={() => setReporting(true)} hitSlop={10} style={{ padding: 6 }}>
+                <Ionicons name="flag-outline" size={21} color={C.muted} />
+              </Pressable>
+            </View>
           ),
         }}
       />

@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { api } from '@/api'
-import { HeaderTitle } from '@/components/kit'
+import { HeaderTitle, HomeButton } from '@/components/kit'
 import { ChangeRequestCard, ContinueCard, planFor, SecondOpinion } from '@/components/project/Continue'
 import type { Part } from '@/components/project/Continue'
 import { IdeaCard, ideaMeta } from '@/components/project/IdeaCard'
@@ -81,7 +81,7 @@ export default function ProjectScreen() {
   const brief = project.brief
   const title = brief.idea?.trim() || latest?.title || project.ideas[0]?.title || 'مشروع'
   const sub = [brief.audience, LANGUAGES[brief.language], brief.platforms.map((pl) => PLATFORMS[pl]).join('، ')].filter(Boolean).join(' · ')
-  const header = <Stack.Screen options={{ headerTitle: () => <HeaderTitle title={title} sub={sub} /> }} />
+  const header = <Stack.Screen options={{ headerTitle: () => <HeaderTitle title={title} sub={sub} />, headerRight: () => <HomeButton /> }} />
 
   // A long job (a script, new ideas) takes the whole screen; leaving it does not stop it.
   const running = (scriptJob && !scriptJob.error ? scriptJob : null) ?? (ideasJob && !ideasJob.error ? ideasJob : null)

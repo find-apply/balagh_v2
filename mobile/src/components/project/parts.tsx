@@ -106,7 +106,11 @@ export function BigButton({ title, onPress, disabled, kind = 'primary', hint }: 
       onPress={disabled ? undefined : onPress}
       style={({ pressed }) => [p.big, kind === 'ghost' ? p.bigGhost : { backgroundColor: disabled ? '#a9b3ae' : C.brand }, pressed && !disabled && { opacity: 0.85 }]}
     >
-      <Text style={[p.bigText, kind === 'ghost' && { color: C.brand, fontFamily: F.semibold, fontSize: 15 }]}>{title}</Text>
+      {/* The label spans the button's width (centred by textAlign): left to size itself, Android can measure the
+          Arabic font too narrow and break the label onto a line the button hides. */}
+      <Text style={[p.bigText, { alignSelf: 'stretch' }, kind === 'ghost' && { color: C.brand, fontFamily: F.semibold, fontSize: 15 }]}>
+        {title}
+      </Text>
     </Pressable>
   )
 }

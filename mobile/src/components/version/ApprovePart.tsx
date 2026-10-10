@@ -13,7 +13,7 @@ import { Collapsible, IconButton, message, ROLE_SUBJECT, shortDate } from './com
 interface Props {
   projectId: string
   script: Script
-  /** The signer's name from their account, prefilled and editable. */
+  /** The full name the person gave at sign-up: signatures carry it (the server holds to it too). */
   accountName: string
   revising: Job | null
   onRevise: () => void
@@ -123,7 +123,7 @@ function Signatures({ script, skipCreator }: { script: Script; skipCreator?: boo
             <View style={{ flex: 1, gap: 4 }}>
               <View style={st.itemHead}>
                 <Text style={st.itemRole}>{ROLES[r.role]}</Text>
-                {a ? <Badge tone="ok">✓ وقّع: {a.name}</Badge> : <Badge tone="warn">ينتظر</Badge>}
+                {a ? <Badge tone="ok">{a.role === 'creator' ? '✓ أكّد' : '✓ اعتمد'}: {a.name}</Badge> : <Badge tone="warn">ينتظر</Badge>}
               </View>
               <Text style={st.reason}>{r.reason}</Text>
               {r.role === 'scholar' && !a && <Text style={[st.reason, { color: C.ink }]}>تعيّن المنصة مراجعا شرعيا مختصا، ويصله رابط دعوة خاص به.</Text>}
@@ -135,8 +135,23 @@ function Signatures({ script, skipCreator }: { script: Script; skipCreator?: boo
   )
 }
 
+/** Whose name the signature carries: the account's full name, shown and not typed. An account from before
+ * sign-up details were asked has none, and types it once here. */
+function SignerName({ name, typed, onType }: { name: string; typed: string; onType: (v: string) => void }) {
+  if (!name) return <Field label="اسمك كما يظهر مع التوقيع" value={typed} onChangeText={onType} maxLength={80} autoComplete="name" />
+  return (
+    <View style={st.signer}>
+      <Ionicons name="person-circle-outline" size={22} color={C.brand} />
+      <Text style={st.signerText}>
+        يُسجَّل باسمك: <Text style={{ fontFamily: F.bold, color: C.ink }}>{name}</Text>
+      </Text>
+    </View>
+  )
+}
+
 function CreatorApprove({ projectId, script, accountName, onRevise, onSigned }: Props) {
-  const [name, setName] = useState(accountName)
+  const [typed, setTyped] = useState('')
+  const name = accountName || typed
   const { busy, error, sign } = useSign(projectId, script, onSigned)
   const mine = script.required_approvals.some((r) => r.role === 'creator') && !script.approvals.some((a) => a.role === 'creator')
 
@@ -155,10 +170,13 @@ function CreatorApprove({ projectId, script, accountName, onRevise, onSigned }: 
       <Signatures script={script} />
       {mine && (
         <View style={st.form}>
-          <H2>وقّع بصفتك صانع المحتوى</H2>
-          <Field label="اسمك" placeholder="يظهر مع توقيعك" value={name} onChangeText={setName} maxLength={80} autoComplete="name" />
+          <View style={{ gap: 2 }}>
+            <H2>تأكيدك كصاحب المحتوى</H2>
+            <P muted small>تؤكد أن هذه النسخة جاهزة من جهتك. الاعتماد بعدها للمراجع الشرعي.</P>
+          </View>
+          <SignerName name={accountName} typed={typed} onType={setTyped} />
           {error && <Notice tone="bad">{error}</Notice>}
-          <IconButton icon="checkmark-done" title="أعتمد هذه النسخة" onPress={() => void sign(name)} disabled={name.trim().length < 2} busy={busy} />
+          <IconButton icon="checkmark" title="أؤكد هذه النسخة" onPress={() => void sign(name)} disabled={name.trim().length < 2} busy={busy} />
         </View>
       )}
       <ShareButton projectId={projectId} script={script} />
@@ -167,7 +185,8 @@ function CreatorApprove({ projectId, script, accountName, onRevise, onSigned }: 
 }
 
 function SpecialistApprove({ projectId, script, accountName, onRevise, onSigned, onVideo }: Props) {
-  const [name, setName] = useState(accountName)
+  const [typed, setTyped] = useState('')
+  const name = accountName || typed
   const [ack, setAck] = useState(false)
   const { busy, error, sign } = useSign(projectId, script, onSigned)
   const mine = script.approvals.find((a) => a.role === 'creator')
@@ -236,10 +255,7 @@ function SpecialistApprove({ projectId, script, accountName, onRevise, onSigned,
               <Text style={st.ackText}>اطّلعت على الملاحظة، وأعتمد النسخة كما هي على مسؤوليتي العلمية.</Text>
             </Pressable>
           )}
-          <View style={{ gap: 4 }}>
-            <Field label="اسمك كما يظهر مع التوقيع" value={name} onChangeText={setName} maxLength={80} autoComplete="name" />
-            {!!accountName && <Text style={st.hint}>من حسابك، ويمكنك تعديله لهذا التوقيع.</Text>}
-          </View>
+          <SignerName name={accountName} typed={typed} onType={setTyped} />
           {error && <Notice tone="bad">{error}</Notice>}
           <IconButton icon="checkmark-done" title="أعتمد هذه النسخة" onPress={() => void sign(name)} disabled={!ready} busy={busy} />
         </View>
@@ -260,6 +276,8 @@ function SpecialistApprove({ projectId, script, accountName, onRevise, onSigned,
 }
 
 const st = StyleSheet.create({
+  signer: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: C.brandSoft, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12 },
+  signerText: { flex: 1, fontSize: 14, lineHeight: 22, fontFamily: F.regular, color: '#0c4a3d' },
   info: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: C.brandSoft, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14 },
   infoText: { flex: 1, fontFamily: F.semibold, fontSize: 14, lineHeight: 24, color: C.brand },
   list: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 18, paddingHorizontal: 16 },

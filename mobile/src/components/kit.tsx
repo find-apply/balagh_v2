@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import type { ComponentProps, ReactNode } from 'react'
+import { router } from 'expo-router'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { C, F } from '@/theme'
@@ -13,6 +14,15 @@ export function HeaderTitle({ title, sub }: { title: string; sub?: string }) {
       <Text numberOfLines={1} style={k.headerTitle}>{title}</Text>
       {!!sub && <Text numberOfLines={1} style={k.headerSub}>{sub}</Text>}
     </View>
+  )
+}
+
+/** Back to the home tab from deep in a project, closing the screens on the way. */
+export function HomeButton() {
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel="الرئيسية" onPress={() => router.dismissTo('/')} hitSlop={8} style={k.headerIcon}>
+      <Ionicons name="home-outline" size={21} color={C.brand} />
+    </Pressable>
   )
 }
 
@@ -166,6 +176,7 @@ export function KeyValue({ rows }: { rows: [string, ReactNode][] }) {
 }
 
 const k = StyleSheet.create({
+  headerIcon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontFamily: F.bold, fontSize: 18, color: C.ink },
   headerSub: { fontFamily: F.regular, fontSize: 12, color: C.muted },
   beta: { backgroundColor: C.goldSoft, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2, alignSelf: 'center' },

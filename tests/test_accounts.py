@@ -202,3 +202,11 @@ def test_a_report_on_generated_content_reaches_the_admin_who_closes_it(client, s
     client.delete("/me", headers=signed("tok-a"))
     kept = next(x for x in client.get("/admin/reports", headers=admin_headers).json() if x["id"] == mine["id"])
     assert kept["email"] is None
+
+
+def test_a_signed_in_person_signs_with_the_name_given_at_sign_up(client, signed):
+    store.save_user("uid-b", "b@example.com", "ب", None, "password", {**PROFILE, "full_name": "بلال الشريف"})
+    client.post("/projects/p1/open", headers=signed("tok-b"))
+    r = client.post("/projects/p1/scripts/s1/approve", headers=signed("tok-b"), json={"role": "creator", "name": "اسم آخر"})
+    assert r.status_code == 200
+    assert [a["name"] for a in r.json()["approvals"] if a["role"] == "creator"] == ["بلال الشريف"]

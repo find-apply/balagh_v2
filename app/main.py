@@ -304,8 +304,12 @@ async def approve_script(project_id: str, script_id: str, body: ApproveIn, user:
     _check_invite(project_id, body.role, body.invite)
     if any(c.role == body.role for c in script.change_requests):
         raise HTTPException(status_code=409, detail="هذا الدور طلب تعديلا على هذه النسخة؛ يُصحَّح في نسخة جديدة ثم يُراجع من جديد.")
+    name = body.name.strip()
+    if user and (account := store.get_user(user.uid)) and account["full_name"]:
+        # Signed in, a person signs with the name the admin checked at sign-up, never one typed here.
+        name = account["full_name"]
     script.approvals = [a for a in script.approvals if a.role != body.role]
-    script.approvals.append(Approval(role=body.role, name=body.name.strip(), at=datetime.now(timezone.utc), note=(body.note or "").strip(),
+    script.approvals.append(Approval(role=body.role, name=name, at=datetime.now(timezone.utc), note=(body.note or "").strip(),
                                      uid=user.uid if user else None))
     store.save(project)
     return script
