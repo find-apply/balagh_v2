@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
-  ActivityIndicator, Alert, AppState, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput,
+  ActivityIndicator, Alert, AppState, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput,
   useWindowDimensions, View,
 } from 'react-native'
 import type { TextInputProps } from 'react-native'
@@ -18,6 +18,9 @@ import { Splash } from '@/components/Splash'
 import { Button, Notice } from '@/components/ui'
 import { CONTACT_EMAIL, writeToAdmin } from '@/contact'
 import { C, F } from '@/theme'
+
+/** Balagh's mark, as on the icon and the site: a white ب whose dot is the brand's gold. */
+const MARK = require('../../assets/mark.png')
 
 const PHONE = /^\+?[0-9 ()-]{6,40}$/
 
@@ -442,7 +445,7 @@ function SignIn() {
         <View style={{ paddingHorizontal: 28, paddingTop: 52, gap: 10 }}>
           <View style={sh.brandRow}>
             <View style={sh.logo}>
-              <Text style={sh.logoMark} accessible={false}>ب</Text>
+              <Image source={MARK} style={sh.logoMark} accessibilityIgnoresInvertColors />
             </View>
             <Text style={[sh.bandTitle, { fontSize: 40, lineHeight: 52 }]} accessibilityRole="header">بلاغ</Text>
             <BetaPill />
@@ -715,7 +718,7 @@ const pat = StyleSheet.create({
 })
 
 const sh = StyleSheet.create({
-  logoMark: { fontFamily: F.bold, fontSize: 26, lineHeight: 36, color: '#fff', includeFontPadding: false },
+  logoMark: { width: 34, height: 34 },
   band: { overflow: 'hidden' },
   card: {
     marginHorizontal: 16, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 24,

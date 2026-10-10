@@ -3,13 +3,16 @@ import { DrawerContentScrollView, useDrawerStatus } from 'expo-router/drawer'
 import type { DrawerContentComponentProps } from 'expo-router/drawer'
 import { router } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { Image, Pressable, Share, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { api, SITE } from '@/api'
 import type { HistoryEntry } from '@/api'
 import { IconCircle, Sheet, SheetItem, Snackbar } from '@/components/kit'
 import { LANGUAGES } from '@/shared/labels'
 import { C, F } from '@/theme'
+
+/** Balagh's mark, as on the icon and the site: a white ب whose dot is the brand's gold. */
+const MARK = require('../../assets/mark.png')
 
 const LONG_PRESS_MS = 450
 const UNDO_MS = 5000
@@ -150,7 +153,7 @@ export function HistoryDrawer({ navigation }: DrawerContentComponentProps) {
           <>
             <View style={st.brand}>
               <View style={st.mark} importantForAccessibility="no-hide-descendants">
-                <Text style={st.markText}>ب</Text>
+                <Image source={MARK} style={st.markImage} accessibilityIgnoresInvertColors />
               </View>
               <Text style={st.brandText}>بلاغ</Text>
             </View>
@@ -272,7 +275,7 @@ const st = StyleSheet.create({
   inner: { padding: 16, gap: 12 },
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },
   mark: { width: 38, height: 38, borderRadius: 11, backgroundColor: C.brand, alignItems: 'center', justifyContent: 'center' },
-  markText: { color: C.brandInk, fontFamily: F.bold, fontSize: 20 },
+  markImage: { width: 28, height: 28 },
   brandText: { color: C.brand, fontFamily: F.bold, fontSize: 22 },
   new: { flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: C.brand, borderRadius: 12, minHeight: 48 },
   newText: { color: C.brandInk, fontFamily: F.bold, fontSize: 15 },

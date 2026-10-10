@@ -39,14 +39,17 @@ export function Logo({ plain = false }: { plain?: boolean } = {}) {
   )
 }
 
+const BA_BODY = 'M31.19 38.03Q25.53 38.03 21.66 37.4Q17.79 36.78 15.4 35.35Q13.01 33.92 11.95 31.64Q10.88 29.35 10.88 25.97Q10.88 23.89 11.43 21.4Q11.97 18.91 12.96 16.47L17.95 17.92Q17.06 19.69 16.57 21.32Q16.08 22.96 16.08 24.26Q16.08 25.77 16.7 26.78Q17.32 27.79 18.73 28.42Q20.13 29.04 22.41 29.32Q24.7 29.61 28.08 29.61H35.35Q38.78 29.61 41.12 29.45Q43.46 29.3 44.89 28.91Q46.31 28.52 46.96 27.92Q47.61 27.32 47.61 26.44Q47.61 25.66 47.48 24.44Q47.35 23.22 46.99 21.25L46.11 16.41L51.77 15.48L52.55 20.31Q52.81 21.71 52.96 23.43Q53.12 25.14 53.12 26.44Q53.12 29.92 52.16 32.16Q51.2 34.39 48.73 35.69Q46.26 36.99 42.03 37.51Q37.79 38.03 31.19 38.03Z'
+const BA_DOT = 'M31.14 48.52Q29.79 48.52 28.93 47.69Q28.08 46.86 28.08 45.04Q28.08 43.22 28.93 42.39Q29.79 41.56 31.14 41.56H32.18Q33.53 41.56 34.39 42.39Q35.25 43.22 35.25 45.04Q35.25 46.86 34.39 47.69Q33.53 48.52 32.18 48.52Z'
+
 function LogoMark({ inner = false }: { inner?: boolean }) {
   return (
     <span className={inner ? 'logo-inner' : 'logo'}>
       <svg viewBox="0 0 64 64" aria-hidden="true">
         <rect width="64" height="64" rx="16" fill="currentColor" />
-        <text x="32" y="45" fontSize="34" fontWeight="700" textAnchor="middle" fill="#fff">
-          ب
-        </text>
+        {/* The letter ب from IBM Plex Sans Arabic Bold, its dot in the brand's gold: the app icon's mark. */}
+        <path fill="#fff" d={BA_BODY} />
+        <path fill="#d4a94d" d={BA_DOT} />
       </svg>
       بلاغ
     </span>

@@ -2,9 +2,12 @@ import Constants from 'expo-constants'
 import { isLoaded } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
-import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View } from 'react-native'
+import { AccessibilityInfo, Animated, Easing, Image, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { C, F } from '@/theme'
+
+/** Balagh's mark, as on the icon and the site: a white ب whose dot is the brand's gold. */
+const MARK = require('../../assets/mark.png')
 
 /** Follows the system's "reduce motion" setting, so the splash stays still for those who asked for it. */
 function useReduceMotion() {
@@ -93,7 +96,7 @@ export function Splash() {
         style={[st.body, { opacity: rise, transform: [{ translateY: rise.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }]}
       >
         <View style={st.logo}>
-          <Text style={[st.mark, font(F.bold)]} accessible={false}>ب</Text>
+          <Image source={MARK} style={st.mark} accessibilityIgnoresInvertColors />
         </View>
         <Text style={[st.title, font(F.bold)]}>بلاغ</Text>
         <Text style={[st.tagline, font(F.regular)]}>صناعة محتوى دعوي موثَّق، بمراجعة بشرية قبل النشر.</Text>
@@ -122,8 +125,7 @@ const st = StyleSheet.create({
     position: 'absolute', width: 420, height: 420, borderRadius: 210, backgroundColor: 'rgba(255,255,255,0.06)',
   },
   body: { alignItems: 'center', gap: 18, paddingHorizontal: 32 },
-  // The site's mark: the letter ب, as on the app icon.
-  mark: { fontSize: 52, lineHeight: 72, color: '#fff', fontWeight: '700', includeFontPadding: false },
+  mark: { width: 64, height: 64 },
   logo: {
     width: 96, height: 96, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.14)', borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center',
