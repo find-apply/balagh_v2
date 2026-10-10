@@ -182,3 +182,23 @@ def test_the_app_can_ask_whether_generation_is_paused(client, monkeypatch):
     real = flow_settings.current()
     monkeypatch.setattr(flow_settings, "current", lambda: real.model_copy(update={"paused": True, "paused_message": "صيانة"}))
     assert client.get("/status").json() == {"paused": True, "message": "صيانة"}
+
+
+def test_a_report_on_generated_content_reaches_the_admin_who_closes_it(client, signed, admin_headers, monkeypatch):
+    r = client.post("/reports", headers=signed("tok-a"), json={"project_id": "p1", "script_id": "s1", "reason": "offensive", "note": "عبارة غير لائقة"})
+    assert r.status_code == 201 and r.json()["status"] == "open"
+    # a visitor can report too; an unknown version or a made-up reason is refused
+    assert client.post("/reports", json={"project_id": "p1", "reason": "wrong_text"}).status_code == 201
+    assert client.post("/reports", json={"project_id": "p1", "script_id": "nope", "reason": "other"}).status_code == 404
+    assert client.post("/reports", json={"project_id": "p1", "reason": "spam"}).status_code == 422
+    open_ = client.get("/admin/reports?status=open", headers=admin_headers).json()
+    mine = next(x for x in open_ if x["id"] == r.json()["id"])
+    assert mine["email"] == "a@example.com" and mine["reason"] == "offensive" and mine["note"] == "عبارة غير لائقة"
+    assert client.get("/admin/overview", headers=admin_headers).json()["totals"]["open_reports"] >= 2
+    assert client.put(f"/admin/reports/{mine['id']}", headers=admin_headers, json={"status": "closed"}).status_code == 200
+    assert all(x["id"] != mine["id"] for x in client.get("/admin/reports?status=open", headers=admin_headers).json())
+    # deleting the account keeps the report, without the reporter
+    monkeypatch.setattr(firebase, "delete_user", lambda uid: True)
+    client.delete("/me", headers=signed("tok-a"))
+    kept = next(x for x in client.get("/admin/reports", headers=admin_headers).json() if x["id"] == mine["id"])
+    assert kept["email"] is None

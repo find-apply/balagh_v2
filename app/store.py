@@ -118,6 +118,20 @@ published = Table(
     Column("project_id", String(32), primary_key=True),
     Column("at", DateTime(timezone=True), nullable=False),
 )
+# What people flag in generated content (an offensive line, a wrong text): the admin reads and closes each one.
+reports = Table(
+    "reports", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("project_id", String(32), nullable=False, index=True),
+    Column("script_id", String(32)),
+    Column("video_id", String(32)),
+    Column("reason", String(30), nullable=False),
+    Column("note", Text),
+    Column("user_id", String(128)),
+    Column("status", String(20), nullable=False, default="open"),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+REPORT_REASONS = ("offensive", "religious_error", "wrong_text", "other")
 metadata.create_all(engine)
 # Ratings stored before the admin could feature them get the column added in place.
 if "featured" not in {c["name"] for c in inspect(engine).get_columns("feedback")}:
@@ -355,6 +369,7 @@ def delete_user(uid: str) -> bool:
         removed = conn.execute(delete(users).where(users.c.uid == uid)).rowcount
         conn.execute(delete(history).where(history.c.client_id == f"u:{uid}"))
         conn.execute(update(feedback).where(feedback.c.user_id == uid).values(name="مشاهد", user_id=None))
+        conn.execute(update(reports).where(reports.c.user_id == uid).values(user_id=None))
         for pid, data in conn.execute(select(projects.c.id, projects.c.data)).all():
             stored = json.loads(data)
             touched = False
@@ -366,6 +381,30 @@ def delete_user(uid: str) -> bool:
             if touched:
                 conn.execute(update(projects).where(projects.c.id == pid).values(data=json.dumps(stored, ensure_ascii=False)))
     return bool(removed)
+
+
+def add_report(project_id: str, script_id: Optional[str], video_id: Optional[str], reason: str, note: str,
+               user_id: Optional[str]) -> dict:
+    row = dict(project_id=project_id, script_id=script_id, video_id=video_id, reason=reason, note=note or None,
+               user_id=user_id, status="open", created_at=datetime.now(timezone.utc))
+    with engine.begin() as conn:
+        row["id"] = conn.execute(insert(reports).values(**row)).inserted_primary_key[0]
+    return row
+
+
+def list_reports(status: Optional[str] = None) -> list[dict]:
+    """Reports newest first, with the reporter's email when the account still exists."""
+    q = (select(reports, users.c.email).select_from(reports.outerjoin(users, users.c.uid == reports.c.user_id))
+         .order_by(reports.c.id.desc()))
+    if status:
+        q = q.where(reports.c.status == status)
+    with engine.connect() as conn:
+        return [dict(r._mapping) for r in conn.execute(q)]
+
+
+def set_report_status(report_id: int, status: str) -> bool:
+    with engine.begin() as conn:
+        return conn.execute(update(reports).where(reports.c.id == report_id).values(status=status)).rowcount > 0
 
 
 def count_users() -> int:

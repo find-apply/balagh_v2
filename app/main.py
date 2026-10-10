@@ -416,6 +416,34 @@ async def video_feedback(video_id: str) -> list[Feedback]:
     return store.feedback_for(video_id)
 
 
+class ReportIn(BaseModel):
+    project_id: str = Field(max_length=32)
+    script_id: Optional[str] = Field(default=None, max_length=32)
+    video_id: Optional[str] = Field(default=None, max_length=32)
+    reason: str = Field(pattern="^(offensive|religious_error|wrong_text|other)$",
+                        description="offensive, religious_error (a ruling or meaning that is wrong), wrong_text (a quoted text that is not as in its source), or other.")
+    note: str = Field(default="", max_length=1000)
+
+
+class ReportOut(BaseModel):
+    id: int
+    status: str
+
+
+@app.post("/reports", response_model=ReportOut, status_code=201)
+async def report_content(body: ReportIn, user: Optional[User] = Depends(current_user)) -> ReportOut:
+    """Flags generated content (a script or its video) for the admin: offensive, a religious error, a text that is
+    not as in its source, or something else. The admin reads each report and closes it."""
+    project = _get_project(body.project_id)
+    if body.script_id and body.script_id not in project.scripts:
+        raise HTTPException(status_code=404, detail="النسخة غير موجودة.")
+    if body.video_id and store.load_video(body.video_id) is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+    row = store.add_report(body.project_id, body.script_id, body.video_id, body.reason, body.note.strip(),
+                           user.uid if user else None)
+    return ReportOut(id=row["id"], status=row["status"])
+
+
 class PublicRating(BaseModel):
     stars: int
     role: str

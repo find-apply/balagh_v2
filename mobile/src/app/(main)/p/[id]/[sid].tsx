@@ -1,8 +1,11 @@
+import Ionicons from '@expo/vector-icons/Ionicons'
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Pressable } from 'react-native'
 import { api } from '@/api'
 import { useAccount } from '@/account'
 import { HeaderTitle, Stepper } from '@/components/kit'
+import { ReportSheet } from '@/components/ReportSheet'
 import type { Step, StepState } from '@/components/kit'
 import { Notice, P, Screen } from '@/components/ui'
 import { ApprovePart } from '@/components/version/ApprovePart'
@@ -15,6 +18,7 @@ import { clearJob, run, useJob } from '@/jobs'
 import { loadPrefs } from '@/prefs'
 import { TASKS } from '@/shared/tasks'
 import type { Project, Script, Video, VideoTemplate } from '@/shared/types'
+import { C } from '@/theme'
 
 /** Where an open version stands: the part its next step needs opens first. */
 function partFor(sc: Script): Part {
@@ -32,6 +36,7 @@ export default function VersionScreen() {
   const [error, setError] = useState<string | null>(null)
   const [templates, setTemplates] = useState<VideoTemplate[] | null>(null)
   const [videos, setVideos] = useState<Video[] | null>(null)
+  const [reporting, setReporting] = useState(false)
   const reviewKey = `review:${sid}`
   const reviseKey = `revise:${sid}`
   const reviewJob = useJob(reviewKey)
@@ -105,7 +110,17 @@ export default function VersionScreen() {
 
   return (
     <Screen>
-      <Stack.Screen options={{ headerTitle: () => <HeaderTitle title={script.title} sub={versionLine(script)} /> }} />
+      <Stack.Screen
+        options={{
+          headerTitle: () => <HeaderTitle title={script.title} sub={versionLine(script)} />,
+          headerRight: () => (
+            <Pressable accessibilityRole="button" accessibilityLabel="أبلغ عن مشكلة في هذا المحتوى" onPress={() => setReporting(true)} hitSlop={10} style={{ padding: 6 }}>
+              <Ionicons name="flag-outline" size={21} color={C.muted} />
+            </Pressable>
+          ),
+        }}
+      />
+      <ReportSheet visible={reporting} onClose={() => setReporting(false)} projectId={id} scriptId={sid} videoId={part === 'video' ? newest?.id : null} />
       <Stepper steps={steps} />
 
       {part === 'script' && (

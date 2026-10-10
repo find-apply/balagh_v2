@@ -23,6 +23,8 @@ export function Overview() {
         <Stat icon="file" label="السيناريوهات" value={num(t.scripts)} hint={`${num(t.localized)} موطّنة`} />
         <Stat icon="check" label="معتمدة" value={num(t.approved)} tone="ok" />
         <Stat icon="clock" label="بانتظار الاعتماد" value={num(t.awaiting)} tone={t.awaiting ? 'warn' : undefined} hint={`${num(t.specialist)} تحتاج مختصا`} />
+        <Stat icon="users" label="حسابات تنتظر القبول" value={num(t.pending_accounts)} tone={t.pending_accounts ? 'warn' : undefined} />
+        <Stat icon="alert" label="بلاغات مفتوحة" value={num(t.open_reports)} tone={t.open_reports ? 'bad' : undefined} />
         <Stat icon="cpu" label="استدعاءات النموذج (24 ساعة)" value={num(total)} tone={failRate > 10 ? 'bad' : undefined} hint={`${num(failRate)}٪ فشل`} />
       </div>
 

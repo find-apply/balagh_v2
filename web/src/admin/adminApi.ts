@@ -54,7 +54,7 @@ async function call<T>(method: string, path: string, body?: unknown, token = adm
 }
 
 export interface Overview {
-  totals: { projects: number; scripts: number; approved: number; awaiting: number; specialist: number; localized: number; pending_accounts: number }
+  totals: { projects: number; scripts: number; approved: number; awaiting: number; specialist: number; localized: number; pending_accounts: number; open_reports: number }
   by_language: Record<string, number>
   by_level: Record<string, number>
   runs_24h: { total: number; failed: number; by_kind: { kind: string; total: number; failed: number; avg_seconds: number }[] }
@@ -138,7 +138,25 @@ export interface AccountRow {
   last_seen: string | null
 }
 
+export type ReportReason = 'offensive' | 'religious_error' | 'wrong_text' | 'other'
+export type ReportStatus = 'open' | 'closed'
+
+/** Something a person flagged in generated content. */
+export interface ReportRow {
+  id: number
+  project_id: string
+  script_id: string | null
+  video_id: string | null
+  reason: ReportReason
+  note: string | null
+  email: string | null
+  status: ReportStatus
+  created_at: string
+}
+
 export const adminApi = {
+  reports: (status?: ReportStatus) => call<ReportRow[]>('GET', `/reports${status ? `?status=${status}` : ''}`),
+  setReport: (id: number, status: ReportStatus) => call<{ id: number; status: ReportStatus }>('PUT', `/reports/${id}`, { status }),
   accounts: (status?: AccountStatus) => call<AccountRow[]>('GET', `/accounts${status ? `?status=${status}` : ''}`),
   setAccountStatus: (uid: string, status: AccountStatus, role?: AccountRole) =>
     call<AccountRow>('PUT', `/accounts/${encodeURIComponent(uid)}/status`, { status, role }),

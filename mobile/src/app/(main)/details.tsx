@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ActivityIndicator, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native'
 import { api, BASE } from '@/api'
+import { ReportSheet } from '@/components/ReportSheet'
 import { HeaderTitle, Stepper } from '@/components/kit'
 import { Badge, Button, Notice, P } from '@/components/ui'
 import { VideoPlayer } from '@/components/VideoPlayer'
@@ -71,6 +72,7 @@ export default function Details() {
   const [video, setVideo] = useState<Video | null>(null)
   const [templates, setTemplates] = useState<VideoTemplate[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [reporting, setReporting] = useState(false)
   const scroll = useRef<ScrollView>(null)
   const [offsets, setOffsets] = useState<Partial<Record<SectionKey, number>>>({})
 
@@ -157,7 +159,12 @@ export default function Details() {
               <Text style={[st.actionText, { color: C.brand, fontFamily: F.semibold }]}>شارك</Text>
             </Pressable>
           </View>
+          <Pressable accessibilityRole="button" onPress={() => setReporting(true)} style={st.report} hitSlop={6}>
+            <Ionicons name="flag-outline" size={15} color={C.muted} />
+            <Text style={st.reportText}>أبلغ عن مشكلة في هذا المحتوى</Text>
+          </Pressable>
         </View>
+        <ReportSheet visible={reporting} onClose={() => setReporting(false)} projectId={project.id} scriptId={script.id} videoId={video.id} />
 
         <View style={st.note} accessibilityRole="text">
           <Ionicons name="eye-outline" size={20} color="#3d4a45" />
@@ -292,6 +299,8 @@ export default function Details() {
 }
 
 const st = StyleSheet.create({
+  report: { alignSelf: 'center', minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  reportText: { fontSize: 13, fontFamily: F.semibold, color: C.muted, textDecorationLine: 'underline' },
   center: { flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center', padding: 16 },
   inner: { padding: 16, paddingTop: 8, gap: 14, paddingBottom: 32 },
   card: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 18, padding: 16, gap: 12 },

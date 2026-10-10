@@ -122,7 +122,19 @@ export interface LocalizeBody {
   tone: string | null
 }
 
+export type ReportReason = 'offensive' | 'religious_error' | 'wrong_text' | 'other'
+
+/** Generated content a person flags for the admin. */
+export interface ReportIn {
+  project_id: string
+  script_id?: string | null
+  video_id?: string | null
+  reason: ReportReason
+  note: string
+}
+
 export const api = {
+  report: (body: ReportIn) => request<{ id: number; status: string }>('POST', '/reports', body),
   me: (profile?: Profile) => request<Me>('POST', '/me', profile ? { profile } : undefined),
   updateProfile: (profile: Profile) => request<Me>('PUT', '/me/profile', profile),
   deleteMe: () => request<void>('DELETE', '/me'),

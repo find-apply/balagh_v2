@@ -223,6 +223,7 @@ async def overview() -> dict:
             "specialist": sum(s.needs_specialist_review for s in scripts),
             "localized": sum(s.localized_from is not None for s in scripts),
             "pending_accounts": len(store.list_users("pending")),
+            "open_reports": len(store.list_reports("open")),
         },
         "by_language": {l: sum(p.brief.language.value == l for p, _ in projects) for l in ("ar", "en")},
         "by_level": {l.value: sum(s.content_level == l for s in scripts) for l in ContentLevel},
@@ -432,3 +433,33 @@ async def flow() -> dict:
             "language": "كل نسخة موطّنة",
         },
     }
+
+
+class ReportRow(BaseModel):
+    id: int
+    project_id: str
+    script_id: Optional[str] = None
+    video_id: Optional[str] = None
+    reason: str
+    note: Optional[str] = None
+    email: Optional[str] = Field(default=None, description="The reporter's email, when they were signed in and the account still exists.")
+    status: str
+    created_at: datetime
+
+
+@router.get("/reports", response_model=list[ReportRow])
+async def reports(status: Optional[str] = Query(None, pattern="^(open|closed)$")) -> list[ReportRow]:
+    """What people flagged in generated content, newest first; `status=open` lists the ones not handled yet."""
+    return [ReportRow(**r) for r in store.list_reports(status)]
+
+
+class ReportStatusIn(BaseModel):
+    status: str = Field(pattern="^(open|closed)$")
+
+
+@router.put("/reports/{report_id}", response_model=dict)
+async def set_report(report_id: int, body: ReportStatusIn) -> dict:
+    """Closes a report once handled (or opens it again)."""
+    if not store.set_report_status(report_id, body.status):
+        raise HTTPException(status_code=404, detail="البلاغ غير موجود.")
+    return {"id": report_id, "status": body.status}
