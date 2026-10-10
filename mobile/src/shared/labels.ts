@@ -116,3 +116,13 @@ export function toMarkdown(s: Script): string {
   lines.push('', '---', '', s.ai_disclosure)
   return lines.join('\n')
 }
+
+/** Why a render failed, in words a creator can act on. The server's own Arabic messages are shown as they are;
+ * a technical one (Remotion, a timeout, a missing key) becomes a plain sentence. */
+export function videoErrorText(error: string | null | undefined): string {
+  const e = (error ?? '').trim()
+  if (/[\u0600-\u06FF]/.test(e)) return e
+  if (/magnific|image/i.test(e)) return 'تعذّر صنع صور هذا القالب الآن. أعد المحاولة، أو اختر قالبا بلا صور مثل الزخرفة الهندسية.'
+  if (!e || /timeout|timed out/i.test(e)) return 'استغرق إنشاء الفيديو أطول من المعتاد فتوقّف. أعد المحاولة بعد قليل.'
+  return 'حدث خطأ في خادم الفيديو. أعد المحاولة، وإن تكرر فتواصل مع الإدارة.'
+}

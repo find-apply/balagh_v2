@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api, BASE } from '../api'
-import { VIDEO_STATUS } from '../labels'
+import { VIDEO_STATUS, videoErrorText } from '../labels'
 import { VideoChecks } from './VideoChecks'
 import { VideoFeedback } from './VideoFeedback'
 import { askToNotify, notifyIfAway } from '../notify'
@@ -80,7 +80,7 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
         const before = videos.find((x) => x.id === v.id)
         if (before && ACTIVE.has(before.status) && v.status === 'done')
           notifyIfAway('بلاغ: الفيديو جاهز', v.preview ? 'فيديو المعاينة جاهز للمشاهدة.' : 'الفيديو النهائي جاهز للتنزيل.')
-        if (before && ACTIVE.has(before.status) && v.status === 'failed') notifyIfAway('بلاغ: تعذر إنشاء الفيديو', v.error ?? '')
+        if (before && ACTIVE.has(before.status) && v.status === 'failed') notifyIfAway('بلاغ: تعذر إنشاء الفيديو', videoErrorText(v.error))
       }
       setVideos(fresh)
     }, 4000)
@@ -181,7 +181,7 @@ export function VideoPanel({ projectId, script, template, templates, disabled, o
                 )}
               </div>
               {ACTIVE.has(v.status) && <Waiting video={v} template={templates?.find((t) => t.id === v.template)} />}
-              {v.error && <p className="muted small">{v.error}</p>}
+              {v.status === 'failed' && <p className="muted small">{videoErrorText(v.error)}</p>}
               {v.notes.map((n) => (
                 <p className="muted small" key={n}>
                   {n}

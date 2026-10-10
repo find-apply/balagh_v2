@@ -6,7 +6,7 @@ import { api, BASE } from '@/api'
 import { IconCircle, SubSteps } from '@/components/kit'
 import { Badge, Button, H2, Notice, P } from '@/components/ui'
 import { VideoPlayer } from '@/components/VideoPlayer'
-import { aspectOf, VIDEO_STATUS } from '@/shared/labels'
+import { aspectOf, VIDEO_STATUS, videoErrorText } from '@/shared/labels'
 import type { Script, Video, VideoStatus, VideoTemplate } from '@/shared/types'
 import { C, F } from '@/theme'
 import { ACTIVE, Collapsible, IconButton, LinkButton, message, scenesLabel, shortDate } from './common'
@@ -344,7 +344,7 @@ function VideoStep({ script, video, others, templates, tall, busy, error, onShow
             <Badge tone="bad">{VIDEO_STATUS.failed}</Badge>
             <Badge>{name}</Badge>
           </View>
-          {!!video.error && <P>{video.error}</P>}
+          <P>{videoErrorText(video.error)}</P>
           <P muted small>السيناريو ومراجعته لم يتأثرا. أعد المحاولة، أو جرّب قالبا آخر.</P>
         </View>
         {error && <Notice tone="bad">{error}</Notice>}
