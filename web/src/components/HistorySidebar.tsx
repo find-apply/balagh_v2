@@ -2,7 +2,6 @@ import { useState } from 'react'
 import type { User } from 'firebase/auth'
 import { signOutNow } from '../account'
 import { BASE } from '../api'
-import { AccountDialog } from './AccountDialog'
 import type { HistoryEntry } from '../history'
 import { LANGUAGES } from '../labels'
 import { adminToken } from '../admin/adminApi'
@@ -35,7 +34,6 @@ function group(at: string): string {
 
 export function HistorySidebar({ entries, activeId, busyId, composing, onNew, onOpen, onHide, onHome, user }: Props) {
   const [query, setQuery] = useState('')
-  const [signing, setSigning] = useState(false)
   const q = query.trim()
   const shown = q ? entries.filter((e) => `${e.title} ${e.audience}`.includes(q)) : entries
   const groups = new Map<string, HistoryEntry[]>()
@@ -92,27 +90,19 @@ export function HistorySidebar({ entries, activeId, busyId, composing, onNew, on
         ))}
       </nav>
 
-      {user !== undefined && (
+      {/* Signing in is not offered on the site for now; an account already signed in still shows, with its way out. */}
+      {user && (
         <div className="rail-account">
-          {user ? (
-            <>
-              {user.photoURL ? <img src={user.photoURL} alt="" className="avatar" referrerPolicy="no-referrer" /> : <span className="avatar">{(user.displayName || user.email || '؟').slice(0, 1)}</span>}
-              <span className="rail-account-name">
-                <strong dir="auto">{user.displayName || user.email}</strong>
-                {user.displayName && <small dir="ltr">{user.email}</small>}
-              </span>
-              <button type="button" className="link small" onClick={() => void signOutNow()}>
-                خروج
-              </button>
-            </>
-          ) : (
-            <button type="button" className="block-button" onClick={() => setSigning(true)}>
-              <Icon name="lock" size={16} /> تسجيل الدخول
-            </button>
-          )}
+          {user.photoURL ? <img src={user.photoURL} alt="" className="avatar" referrerPolicy="no-referrer" /> : <span className="avatar">{(user.displayName || user.email || '؟').slice(0, 1)}</span>}
+          <span className="rail-account-name">
+            <strong dir="auto">{user.displayName || user.email}</strong>
+            {user.displayName && <small dir="ltr">{user.email}</small>}
+          </span>
+          <button type="button" className="link small" onClick={() => void signOutNow()}>
+            خروج
+          </button>
         </div>
       )}
-      {signing && <AccountDialog onClose={() => setSigning(false)} />}
 
       <RailFoot
         items={[
