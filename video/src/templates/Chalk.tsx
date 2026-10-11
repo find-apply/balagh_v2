@@ -8,17 +8,17 @@ import {FPS, SceneAudio, StoryScene, StorySpec, Watermark} from '../spec';
 
 const aref = loadAref('normal', {weights: ['400', '700'], subsets: ['arabic']}).fontFamily;
 const patrick = loadPatrick('normal', {weights: ['400'], subsets: ['latin']}).fontFamily;
-const CH = {white: '#f6f3e8', yellow: '#ffe27a', pink: '#ff9ec7', blue: '#8fd3ff', green: '#9be8a8', orange: '#ffb26b'};
-const WHO: Record<string, string> = {narr: CH.white, salim: CH.green, maryam: CH.pink, nour: CH.yellow};
+export const CH = {white: '#f6f3e8', yellow: '#ffe27a', pink: '#ff9ec7', blue: '#8fd3ff', green: '#9be8a8', orange: '#ffb26b'};
+export const WHO: Record<string, string> = {narr: CH.white, salim: CH.green, maryam: CH.pink, nour: CH.yellow};
 const BOARD = 'radial-gradient(ellipse at 30% 20%, #3b6a5c 0%, #2b5247 45%, #1f3d35 100%)';
 
-const useFonts = () => {
+export const useFonts = () => {
   const en = useEn();
   return {chalk: en ? patrick : aref, quote: en ? patrick : amiri, body: en ? inter : cairo};
 };
 
 /** Board, wooden frame, chalk dust and the wobbly-chalk SVG filter. */
-const Board: React.FC<{title?: string; children: React.ReactNode}> = ({title, children}) => {
+export const Board: React.FC<{title?: string; children: React.ReactNode; titleTop?: number}> = ({title, children, titleTop = 46}) => {
   const {f} = useT();
   const fonts = useFonts();
   const en = useEn();
@@ -33,11 +33,11 @@ const Board: React.FC<{title?: string; children: React.ReactNode}> = ({title, ch
       </svg>
       <div style={{position: 'absolute', inset: 22, borderRadius: 10, background: BOARD, boxShadow: 'inset 0 0 90px rgba(0,0,0,.55), 0 0 0 6px #4a2f17'}} />
       {/* Chalk dust: a static noise image (public/dust.png); an SVG turbulence filter here made every frame slow. */}
-      <Img src={staticFile('dust.png')} style={{position: 'absolute', left: 22, top: 22, width: 1236, height: 676, opacity: 0.18, mixBlendMode: 'screen'}} />
+      <Img src={staticFile('dust.png')} style={{position: 'absolute', left: 22, top: 22, width: 'calc(100% - 44px)', height: 'calc(100% - 44px)', opacity: 0.18, mixBlendMode: 'screen'}} />
       <div style={{position: 'absolute', left: 22, right: 22, bottom: 22, height: 14, background: 'linear-gradient(#a98457, #7a5a34)'}} />
       <div style={{position: 'absolute', inset: 22, overflow: 'hidden', borderRadius: 10}}>{children}</div>
       {title && (
-        <div style={{position: 'absolute', top: 46, [en ? 'left' : 'right']: 64, fontFamily: fonts.chalk, fontWeight: 700, fontSize: 40, color: CH.yellow, filter: 'url(#chalk)', borderBottom: `4px solid ${CH.yellow}`, paddingBottom: 2, direction: en ? 'ltr' : 'rtl'}}>{title}</div>
+        <div style={{position: 'absolute', top: titleTop, [en ? 'left' : 'right']: 64, fontFamily: fonts.chalk, fontWeight: 700, fontSize: 40, color: CH.yellow, filter: 'url(#chalk)', borderBottom: `4px solid ${CH.yellow}`, paddingBottom: 2, direction: en ? 'ltr' : 'rtl'}}>{title}</div>
       )}
       <div style={{position: 'absolute', top: 22, bottom: 22, left: `${wipe * 100}%`, right: 22, background: 'rgba(255,255,255,.07)', width: `${(1 - wipe) * 100}%`, pointerEvents: 'none'}} />
     </AbsoluteFill>
@@ -45,7 +45,7 @@ const Board: React.FC<{title?: string; children: React.ReactNode}> = ({title, ch
 };
 
 /** Chalk text: words pop in as they are spoken, current word underlined. */
-const ChalkWords: React.FC<{text: string; size: number; color?: string; t0: number; t1: number; font?: string}> = ({text, size, color = CH.white, t0, t1, font}) => {
+export const ChalkWords: React.FC<{text: string; size: number; color?: string; t0: number; t1: number; font?: string}> = ({text, size, color = CH.white, t0, t1, font}) => {
   const {t} = useT();
   const fonts = useFonts();
   const dir = useDir();
@@ -62,9 +62,9 @@ const ChalkWords: React.FC<{text: string; size: number; color?: string; t0: numb
 };
 
 /** Long lines get a smaller size so two lines still fit under the picture. */
-const fit = (text: string, size: number) => (text.length > 130 ? size * 0.7 : text.length > 80 ? size * 0.82 : size);
+export const fit = (text: string, size: number) => (text.length > 130 ? size * 0.7 : text.length > 80 ? size * 0.82 : size);
 
-const Caption: React.FC<{s: StoryScene; size?: number; skipFirst?: boolean}> = ({s, size = 54, skipFirst}) => {
+export const Caption: React.FC<{s: StoryScene; size?: number; skipFirst?: boolean; side?: number; bottom?: number}> = ({s, size = 54, skipFirst, side = 70, bottom = 54}) => {
   const {t} = useT();
   const fonts = useFonts();
   const en = useEn();
@@ -72,7 +72,7 @@ const Caption: React.FC<{s: StoryScene; size?: number; skipFirst?: boolean}> = (
   if (!cur || (skipFirst && cur.idx === 0)) return null;
   const l = cur.line;
   return (
-    <div style={{position: 'absolute', left: 70, right: 70, bottom: 54}}>
+    <div style={{position: 'absolute', left: side, right: side, bottom}}>
       <div style={{position: 'absolute', top: -68, [en ? 'left' : 'right']: 6, fontFamily: fonts.chalk, fontWeight: 700, fontSize: 46, color: WHO[l.who] ?? CH.white, filter: 'url(#chalk)', direction: en ? 'ltr' : 'rtl', borderBottom: `4px solid ${WHO[l.who] ?? CH.white}`}}>{l.name}</div>
       <ChalkWords text={l.text} size={fit(l.text, size)} t0={l.t0 + 0.05} t1={l.t0 + l.d} />
     </div>
@@ -86,10 +86,10 @@ const SHAPES: Record<string, {d: string; len: number; vb: string}> = {
   spark: {d: 'M50 6 L50 94 M6 50 L94 50 M20 20 L80 80 M80 20 L20 80', len: 420, vb: '0 0 100 100'},
 };
 
-type DoodleProps = {shape: string; x: number; y: number; size?: number; at?: number; color?: string; rot?: number};
+export type DoodleProps = {shape: string; x: number; y: number; size?: number; at?: number; color?: string; rot?: number};
 
 /** A chalk doodle that draws itself starting at `at` seconds. */
-const Doodle: React.FC<DoodleProps> = ({shape, x, y, size = 130, at = 0.8, color = CH.yellow, rot = 0}) => {
+export const Doodle: React.FC<DoodleProps> = ({shape, x, y, size = 130, at = 0.8, color = CH.yellow, rot = 0}) => {
   const {t} = useT();
   const sh = SHAPES[shape];
   const k = Math.max(0, Math.min(1, (t - at) / 0.9));
@@ -109,13 +109,13 @@ const DOODLES: DoodleProps[][] = [
   [{shape: 'star', x: 1110, y: 140, size: 120, at: 0.8}, {shape: 'heart', x: 30, y: 250, size: 120, at: 1.4, color: CH.pink, rot: -8}, {shape: 'star', x: 1130, y: 340, size: 80, at: 2.0, color: CH.blue}],
 ];
 
-const Polaroid: React.FC<{src: string; dur: number; rot?: number; w?: number; h?: number}> = ({src, dur, rot = -2.2, w = 760, h = 430}) => {
+export const Polaroid: React.FC<{src: string; dur: number; rot?: number; w?: number; h?: number; top?: number}> = ({src, dur, rot = -2.2, w = 760, h = 430, top = 52}) => {
   const {f} = useT();
   const p = spring({frame: f, fps: FPS, config: {damping: 12, stiffness: 90}});
   const kb = interpolate(f, [0, dur * FPS], [1.02, 1.12]);
   const wob = Math.sin(f / 26) * 0.5;
   return (
-    <div style={{position: 'absolute', top: 52, left: 0, right: 0, display: 'flex', justifyContent: 'center', transform: `translateY(${(1 - p) * -260}px) rotate(${rot + wob}deg)`, opacity: Math.min(1, p * 1.5)}}>
+    <div style={{position: 'absolute', top, left: 0, right: 0, display: 'flex', justifyContent: 'center', transform: `translateY(${(1 - p) * -260}px) rotate(${rot + wob}deg)`, opacity: Math.min(1, p * 1.5)}}>
       <div style={{position: 'relative', background: '#fffdf6', padding: '14px 14px 14px', boxShadow: '0 14px 30px rgba(0,0,0,.5)'}}>
         <div style={{width: w, height: h, overflow: 'hidden'}}>
           <Img src={staticFile(src)} style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${kb})`}} />
@@ -154,7 +154,7 @@ const Text: React.FC<{s: StoryScene}> = ({s}) => {
   );
 };
 
-const Sticker: React.FC<{word: string; meaning: string; delay: number; rot: number; tint: string}> = ({word, meaning, delay, rot, tint}) => {
+export const Sticker: React.FC<{word: string; meaning: string; delay: number; rot: number; tint: string}> = ({word, meaning, delay, rot, tint}) => {
   const {t} = useT();
   const fonts = useFonts();
   const dir = useDir();
@@ -177,7 +177,7 @@ const WordsScene: React.FC<{s: StoryScene}> = ({s}) => (
   </Board>
 );
 
-const RoughBox: React.FC<{label: string; state: 'idle' | 'right' | 'wrong'; reveal: number}> = ({label, state, reveal}) => {
+export const RoughBox: React.FC<{label: string; state: 'idle' | 'right' | 'wrong'; reveal: number}> = ({label, state, reveal}) => {
   const fonts = useFonts();
   const dir = useDir();
   const col = state === 'right' ? CH.green : state === 'wrong' ? '#ff8a8a' : CH.white;

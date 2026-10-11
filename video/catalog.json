@@ -41,6 +41,28 @@
       "ready": true
     },
     {
+      "id": "kids_reel",
+      "name": "القصة المصورة",
+      "description": "القصة المصورة للأطفال بمقاس Reels وShorts وTikTok: صورة تملأ الشاشة، والحوار في بطاقة فوق أزرار المنصة.",
+      "composition": "KidsReel",
+      "aspect": "9:16",
+      "uses_images": true,
+      "story": true,
+      "ready": true,
+      "variant_of": "kids"
+    },
+    {
+      "id": "chalk_reel",
+      "name": "السبورة",
+      "description": "درس السبورة بمقاس Reels وShorts وTikTok: صورة طولية مثبتة أعلى السبورة، والكلام بالطباشير تحتها.",
+      "composition": "ChalkReel",
+      "aspect": "9:16",
+      "uses_images": true,
+      "story": true,
+      "ready": true,
+      "variant_of": "chalk"
+    },
+    {
       "id": "teaser",
       "name": "إعلان الحلقة للأهل",
       "description": "إعلان 20-30 ثانية بالطول من القصة نفسها، للأهل على TikTok وReels: لقطتان من القصة، والدرس، ومصدر النص، ودعوة لمشاهدة الحلقة كاملة. لا يولّد شيئا جديدا بعد الحلقة.",

@@ -210,7 +210,7 @@ async def build_story(script: Script, template: dict, build: Build) -> dict:
             spec["board"] = labels["board"]
             if s.kind in (StorySceneKind.story, StorySceneKind.outro):
                 prompt, refs = _cast_prompt(s.image_prompt, s.present, lang)
-                spec["image"] = build.take(await media.illustrate(prompt, "16:9", "story", refs), "jpg")
+                spec["image"] = build.take(await media.illustrate(prompt, template["aspect"], "story", refs), "jpg")
             if s.kind == StorySceneKind.words:
                 spec["cards"] = [c.model_dump() for c in s.cards]
             if s.kind == StorySceneKind.quiz:

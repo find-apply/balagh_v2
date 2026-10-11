@@ -4,16 +4,16 @@ import {WHO, currentLine, spokenParts, useDir, useT} from '../core/story';
 import {LangCtx, amiri, cairo, inter, useEn} from '../core/theme';
 import {FPS, SceneAudio, StoryScene, StorySpec, Watermark} from '../spec';
 
-const C = {teal: '#1f9d8a', tealDark: '#14705f', peach: '#ffc9a8', cream: '#fff7ea', yellow: '#ffd84d', ink: '#26343b'};
-const PASTEL = 'linear-gradient(135deg, #fde7d3 0%, #f3f7e6 45%, #d6efe8 100%)';
+export const C = {teal: '#1f9d8a', tealDark: '#14705f', peach: '#ffc9a8', cream: '#fff7ea', yellow: '#ffd84d', ink: '#26343b'};
+export const PASTEL = 'linear-gradient(135deg, #fde7d3 0%, #f3f7e6 45%, #d6efe8 100%)';
 
-const useFonts = () => {
+export const useFonts = () => {
   const en = useEn();
   return {body: en ? inter : cairo, quote: en ? inter : amiri};
 };
 
 /** Words highlight as they are spoken (weighted by word length). */
-const Words: React.FC<{text: string; size: number; font?: string; color?: string; active?: string; t0: number; t1: number}> = ({text, size, font, color = C.ink, active = C.yellow, t0, t1}) => {
+export const Words: React.FC<{text: string; size: number; font?: string; color?: string; active?: string; t0: number; t1: number}> = ({text, size, font, color = C.ink, active = C.yellow, t0, t1}) => {
   const {t} = useT();
   const fonts = useFonts();
   const dir = useDir();
@@ -27,10 +27,10 @@ const Words: React.FC<{text: string; size: number; font?: string; color?: string
 };
 
 /** Long lines get a smaller size so the bar stays two lines high. */
-const fit = (text: string, size: number) => (text.length > 130 ? size * 0.7 : text.length > 80 ? size * 0.82 : size);
+export const fit = (text: string, size: number) => (text.length > 130 ? size * 0.7 : text.length > 80 ? size * 0.82 : size);
 
 /** Subtitle bar for dialogue: speaker chip + highlighted words of the current line. */
-const SubBar: React.FC<{s: StoryScene; size?: number; skipFirst?: boolean}> = ({s, size = 44, skipFirst}) => {
+export const SubBar: React.FC<{s: StoryScene; size?: number; skipFirst?: boolean; side?: number; bottom?: number}> = ({s, size = 44, skipFirst, side = 60, bottom = 36}) => {
   const {t} = useT();
   const fonts = useFonts();
   const en = useEn();
@@ -38,14 +38,14 @@ const SubBar: React.FC<{s: StoryScene; size?: number; skipFirst?: boolean}> = ({
   if (!cur || (skipFirst && cur.idx === 0)) return null;
   const l = cur.line;
   return (
-    <div style={{position: 'absolute', left: 60, right: 60, bottom: 36, background: 'rgba(255,255,255,.95)', borderRadius: 28, padding: '30px 30px 14px', boxShadow: '0 10px 30px rgba(0,0,0,.18)'}}>
+    <div style={{position: 'absolute', left: side, right: side, bottom, background: 'rgba(255,255,255,.95)', borderRadius: 28, padding: '30px 30px 14px', boxShadow: '0 10px 30px rgba(0,0,0,.18)'}}>
       <div style={{position: 'absolute', top: -18, [en ? 'left' : 'right']: 36, background: WHO[l.who] ?? C.teal, color: '#fff', fontFamily: fonts.body, fontWeight: 800, fontSize: 28, padding: '2px 22px', borderRadius: 18}}>{l.name}</div>
       <Words text={l.text} size={fit(l.text, size)} t0={l.t0 + 0.05} t1={l.t0 + l.d} />
     </div>
   );
 };
 
-const Chrome: React.FC<{children: React.ReactNode; title?: string}> = ({children, title}) => {
+export const Chrome: React.FC<{children: React.ReactNode; title?: string}> = ({children, title}) => {
   const fonts = useFonts();
   const en = useEn();
   return (

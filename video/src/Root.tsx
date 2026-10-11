@@ -9,6 +9,8 @@ import {Captions} from './templates/Captions';
 import {Chalk} from './templates/Chalk';
 import {Geo} from './templates/Geo';
 import {Kids} from './templates/Kids';
+import {KidsReel} from './templates/KidsReel';
+import {ChalkReel} from './templates/ChalkReel';
 import {Explainer, ExplainerSpec, explainerFrames} from './templates/Explainer';
 import explainerSample from '../samples/explainer.json';
 import kursiSample from '../samples/kursi.json';
@@ -33,6 +35,10 @@ export const Root: React.FC = () => (
     <Composition id="Kids" component={Kids} fps={FPS} width={1280} height={720} durationInFrames={1}
       defaultProps={storyDefaults} calculateMetadata={storyMetadata} />
     <Composition id="Chalk" component={Chalk} fps={FPS} width={1280} height={720} durationInFrames={1}
+      defaultProps={storyDefaults} calculateMetadata={storyMetadata} />
+    <Composition id="KidsReel" component={KidsReel} fps={FPS} width={720} height={1280} durationInFrames={1}
+      defaultProps={storyDefaults} calculateMetadata={storyMetadata} />
+    <Composition id="ChalkReel" component={ChalkReel} fps={FPS} width={720} height={1280} durationInFrames={1}
       defaultProps={storyDefaults} calculateMetadata={storyMetadata} />
     <Composition id="Teaser" component={Teaser} fps={FPS} width={720} height={1280} durationInFrames={1}
       defaultProps={teaserDefaults} calculateMetadata={teaserMetadata} />

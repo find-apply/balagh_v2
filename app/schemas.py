@@ -536,6 +536,9 @@ class VideoTemplate(BaseModel):
     uses_images: bool = Field(description="Whether scenes may use generated still photos.")
     story: bool = Field(description="True for templates that play a children's dialogue story written from the script.")
     ready: bool = Field(description="False while the template cannot be chosen yet.")
+    variant_of: Optional[str] = Field(
+        default=None, description="Set on another frame of the same template (the vertical kids story for the wide one): "
+                                  "pickers show one card per template, in the frame the platform needs.")
     typical_seconds: Optional[float] = Field(
         default=None, description="Median wall time of this template's recent renders, for the waiting screen; null until one finished.")
 
