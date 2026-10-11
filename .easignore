@@ -1,0 +1,22 @@
+# What EAS Build uploads from this repository: only the mobile app. Everything else (the API, the site, the
+# video renderer and its data) is not part of an Android or iOS build. Replaces .gitignore for EAS, so the
+# usual ignores are repeated here.
+/*
+!/mobile
+
+# Secrets never leave this machine in the archive (EAS reads credentials.json itself)
+/mobile/credentials.json
+**/*.jks
+**/*.keystore
+**/.env*
+
+# Dependencies and generated folders
+**/node_modules/
+/mobile/.expo/
+/mobile/dist/
+/mobile/web-build/
+/mobile/android/
+/mobile/ios/
+/mobile/.kotlin/
+**/.DS_Store
+**/*.tsbuildinfo
