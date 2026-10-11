@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
+import { useVideoPlayer, VideoView } from 'expo-video'
 import { F } from '@/theme'
 import { useReduceMotion } from './common'
 
@@ -23,9 +24,39 @@ export function TemplatePreview({ template, lines, size = 'card', delay = 0, wid
   style?: StyleProp<ViewStyle>
 }) {
   const frame = [st.frame, { aspectRatio: wide ? 16 / 9 : 9 / 16, borderRadius: size === 'card' ? 16 : 12 }, style]
+  const clip = CLIPS[template]
+  if (clip && size === 'card') return <ClipPreview clip={clip} style={frame} />
   if (template === 'geo') return <GeoPreview lines={lines} size={size} delay={delay} style={frame} />
   if (template === 'captions') return <CaptionsPreview lines={lines} size={size} delay={delay} style={frame} />
   return <GenericPreview lines={lines} size={size} delay={delay} style={frame} />
+}
+
+/** Templates whose look a drawing cannot give (pictures of the characters, the chalkboard): a few seconds of the
+ * real render, sped up, silent and looping. Captions and geo stay drawn, since they show the script's own lines. */
+const CLIPS: Record<string, number> = {
+  kids: require('../../../assets/templates/kids.mp4'),
+  chalk: require('../../../assets/templates/chalk.mp4'),
+  kids_reel: require('../../../assets/templates/kids_reel.mp4'),
+  chalk_reel: require('../../../assets/templates/chalk_reel.mp4'),
+  teaser: require('../../../assets/templates/teaser.mp4'),
+}
+
+function ClipPreview({ clip, style }: { clip: number; style: StyleProp<ViewStyle> }) {
+  const reduce = useReduceMotion()
+  const player = useVideoPlayer(clip, (p) => {
+    p.loop = true
+    p.muted = true
+  })
+  useEffect(() => {
+    if (reduce) player.pause()
+    else player.play()
+  }, [player, reduce])
+  return (
+    <View style={[style, { backgroundColor: '#14201c' }]}>
+      <VideoView player={player} nativeControls={false} contentFit="cover" style={StyleSheet.absoluteFill} pointerEvents="none" />
+      <Muted size="card" />
+    </View>
+  )
 }
 
 /** The cycle's clock: 0 → 1 over `ms`, again and again, unless motion is reduced. */
