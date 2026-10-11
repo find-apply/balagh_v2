@@ -9,4 +9,5 @@ export const GROUPS: { label: string; knowledge: AudienceKnowledge }[] = [
   { label: 'غير مسلمين يتعرفون على الإسلام', knowledge: 'new' },
   { label: 'طلاب جامعات غير مسلمين', knowledge: 'new' },
   { label: 'عامة الناس', knowledge: 'basic' },
+  { label: 'أطفال مسلمون (7-12)', knowledge: 'basic' },
 ]

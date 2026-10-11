@@ -84,6 +84,8 @@ export interface VideoTemplate {
   uses_images: boolean
   story: boolean
   ready: boolean
+  /** Another frame of the same template (the vertical kids story for the wide one). */
+  variant_of?: string | null
   /** Median job time of this template's recent renders; null until one finished. */
   typical_seconds: number | null
 }

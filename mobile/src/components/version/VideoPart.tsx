@@ -6,7 +6,8 @@ import { api, BASE } from '@/api'
 import { IconCircle, SubSteps } from '@/components/kit'
 import { Badge, Button, H2, Notice, P } from '@/components/ui'
 import { VideoPlayer } from '@/components/VideoPlayer'
-import { aspectOf, VIDEO_STATUS, videoErrorText } from '@/shared/labels'
+import { aspectOf, templateOptions, VIDEO_STATUS, videoErrorText } from '@/shared/labels'
+import type { TemplateOption } from '@/shared/labels'
 import type { Script, Video, VideoStatus, VideoTemplate } from '@/shared/types'
 import { C, F } from '@/theme'
 import { ACTIVE, Collapsible, IconButton, LinkButton, message, scenesLabel, shortDate } from './common'
@@ -54,11 +55,10 @@ export function VideoPart({ projectId, script, templates, videos, focus, onChang
 
   if (templates === null || videos === null) return <P muted>يحمّل…</P>
 
-  const tall = aspectOf(script.platforms) === '9:16'
-  // Story templates need their own story written first; the app offers the others.
-  const ready = templates.filter((t) => t.ready && !t.story)
-  const matching = ready.filter((t) => t.aspect === (tall ? '9:16' : '16:9') || t.aspect === 'any')
-  const usable = matching.length ? matching : ready
+  const aspect = aspectOf(script.platforms)
+  const tall = aspect === '9:16'
+  // As on the site: one card per template in the platform's frame, the ones this audience cannot use greyed with why.
+  const options = templateOptions(templates, aspect, script.target.audience)
   const nameOf = (id: string | null) => templates.find((t) => t.id === id)?.name ?? id ?? ''
 
   const newest = videos[0]
@@ -102,8 +102,7 @@ export function VideoPart({ projectId, script, templates, videos, focus, onChang
       {current === 0 && (
         <TemplateStep
           script={script}
-          usable={usable}
-          stories={templates.filter((t) => t.ready && t.story)}
+          options={options}
           tall={tall}
           busy={busy}
           error={error}
@@ -152,61 +151,76 @@ export function VideoPart({ projectId, script, templates, videos, focus, onChang
   )
 }
 
-function TemplateStep({ script, usable, stories, tall, busy, error, onChoose }: {
+function TemplateStep({ script, options, tall, busy, error, onChoose }: {
   script: Script
-  usable: VideoTemplate[]
-  stories: VideoTemplate[]
+  options: TemplateOption[]
   tall: boolean
   busy: boolean
   error: string | null
   onChoose: (id: string) => void
 }) {
-  const initial = usable.find((t) => t.id === script.template)?.id ?? usable[0]?.id ?? null
-  const [pick, setPick] = useState<string | null>(initial)
-  const chosen = usable.find((t) => t.id === pick)
+  const open = options.filter((o) => o.group !== 'blocked')
+  const blocked = options.filter((o) => o.group === 'blocked')
+  const initial = open.find((o) => script.template && o.family.includes(script.template)) ?? open[0]
+  const [pick, setPick] = useState<string | null>(initial?.template.id ?? null)
+  const chosen = open.find((o) => o.template.id === pick)?.template
+  const card = (o: TemplateOption) => {
+    const t = o.template
+    const on = t.id === pick
+    const off = o.group === 'blocked'
+    const wide = t.aspect === '16:9'
+    return (
+      <Pressable
+        key={t.id}
+        accessibilityRole="radio"
+        accessibilityState={{ checked: on, disabled: off }}
+        accessibilityLabel={`${t.name}. ${off ? o.reason : t.description}`}
+        onPress={off ? undefined : () => setPick(t.id)}
+        disabled={off}
+        style={[st.card, { width: tall && !wide ? '48%' : '100%' }, off && { opacity: 0.5 }]}
+      >
+        <View style={[st.ring, { borderColor: on ? C.brand : 'transparent' }]}>
+          <TemplatePreview template={t.id} lines={t.id === 'geo' ? geoLines(script) : cardLines(script)} wide={wide} />
+          {on && (
+            <View style={st.check}>
+              <Ionicons name="checkmark" size={17} color="#fff" />
+            </View>
+          )}
+        </View>
+        <View style={{ gap: 2, paddingHorizontal: 2 }}>
+          <Text style={st.name}>{t.name}</Text>
+          {t.story && !off && <Text style={st.kids}>للأطفال</Text>}
+          {o.reason ? (
+            <Text style={[st.desc, off && st.reasonOff]}>
+              {off && <Ionicons name="lock-closed" size={11} color={C.bad} />} {o.reason}
+            </Text>
+          ) : (
+            <Text style={st.desc}>{t.description}</Text>
+          )}
+        </View>
+      </Pressable>
+    )
+  }
   return (
     <>
       <View style={{ gap: 2 }}>
         <H2>اختر القالب</H2>
         <P muted small>معاينة حية لكل قالب، بلا صوت.</P>
       </View>
-      {usable.length === 0 && <Notice tone="warn">لا قالب جاهزا الآن لهذا المقاس. جرّب لاحقا.</Notice>}
-      <View style={st.grid}>
-        {usable.map((t) => {
-          const on = t.id === pick
-          const wide = t.aspect === '16:9'
-          return (
-            <Pressable
-              key={t.id}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: on }}
-              accessibilityLabel={`${t.name}. ${t.description}`}
-              onPress={() => setPick(t.id)}
-              style={[st.card, { width: tall && !wide && usable.length > 1 ? '48%' : '100%' }]}
-            >
-              <View style={[st.ring, { borderColor: on ? C.brand : 'transparent' }]}>
-                <TemplatePreview template={t.id} lines={t.id === 'geo' ? geoLines(script) : cardLines(script)} wide={wide} />
-                {on && (
-                  <View style={st.check}>
-                    <Ionicons name="checkmark" size={17} color="#fff" />
-                  </View>
-                )}
-              </View>
-              <View style={{ gap: 2, paddingHorizontal: 2 }}>
-                <Text style={st.name}>{t.name}</Text>
-                <Text style={st.desc}>{t.description}</Text>
-              </View>
-            </Pressable>
-          )
-        })}
-      </View>
-      {stories.length > 0 && (
-        <P muted small>
-          القوالب القصصية ({stories.map((t) => t.name).join('، ')}) تحتاج قصة تُكتب لها أولا، وتجدها في الموقع.
-        </P>
+      {open.length === 0 && <Notice tone="warn">لا قالب متاحا لهذا الجمهور الآن.</Notice>}
+      <View style={st.grid}>{open.map(card)}</View>
+      {chosen?.story && (
+        <Notice>أول اختيار لقالب أطفال يكتب بلاغ منه قصة حوار بالشخصيات الثابتة (نحو دقيقة)، وهي نص جديد يلزم اعتماده.</Notice>
       )}
       {error && <Notice tone="bad">{error}</Notice>}
       {chosen && <Button title={`التالي: شاهد المشاهد بـ${chosen.name}`} busy={busy} onPress={() => onChoose(chosen.id)} />}
+      {blocked.length > 0 && (
+        <View style={{ gap: 10, marginTop: 6 }}>
+          <Text style={st.groupTitle}>غير متاح لهذا الجمهور</Text>
+          {blocked.some((o) => o.needsKids) && <P muted small>لاستعمالها، وطّن السيناريو لجمهور الأطفال أولا.</P>}
+          <View style={st.grid}>{blocked.map(card)}</View>
+        </View>
+      )}
     </>
   )
 }
@@ -439,6 +453,9 @@ const st = StyleSheet.create({
   check: { position: 'absolute', top: 8, start: 8, width: 28, height: 28, borderRadius: 14, backgroundColor: C.brand, alignItems: 'center', justifyContent: 'center' },
   name: { fontFamily: F.bold, fontSize: 15, color: C.ink },
   desc: { fontFamily: F.regular, fontSize: 12, lineHeight: 18, color: C.muted },
+  reasonOff: { color: C.bad, fontFamily: F.semibold },
+  kids: { alignSelf: 'flex-start', fontFamily: F.bold, fontSize: 11, color: C.info, backgroundColor: C.infoBg, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 1 },
+  groupTitle: { fontFamily: F.bold, fontSize: 15, color: C.ink },
   headRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   scene: { flexDirection: 'row', gap: 12, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 18, padding: 12 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },

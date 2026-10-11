@@ -1,104 +1,118 @@
-import type { Aspect } from '../labels'
-import { ASPECTS } from '../labels'
+import type { Aspect, TemplateOption } from '../labels'
+import { ASPECTS, isChildren, templateOptions } from '../labels'
 import type { VideoTemplate } from '../types'
+import { Icon } from './Icon'
+
+export { isChildren }
 
 interface Props {
   templates: VideoTemplate[] | null
   chosen: string | null
-  /** The frame the script's platform implies; matching templates come first, the rest stay available. */
+  /** The frame the script's platform implies: a template with a frame for it shows in that frame. */
   aspect: Aspect
   /** The script's audience as the brief words it: children's templates fit only an audience of children. */
   audience: string
   disabled: boolean
   onPick: (template: VideoTemplate) => void
+  /** Opens the localize form set for children, the way to a children's template from another audience. */
+  onWantKids?: () => void
 }
 
-/** The same test the server applies: the story templates are for an audience of children. */
-export const isChildren = (audience: string) => /أطفال|طفل|أولاد|صغار|براعم|\bkids?\b|\bchildren\b|\bchild\b|\b(?:[3-9]|1[0-2])\s*(?:إلى|الى|-|–|to)\s*(?:[4-9]|1[0-2])\s*(?:سنوات|سنة|years?)/i.test(audience)
-
-export function TemplatePicker({ templates, chosen, aspect, audience, disabled, onPick }: Props) {
+/** Every template, one card each: what fits the script, what fits it in another frame, and what its audience
+ * cannot use (shown greyed, with the reason), so none disappears without a word. */
+export function TemplatePicker({ templates, chosen, aspect, audience, disabled, onPick, onWantKids }: Props) {
   const kids = isChildren(audience)
-  // Templates for this audience, in the platform's frame first; the children's story templates are offered
-  // only to an audience of children, and the others only to everyone else.
-  const forThem = templates?.filter((t) => t.story === kids) ?? []
-  const fit = forThem.filter((t) => t.aspect === aspect)
-  const rest = forThem.filter((t) => t.aspect !== aspect)
-  const others = templates?.filter((t) => t.story !== kids) ?? []
+  const options = templates ? templateOptions(templates, aspect, audience) : []
+  const fit = options.filter((o) => o.group === 'fit')
+  const other = options.filter((o) => o.group === 'other')
+  const blocked = options.filter((o) => o.group === 'blocked')
   return (
     <section className="card">
       <p className="muted small">
         {kids
           ? 'القالب الذي يُحوَّل به السيناريو إلى فيديو. قوالب الأطفال تكتب أول مرة قصة حوار بالشخصيات الثابتة، وهي نص جديد يلزم اعتماده.'
-          : 'القالب الذي يُحوَّل به السيناريو إلى فيديو. قوالب الأطفال (القصة المصورة، السبورة، إعلان الأهل) لا تناسب هذا الجمهور، فهي لا تُعرض هنا.'}
+          : 'القالب الذي يُحوَّل به السيناريو إلى فيديو.'}
       </p>
       {!templates && <p className="muted">تعذر تحميل مكتبة القوالب. تأكد أن الخادم يعمل ثم أعد تحميل الصفحة.</p>}
       {templates && (
         <>
-        {rest.length > 0 && <h4 className="tpl-group">{`يناسب منصتك (${ASPECTS[aspect]})`}</h4>}
-        <div className="templates">
-          {fit.map((t) => (
-            <article className={t.id === chosen ? 'card idea chosen' : 'card idea'} key={t.id}>
-              <img
-                className={`preview ${t.aspect === '9:16' ? 'tall' : ''}`}
-                src={`/templates/${t.id}.jpg`}
-                alt=""
-                onError={(e) => (e.currentTarget.style.display = 'none')}
-              />
-              <div className="badges">
-                <span className="badge" dir="ltr">
-                  {t.aspect}
-                </span>
-                <span className="badge">{t.uses_images ? 'رسوم وصور' : 'رسوم فقط'}</span>
-                {t.story && <span className="badge info">للأطفال</span>}
-                {t.typical_seconds != null && (
-                  <span className="badge">{`التصيير ${Math.ceil(t.typical_seconds / 60)} د تقريبا`}</span>
-                )}
-                {!t.ready && <span className="badge warn">قريبا</span>}
-                {t.id === chosen && <span className="badge ok">القالب المختار</span>}
-              </div>
-              <h4>{t.name}</h4>
-              <p>{t.description}</p>
-              {t.id !== chosen && (
-                <button className="primary" disabled={disabled || !t.ready} onClick={() => onPick(t)}>
-                  اختر هذا القالب
-                </button>
-              )}
-            </article>
-          ))}
-        </div>
-        {rest.length > 0 && (
-          <details className="tpl-rest">
-            <summary>{`قوالب بصيغة أخرى (${rest.length}): ${ASPECTS[rest[0].aspect as Aspect]}`}</summary>
-            <div className="templates">
-              {rest.map((t) => (
-                <article className={t.id === chosen ? 'card idea chosen' : 'card idea'} key={t.id}>
-                  <img className="preview" src={`/templates/${t.id}.jpg`} alt="" onError={(e) => (e.currentTarget.style.display = 'none')} />
-                  <div className="badges">
-                    <span className="badge" dir="ltr">{t.aspect}</span>
-                    {t.story && <span className="badge info">للأطفال</span>}
-                    {t.id === chosen && <span className="badge ok">القالب المختار</span>}
-                  </div>
-                  <h4>{t.name}</h4>
-                  <p>{t.description}</p>
-                  {t.id !== chosen && (
-                    <button className="primary" disabled={disabled || !t.ready} onClick={() => onPick(t)}>
-                      اختر هذا القالب
-                    </button>
-                  )}
-                </article>
-              ))}
-            </div>
-          </details>
-        )}
-        {others.length > 0 && (
-          <p className="muted small tpl-others">
-            {kids
-              ? `قوالب الكبار (${others.map((t) => t.name).join('، ')}) لا تُعرض لجمهور من الأطفال.`
-              : `قوالب الأطفال (${others.map((t) => t.name).join('، ')}) تظهر حين يكون الجمهور أطفالا؛ وطّن السيناريو لهم أولا إن أردتها.`}
-          </p>
-        )}
+          <Group title={`يناسب مشروعك (${ASPECTS[aspect]})`} options={fit} chosen={chosen} disabled={disabled} onPick={onPick} />
+          <Group title="بمقاس آخر" note="متاحة، لكن مقاسها غير مقاس منصتك." options={other} chosen={chosen} disabled={disabled} onPick={onPick} />
+          <Group
+            title="غير متاح لهذا الجمهور"
+            options={blocked}
+            chosen={chosen}
+            disabled
+            onPick={onPick}
+            action={!kids && onWantKids && blocked.some((o) => o.needsKids) ? { label: 'وطّن السيناريو للأطفال', onClick: onWantKids } : undefined}
+          />
         </>
       )}
     </section>
+  )
+}
+
+function Group({ title, note, options, chosen, disabled, onPick, action }: {
+  title: string
+  note?: string
+  options: TemplateOption[]
+  chosen: string | null
+  disabled: boolean
+  onPick: (t: VideoTemplate) => void
+  action?: { label: string; onClick: () => void }
+}) {
+  if (options.length === 0) return null
+  return (
+    <div className="tpl-group-block">
+      <h4 className="tpl-group">{title}</h4>
+      {note && <p className="muted small">{note}</p>}
+      <div className="templates">
+        {options.map((o) => (
+          <Card key={o.template.id} option={o} chosen={chosen} disabled={disabled} onPick={onPick} />
+        ))}
+      </div>
+      {action && (
+        <p className="tpl-action">
+          <button type="button" onClick={action.onClick}>
+            {action.label}
+          </button>
+        </p>
+      )}
+    </div>
+  )
+}
+
+function Card({ option, chosen, disabled, onPick }: { option: TemplateOption; chosen: string | null; disabled: boolean; onPick: (t: VideoTemplate) => void }) {
+  const t = option.template
+  const isChosen = chosen !== null && option.family.includes(chosen)
+  const blocked = option.group === 'blocked'
+  return (
+    <article className={['card idea', isChosen && 'chosen', blocked && 'tpl-off'].filter(Boolean).join(' ')} aria-disabled={blocked || undefined}>
+      <img
+        className={`preview ${t.aspect === '9:16' ? 'tall' : ''}`}
+        src={`/templates/${t.id}.jpg`}
+        alt=""
+        onError={(e) => (e.currentTarget.style.display = 'none')}
+      />
+      <div className="badges">
+        <span className="badge" dir="ltr">{t.aspect}</span>
+        <span className="badge">{t.uses_images ? 'رسوم وصور' : 'رسوم فقط'}</span>
+        {t.story && <span className="badge info">للأطفال</span>}
+        {t.typical_seconds != null && <span className="badge">{`التصيير ${Math.ceil(t.typical_seconds / 60)} د تقريبا`}</span>}
+        {isChosen && <span className="badge ok">القالب المختار</span>}
+      </div>
+      <h4>{t.name}</h4>
+      <p>{t.description}</p>
+      {option.reason && (
+        <p className={blocked ? 'tpl-reason off' : 'tpl-reason'}>
+          {blocked && <Icon name="lock" size={14} />} {option.reason}
+        </p>
+      )}
+      {!isChosen && (
+        <button className="primary" disabled={disabled || blocked} onClick={() => onPick(t)}>
+          {blocked ? 'غير متاح' : 'اختر هذا القالب'}
+        </button>
+      )}
+    </article>
   )
 }

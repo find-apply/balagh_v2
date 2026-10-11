@@ -4552,3 +4552,31 @@ button.danger {
 button.danger:disabled {
   opacity: 0.5;
 }
+
+/* Template picker groups: what fits, what fits in another frame, and what this audience cannot use. */
+.tpl-group-block + .tpl-group-block {
+  margin-top: 22px;
+}
+
+.templates .idea.tpl-off {
+  opacity: 0.55;
+  filter: grayscale(0.6);
+}
+
+.tpl-reason {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tpl-reason.off {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+.tpl-action {
+  margin: 12px 0 0;
+}

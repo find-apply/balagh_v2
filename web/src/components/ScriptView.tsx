@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { aspectOf, CLAIMS, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
+import { aspectOf, CLAIMS, isChildren, KNOWLEDGE, LANGUAGES, LEVELS, PLATFORMS, REVIEWERS, ROLES, toMarkdown } from '../labels'
 import type { AudienceSpec, LocalizeRequest, ReviewRole, Script, Video, VideoTemplate } from '../types'
 import { api, BASE } from '../api'
 import { reviewHash } from '../route'
@@ -101,14 +101,21 @@ export function Scenes({ script }: { script: Script }) {
   )
 }
 
-function LocalizeForm({ script, disabled, onLocalize }: { script: Script; disabled: boolean; onLocalize: Handlers['onLocalize'] }) {
-  const [target, setTarget] = useState<AudienceSpec>({
-    audience: GROUPS[4].label,
-    language: script.target.language === 'ar' ? 'en' : 'ar',
-    dialect: null,
-    audience_knowledge: GROUPS[4].knowledge,
-    tone: null,
-  })
+/** Children: the group the template picker sends to, for a children's template from another audience. */
+const KIDS = GROUPS.find((g) => isChildren(g.label)) ?? GROUPS[4]
+
+function LocalizeForm({ script, disabled, onLocalize, forKids }: { script: Script; disabled: boolean; onLocalize: Handlers['onLocalize']; forKids?: boolean }) {
+  const [target, setTarget] = useState<AudienceSpec>(
+    forKids
+      ? { audience: KIDS.label, language: script.target.language, dialect: null, audience_knowledge: KIDS.knowledge, tone: null }
+      : {
+          audience: GROUPS[4].label,
+          language: script.target.language === 'ar' ? 'en' : 'ar',
+          dialect: null,
+          audience_knowledge: GROUPS[4].knowledge,
+          tone: null,
+        },
+  )
   const [notes, setNotes] = useState('')
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -305,6 +312,9 @@ function Approvals({ projectId, script, disabled, onApprove, onGo }: { projectId
 export function ScriptView({ projectId, script, source, templates, disabled, tab, onTab, actions }: Props) {
   const [notes, setNotes] = useState('')
   const [showLocalize, setShowLocalize] = useState(false)
+  // The template picker can open the localize form already set for children.
+  const [localizeKids, setLocalizeKids] = useState(false)
+  const localizeRef = useRef<HTMLDivElement>(null)
   const [compare, setCompare] = useState(false)
   const setTab = onTab
   const review = script.review
@@ -485,7 +495,18 @@ export function ScriptView({ projectId, script, source, templates, disabled, tab
           audience={script.target.audience}
           disabled={disabled || !actions}
           onPick={(t) => actions?.onTemplate(t)}
+          onWantKids={
+            actions
+              ? () => {
+                  setLocalizeKids(true)
+                  setTimeout(() => localizeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50)
+                }
+              : undefined
+          }
         />
+        <div ref={localizeRef}>
+          {localizeKids && actions && <LocalizeForm script={script} disabled={disabled} onLocalize={actions.onLocalize} forKids />}
+        </div>
         <StoryView script={script} disabled={disabled || !actions} onRewrite={(notes) => actions?.onStory(notes)} />
       </div>
 

@@ -1,4 +1,4 @@
-import type { AudienceKnowledge, AuthorRole, ContentLevel, Language, Platform, Script } from './types'
+import type { AudienceKnowledge, AuthorRole, ContentLevel, Language, Platform, Script, VideoTemplate } from './types'
 
 export const PLATFORMS: Record<Platform, string> = {
   tiktok: 'TikTok',
@@ -124,4 +124,50 @@ export function videoErrorText(error: string | null | undefined): string {
   if (/magnific|image/i.test(e)) return 'تعذّر صنع صور هذا القالب الآن. أعد المحاولة، أو اختر قالبا بلا صور مثل الزخرفة الهندسية.'
   if (!e || /timeout|timed out/i.test(e)) return 'استغرق إنشاء الفيديو أطول من المعتاد فتوقّف. أعد المحاولة بعد قليل.'
   return 'حدث خطأ في خادم الفيديو. أعد المحاولة، وإن تكرر فتواصل مع الإدارة.'
+}
+
+/** The same test the server applies: the story templates are for an audience of children. */
+export const isChildren = (audience: string) =>
+  /أطفال|طفل|أولاد|صغار|براعم|\bkids?\b|\bchildren\b|\bchild\b|\b(?:[3-9]|1[0-2])\s*(?:إلى|الى|-|–|to)\s*(?:[4-9]|1[0-2])\s*(?:سنوات|سنة|years?)/i.test(audience)
+
+/** A template as a picker shows it: one card per template (its frame for this platform), and whether it can be chosen. */
+export interface TemplateOption {
+  template: VideoTemplate
+  /** The ids of every frame of this template, to mark it chosen whichever frame was picked. */
+  family: string[]
+  group: 'fit' | 'other' | 'blocked'
+  /** Why it sits in its group: the frame it will show in, or why this script cannot use it. */
+  reason: string | null
+  /** A blocked children's template can be reached by localizing the script for children. */
+  needsKids: boolean
+}
+
+/** Sorts the library for a script: what fits its platform and audience, what fits only its audience (another
+ * frame), and what its audience cannot use, with the reason, so nothing disappears without a word. */
+export function templateOptions(templates: VideoTemplate[], aspect: Aspect, audience: string): TemplateOption[] {
+  const kids = isChildren(audience)
+  const families = new Map<string, VideoTemplate[]>()
+  for (const t of templates) {
+    const root = t.variant_of ?? t.id
+    families.set(root, [...(families.get(root) ?? []), t])
+  }
+  const order = { fit: 0, other: 1, blocked: 2 }
+  return [...families.values()]
+    .map((members): TemplateOption => {
+      const template = members.find((m) => m.aspect === aspect) ?? members.find((m) => !m.variant_of) ?? members[0]
+      const family = members.map((m) => m.id)
+      if (template.story !== kids)
+        return {
+          template, family, group: 'blocked', needsKids: template.story,
+          reason: template.story ? 'للأطفال فقط: شخصياته وصوته مصمَّمة لهم.' : 'لجمهور غير الأطفال: لجمهور الأطفال قوالبه الخاصة.',
+        }
+      if (!template.ready) return { template, family, group: 'blocked', needsKids: false, reason: 'قريبا.' }
+      if (template.aspect !== aspect)
+        return {
+          template, family, group: 'other', needsKids: false,
+          reason: template.aspect === '16:9' ? 'عريض 16:9: يظهر في منصتك بشريطين أعلى الفيديو وأسفله.' : 'عمودي 9:16: يظهر في منصتك بشريطين على جانبيه.',
+        }
+      return { template, family, group: 'fit', needsKids: false, reason: null }
+    })
+    .sort((a, b) => order[a.group] - order[b.group])
 }
