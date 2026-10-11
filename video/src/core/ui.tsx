@@ -120,6 +120,9 @@ export const CaptionStage: React.FC<{cues: Cue[]; visuals?: Visual[]; hook?: str
         const wait = hook && i === 0 ? 3.4 : 0;
         const from = Math.round((v.t0 + wait) * fps);
         const dur = Math.round((v.t1 - v.t0 - wait) * fps);
+        // A first scene shorter than the hook has no time of its own left: its visual is skipped, not given a
+        // negative length (which failed the whole render).
+        if (dur + 10 <= 0) return null;
         return (
           <Sequence key={i} from={from} durationInFrames={dur + 10}>
             <FadeIn>{renderVisual(v)}</FadeIn>
