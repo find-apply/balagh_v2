@@ -7,14 +7,15 @@ import { BigButton, Choice, Choices, Note, p, Section, SectionTitle } from '@/co
 import { Notice, P, Progress, Screen } from '@/components/ui'
 import { clearJob, run, useJob } from '@/jobs'
 import { GROUPS } from '@/shared/audiences'
-import { LANGUAGES } from '@/shared/labels'
+import { isChildren, LANGUAGES } from '@/shared/labels'
 import { loadPrefs } from '@/prefs'
 import { TASKS } from '@/shared/tasks'
 import type { Language, Script } from '@/shared/types'
 
 /** An approved version, adapted for another language or audience: a new version in the same project. */
 export default function Localize() {
-  const { id, sid } = useLocalSearchParams<{ id: string; sid: string }>()
+  // kids: opened from a children's template, so the children's audience comes chosen.
+  const { id, sid, kids } = useLocalSearchParams<{ id: string; sid: string; kids?: string }>()
   const [script, setScript] = useState<Script | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [language, setLanguage] = useState<Language>('en')
@@ -30,12 +31,14 @@ export default function Localize() {
         setScript(sc)
         // Start from something other than what the version already speaks.
         setLanguage(sc.target.language === 'ar' ? 'en' : 'ar')
-        const other = GROUPS.findIndex((g) => g.label !== sc.target.audience)
+        const other = kids ? GROUPS.findIndex((g) => isChildren(g.label)) : GROUPS.findIndex((g) => g.label !== sc.target.audience)
         setGroup(Math.max(0, other))
+        // Children's stories are told in the language the version already speaks.
+        if (kids) setLanguage(sc.target.language)
       },
       (e: unknown) => setError(e instanceof Error ? e.message : String(e)),
     )
-  }, [id, sid])
+  }, [id, sid, kids])
 
   const localize = async () => {
     const g = GROUPS[group]

@@ -4747,3 +4747,175 @@ button.danger:disabled {
     width: 200px;
   }
 }
+
+/* The picker on a phone: names to jump by, a strip swiped one template at a time, and the one in the middle's facts
+ * and action under it. Every slide has the same width, so a swipe moves by one fixed step. */
+.tpl-phone {
+  padding-inline: 0;
+  overflow: hidden;
+}
+
+.tpl-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 16px 10px;
+  scrollbar-width: none;
+}
+
+.tpl-chips::-webkit-scrollbar,
+.tpl-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.tpl-chips button {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tpl-chips button.off {
+  border-style: dashed;
+  background: transparent;
+  color: var(--muted);
+}
+
+.tpl-chips button[aria-pressed='true'] {
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+
+.tpl-strip {
+  --slide: min(56vw, 230px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 6px calc((100% - var(--slide)) / 2) 10px;
+  scrollbar-width: none;
+}
+
+.tpl-slide {
+  flex: none;
+  position: relative;
+  width: var(--slide);
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--ink);
+  scroll-snap-align: center;
+  transform: scale(0.9);
+  opacity: 0.55;
+  transition: transform 0.25s, opacity 0.25s;
+}
+
+.tpl-slide.tall {
+  aspect-ratio: 9 / 16;
+}
+
+.tpl-slide.wide {
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+}
+
+.tpl-slide.off {
+  filter: grayscale(0.4);
+}
+
+.tpl-slide.on {
+  transform: none;
+  opacity: 1;
+  filter: none;
+}
+
+.tpl-slide video,
+.tpl-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tpl-slide .tpl-chip {
+  inset-inline-start: auto;
+  inset-inline-end: 10px;
+  top: auto;
+  bottom: 10px;
+}
+
+.tpl-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tpl-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line-strong);
+  transition: width 0.2s;
+}
+
+.tpl-dots span.on {
+  width: 18px;
+  background: var(--brand);
+}
+
+.tpl-now {
+  padding: 12px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tpl-now h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.tpl-now p {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.tpl-now .tpl-facts {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.tpl-act {
+  padding: 14px 16px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tpl-act .primary,
+.tpl-act .tpl-kids {
+  align-self: stretch;
+  min-height: 52px;
+  font-size: 1rem;
+}
+
+.tpl-why-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--warn);
+}

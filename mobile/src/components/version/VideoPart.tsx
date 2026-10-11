@@ -1,12 +1,13 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { router } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Animated, I18nManager, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { api, BASE } from '@/api'
 import { IconCircle, SubSteps } from '@/components/kit'
 import { Badge, Button, H2, Notice, P } from '@/components/ui'
 import { VideoPlayer } from '@/components/VideoPlayer'
-import { aspectOf, templateOptions, VIDEO_STATUS, videoErrorText } from '@/shared/labels'
+import { aspectOf, isChildren, templateOptions, VIDEO_STATUS, videoErrorText } from '@/shared/labels'
 import type { TemplateOption } from '@/shared/labels'
 import type { Script, Video, VideoStatus, VideoTemplate } from '@/shared/types'
 import { C, F } from '@/theme'
@@ -101,9 +102,9 @@ export function VideoPart({ projectId, script, templates, videos, focus, onChang
       <SubSteps labels={STEPS} current={current} onPress={go} error={current === 2 && failed} />
       {current === 0 && (
         <TemplateStep
+          projectId={projectId}
           script={script}
           options={options}
-          tall={tall}
           busy={busy}
           error={error}
           onChoose={(id) =>
@@ -151,74 +152,166 @@ export function VideoPart({ projectId, script, templates, videos, focus, onChang
   )
 }
 
-function TemplateStep({ script, options, tall, busy, error, onChoose }: {
+const GAP = 12
+
+/** The templates side by side at full size, swiped through one at a time (or reached by name above), each playing;
+ * under the one in the middle its facts and the one action it allows: choose it, go on with it, or, for one this
+ * audience cannot use, why and the way to it. */
+function TemplateStep({ projectId, script, options, busy, error, onChoose }: {
+  projectId: string
   script: Script
   options: TemplateOption[]
-  tall: boolean
   busy: boolean
   error: string | null
   onChoose: (id: string) => void
 }) {
-  const open = options.filter((o) => o.group !== 'blocked')
-  const blocked = options.filter((o) => o.group === 'blocked')
-  const initial = open.find((o) => script.template && o.family.includes(script.template)) ?? open[0]
-  const [pick, setPick] = useState<string | null>(initial?.template.id ?? null)
-  const chosen = open.find((o) => o.template.id === pick)?.template
-  const card = (o: TemplateOption) => {
-    const t = o.template
-    const on = t.id === pick
-    const off = o.group === 'blocked'
-    const wide = t.aspect === '16:9'
-    return (
-      <Pressable
-        key={t.id}
-        accessibilityRole="radio"
-        accessibilityState={{ checked: on, disabled: off }}
-        accessibilityLabel={`${t.name}. ${off ? o.reason : t.description}`}
-        onPress={off ? undefined : () => setPick(t.id)}
-        disabled={off}
-        style={[st.card, { width: tall && !wide ? '48%' : '100%' }, off && { opacity: 0.5 }]}
-      >
-        <View style={[st.ring, { borderColor: on ? C.brand : 'transparent' }]}>
-          <TemplatePreview template={t.id} lines={t.id === 'geo' ? geoLines(script) : cardLines(script)} wide={wide} />
-          {on && (
-            <View style={st.check}>
-              <Ionicons name="checkmark" size={17} color="#fff" />
-            </View>
-          )}
-        </View>
-        <View style={{ gap: 2, paddingHorizontal: 2 }}>
-          <Text style={st.name}>{t.name}</Text>
-          {t.story && !off && <Text style={st.kids}>للأطفال</Text>}
-          {o.reason ? (
-            <Text style={[st.desc, off && st.reasonOff]}>
-              {off && <Ionicons name="lock-closed" size={11} color={C.bad} />} {o.reason}
-            </Text>
-          ) : (
-            <Text style={st.desc}>{t.description}</Text>
-          )}
-        </View>
-      </Pressable>
-    )
+  const kids = isChildren(script.target.audience)
+  const isChosen = (o: TemplateOption) => o.group !== 'blocked' && script.template != null && o.family.includes(script.template)
+  const [idx, setIdx] = useState(() => Math.max(0, options.findIndex(isChosen)))
+  const [width, setWidth] = useState(0)
+  const cardW = Math.min(230, Math.round(width * 0.56))
+  const step = cardW + GAP
+  // The strip is drawn by hand, not by a scroll view (whose right-to-left offsets Android gets wrong): cards side by
+  // side from the start edge, all moved together so the one in view sits in the middle. In right-to-left the next
+  // card lies to the left, so bringing it in moves the strip right.
+  const dir = I18nManager.isRTL ? 1 : -1
+  const [shift] = useState(() => new Animated.Value(0))
+  const go = (i: number) => {
+    setIdx(i)
+    Animated.spring(shift, { toValue: dir * i * step, useNativeDriver: true, bounciness: 4 }).start()
   }
+  useEffect(() => {
+    // the card in view in the middle as the step opens, and again if the width changes; moves between cards spring
+    shift.setValue(dir * idx * step)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
+  // A drag of a quarter card, or a flick, moves one card the way the finger pulled the strip: in right-to-left,
+  // pulling it right brings in the next card from the left. The pan is gesture-handler's, as the side drawer's is,
+  // so a sideways drag on the strip moves the strip and not the drawer; a vertical one still scrolls the page.
+  const swipe = Gesture.Pan()
+    .runOnJS(true)
+    .activeOffsetX([-12, 12])
+    .failOffsetY([-14, 14])
+    .onUpdate((e) => shift.setValue(dir * idx * step + e.translationX))
+    .onEnd((e) => {
+      const moved = Math.abs(e.translationX) > step / 4 || Math.abs(e.velocityX) > 500 ? Math.sign(e.translationX) * dir : 0
+      go(Math.min(options.length - 1, Math.max(0, idx + moved)))
+    })
+  const o = options[idx]
+  if (!o) return <Notice tone="warn">لا قالب في المكتبة الآن.</Notice>
+  const t = o.template
+  const blocked = o.group === 'blocked'
   return (
     <>
       <View style={{ gap: 2 }}>
         <H2>اختر القالب</H2>
-        <P muted small>معاينة حية لكل قالب، بلا صوت.</P>
+        <P muted small>اسحب لتشاهد كل قالب يتحرك، بلا صوت.</P>
       </View>
-      {open.length === 0 && <Notice tone="warn">لا قالب متاحا لهذا الجمهور الآن.</Notice>}
-      <View style={st.grid}>{open.map(card)}</View>
-      {chosen?.story && (
-        <Notice>أول اختيار لقالب أطفال يكتب بلاغ منه قصة حوار بالشخصيات الثابتة (نحو دقيقة)، وهي نص جديد يلزم اعتماده.</Notice>
-      )}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={st.bleed} contentContainerStyle={st.chips}>
+        {options.map((x, i) => {
+          const on = i === idx
+          const off = x.group === 'blocked'
+          return (
+            <Pressable
+              key={x.template.id}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: on }}
+              accessibilityLabel={`${x.template.name}${off ? '، غير متاح' : ''}`}
+              onPress={() => go(i)}
+              style={[st.chip, off && st.chipOff, on && st.chipOn]}
+            >
+              {off && <Ionicons name="lock-closed" size={12} color={on ? '#fff' : C.muted} />}
+              {isChosen(x) && <Ionicons name="checkmark" size={14} color={on ? '#fff' : C.brand} />}
+              <Text style={[st.chipText, off && { color: C.muted }, on && { color: '#fff' }]}>{x.template.name}</Text>
+            </Pressable>
+          )
+        })}
+      </ScrollView>
+      <View
+        style={st.bleed}
+        onLayout={(e) => {
+          const w = Math.round(e.nativeEvent.layout.width)
+          if (w !== width) setWidth(w)
+        }}
+      >
+        {width > 0 && (
+          <GestureDetector gesture={swipe}>
+            <View style={{ height: Math.round((cardW * 16) / 9), overflow: 'hidden' }}>
+              <Animated.View style={[StyleSheet.absoluteFill, { transform: [{ translateX: shift }] }]}>
+                {options.map((x, i) => {
+                  const on = i === idx
+                  const off = x.group === 'blocked'
+                  const wide = x.template.aspect === '16:9'
+                  const h = wide ? (cardW * 9) / 16 : (cardW * 16) / 9
+                  return (
+                    <Pressable
+                      key={x.template.id}
+                      accessibilityLabel={x.template.name}
+                      accessibilityState={{ selected: on }}
+                      onPress={() => !on && go(i)}
+                      style={{
+                        position: 'absolute',
+                        start: (width - cardW) / 2 + i * step,
+                        top: (Math.round((cardW * 16) / 9) - h) / 2,
+                        width: cardW,
+                        opacity: on ? 1 : 0.55,
+                        transform: [{ scale: on ? 1 : 0.9 }],
+                      }}
+                    >
+                      <TemplatePreview template={x.template.id} lines={x.template.id === 'geo' ? geoLines(script) : cardLines(script)} wide={wide} style={{ borderRadius: 20 }} />
+                      {off && (
+                        <View style={st.lockChip}>
+                          <Ionicons name="lock-closed" size={11} color="#fff" />
+                          <Text style={st.lockText}>غير متاح</Text>
+                        </View>
+                      )}
+                    </Pressable>
+                  )
+                })}
+              </Animated.View>
+            </View>
+          </GestureDetector>
+        )}
+      </View>
+      <View style={st.dots} importantForAccessibility="no-hide-descendants">
+        {options.map((x, i) => (
+          <View key={x.template.id} style={[st.dot, i === idx && st.dotOn]} />
+        ))}
+      </View>
+      <View style={{ gap: 4 }} accessibilityLiveRegion="polite">
+        <Text style={st.nowName}>{t.name}</Text>
+        <Text style={st.nowFacts}>
+          {t.aspect === '16:9' ? 'عريض 16:9' : 'عمودي 9:16'} · {t.uses_images ? 'رسوم وصور' : 'رسوم فقط'}
+          {t.typical_seconds != null ? ` · التصيير ${Math.ceil(t.typical_seconds / 60)} د تقريبا` : ''}
+        </Text>
+        <Text style={st.nowDesc}>{t.description}</Text>
+        {o.group === 'other' && <Text style={st.nowOther}>{o.reason}</Text>}
+      </View>
       {error && <Notice tone="bad">{error}</Notice>}
-      {chosen && <Button title={`التالي: شاهد المشاهد بـ${chosen.name}`} busy={busy} onPress={() => onChoose(chosen.id)} />}
-      {blocked.length > 0 && (
-        <View style={{ gap: 10, marginTop: 6 }}>
-          <Text style={st.groupTitle}>غير متاح لهذا الجمهور</Text>
-          {blocked.some((o) => o.needsKids) && <P muted small>لاستعمالها، وطّن السيناريو لجمهور الأطفال أولا.</P>}
-          <View style={st.grid}>{blocked.map(card)}</View>
+      {blocked ? (
+        <View style={{ gap: 10 }}>
+          <Text style={st.why}>
+            <Ionicons name="lock-closed" size={13} color={C.warn} /> {o.reason}
+          </Text>
+          {o.needsKids && !kids && (
+            <Button
+              kind="ghost"
+              title="وطّن السيناريو للأطفال"
+              onPress={() => router.push({ pathname: '/localize', params: { id: projectId, sid: script.id, kids: '1' } })}
+            />
+          )}
+        </View>
+      ) : (
+        <View style={{ gap: 10 }}>
+          {t.story && !isChosen(o) && (
+            <Notice>أول اختيار لقالب أطفال يكتب بلاغ منه قصة حوار بالشخصيات الثابتة (نحو دقيقة)، وهي نص جديد يلزم اعتماده.</Notice>
+          )}
+          {isChosen(o) && (
+            <Text style={st.chosen}>
+              <Ionicons name="checkmark" size={16} color={C.brand} /> قالب مشروعك
+            </Text>
+          )}
+          <Button title={isChosen(o) ? 'التالي: شاهد المشاهد' : `اختر «${t.name}»`} busy={busy} onPress={() => onChoose(t.id)} />
         </View>
       )}
     </>
@@ -447,15 +540,23 @@ function VideoStep({ script, video, others, templates, tall, busy, error, onShow
 }
 
 const st = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 14 },
-  card: { gap: 8, minHeight: 44 },
-  ring: { borderWidth: 3, borderRadius: 19, padding: 0, overflow: 'hidden' },
-  check: { position: 'absolute', top: 8, start: 8, width: 28, height: 28, borderRadius: 14, backgroundColor: C.brand, alignItems: 'center', justifyContent: 'center' },
-  name: { fontFamily: F.bold, fontSize: 15, color: C.ink },
-  desc: { fontFamily: F.regular, fontSize: 12, lineHeight: 18, color: C.muted },
-  reasonOff: { color: C.bad, fontFamily: F.semibold },
-  kids: { alignSelf: 'flex-start', fontFamily: F.bold, fontSize: 11, color: C.info, backgroundColor: C.infoBg, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 1 },
-  groupTitle: { fontFamily: F.bold, fontSize: 15, color: C.ink },
+  bleed: { marginHorizontal: -16 },
+  chips: { gap: 8, paddingHorizontal: 16 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 5, minHeight: 40, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: C.lineStrong, backgroundColor: C.surface },
+  chipOff: { borderStyle: 'dashed', backgroundColor: 'transparent' },
+  chipOn: { backgroundColor: C.brand, borderColor: C.brand, borderStyle: 'solid' },
+  chipText: { fontFamily: F.semibold, fontSize: 13, color: C.ink },
+  lockChip: { position: 'absolute', bottom: 10, end: 10, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999, backgroundColor: 'rgba(20,32,28,0.85)' },
+  lockText: { fontFamily: F.semibold, fontSize: 11, color: '#fff' },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: -4 },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.line },
+  dotOn: { width: 18, backgroundColor: C.brand },
+  nowName: { fontFamily: F.bold, fontSize: 20, color: C.ink },
+  nowFacts: { fontFamily: F.semibold, fontSize: 12, color: C.muted },
+  nowDesc: { fontFamily: F.regular, fontSize: 14, lineHeight: 23, color: C.ink },
+  nowOther: { fontFamily: F.semibold, fontSize: 13, color: C.warn },
+  why: { fontFamily: F.semibold, fontSize: 13, lineHeight: 21, color: C.warn },
+  chosen: { fontFamily: F.bold, fontSize: 14, color: C.brand },
   headRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   scene: { flexDirection: 'row', gap: 12, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 18, padding: 12 },
   badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
