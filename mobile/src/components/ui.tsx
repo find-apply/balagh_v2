@@ -1,16 +1,25 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ReactElement, ReactNode } from 'react'
-import { AccessibilityInfo, ActivityIndicator, Animated, Easing, I18nManager, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { AccessibilityInfo, ActivityIndicator, Animated, Easing, I18nManager, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { RefreshControlProps, StyleProp, TextInputProps, TextStyle, ViewStyle } from 'react-native'
 import { C, F, R, isQuranic, shownQuran } from '../theme'
 import type { Task } from '../shared/tasks'
 
+/** A scrolling screen. The keyboard pads it from below on both systems: Android draws the app edge to edge, so its
+ * window no longer shrinks for the keyboard, and without this what lies under the keyboard cannot be scrolled to. */
 export function Screen({ children, refresh }: { children: ReactNode; refresh?: ReactElement<RefreshControlProps> }) {
+  // The keyboard is placed in window coordinates, the screen below a header; its top in the window is the offset.
+  const box = useRef<View>(null)
+  const [top, setTop] = useState(0)
   return (
-    <ScrollView style={s.screen} contentContainerStyle={s.screenInner} refreshControl={refresh} keyboardShouldPersistTaps="handled">
-      {children}
-    </ScrollView>
+    <View ref={box} style={s.screen} onLayout={() => box.current?.measureInWindow((_x, y) => setTop(Math.round(y)))}>
+      <KeyboardAvoidingView style={s.screen} behavior="padding" keyboardVerticalOffset={top}>
+        <ScrollView style={s.screen} contentContainerStyle={s.screenInner} refreshControl={refresh} keyboardShouldPersistTaps="handled">
+          {children}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   )
 }
 

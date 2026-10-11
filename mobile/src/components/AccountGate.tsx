@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
-  ActivityIndicator, Alert, AppState, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput,
+  ActivityIndicator, Alert, AppState, Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput,
   useWindowDimensions, View,
 } from 'react-native'
 import type { TextInputProps } from 'react-native'
@@ -96,7 +96,7 @@ function Shell({ band = C.brand, bandHeight, overlap, header, footer, children }
   const insets = useSafeAreaInsets()
   const height = bandHeight + insets.top
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior="padding">
       <StatusBar style="light" />
       <ScrollView
         style={{ flex: 1 }}

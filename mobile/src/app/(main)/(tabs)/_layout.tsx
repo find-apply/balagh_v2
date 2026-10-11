@@ -3,6 +3,7 @@ import { DrawerActions } from 'expo-router/react-navigation'
 import { Tabs, useNavigation } from 'expo-router'
 import { useEffect } from 'react'
 import { AppState, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BetaBadge } from '@/components/kit'
 import { refreshLibrary, useLibrary, useUnseen } from '@/components/tabs/libraryFeed'
 import { C, F } from '@/theme'
@@ -43,6 +44,8 @@ const POLL_MS = 60_000
 
 /** The footer: home, the library of generated videos (with how many are new), and settings. */
 export default function TabsLayout() {
+  // The bar sits above Android's own navigation (buttons or gesture line), which the app draws under edge to edge.
+  const insets = useSafeAreaInsets()
   const unseen = useUnseen().size
 
   useEffect(() => {
@@ -70,7 +73,7 @@ export default function TabsLayout() {
         tabBarActiveTintColor: C.brand,
         tabBarInactiveTintColor: C.muted,
         tabBarLabelStyle: { fontFamily: F.semibold, fontSize: 12 },
-        tabBarStyle: { backgroundColor: C.surface, borderTopColor: C.line, height: 64, paddingTop: 6 },
+        tabBarStyle: { backgroundColor: C.surface, borderTopColor: C.line, height: 64 + insets.bottom, paddingTop: 6, paddingBottom: insets.bottom },
         sceneStyle: { backgroundColor: C.bg },
       }}
       screenListeners={{ focus: () => void refreshLibrary() }}
