@@ -11,7 +11,7 @@ export const VIEWER_ROLES: Record<ViewerRole, string> = {
 
 const KEY = 'balagh.rater'
 /** The remark is required, and must say something: at least this many words (the API checks it too). */
-const MIN_WORDS = 10
+const MIN_WORDS = 5
 const words = (s: string) => s.trim().split(/\s+/).filter(Boolean).length
 
 /** The rater's name and standing, remembered on this device so a reviewer types them once. */
@@ -133,8 +133,8 @@ export function VideoFeedback({ videoId }: { videoId: string }) {
             aria-label="الملاحظة"
             aria-describedby="feedback-words"
           />
-          <span id="feedback-words" className={`small ${count >= MIN_WORDS ? 'ok-text' : 'muted'}`}>
-            {count >= MIN_WORDS ? `✓ ${count} كلمة` : `${count} من ${MIN_WORDS} كلمات على الأقل`}
+          <span id="feedback-words" className={`small ${count >= MIN_WORDS ? 'ok-text' : 'bad-text'}`}>
+            {count >= MIN_WORDS ? `✓ ${count} كلمة` : `أقل حد ${MIN_WORDS} كلمات (كتبت ${count})`}
           </span>
           {error && <p className="notice bad small">{error}</p>}
           <button type="submit" className="primary" disabled={!ready || sending}>

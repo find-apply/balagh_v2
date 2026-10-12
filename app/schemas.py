@@ -643,7 +643,7 @@ class Video(BaseModel):
     frames: list[str] = Field(default_factory=list, description="Paths of a few stills under the API, for a glance.")
 
 
-MIN_FEEDBACK_WORDS = 10
+MIN_FEEDBACK_WORDS = 5
 
 
 class ViewerRole(str, Enum):

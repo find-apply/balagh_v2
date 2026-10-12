@@ -9,7 +9,7 @@ import { loadPrefs, setPrefs } from '@/prefs'
 import type { Feedback as Rating, Video, VideoTemplate, ViewerRole } from '@/shared/types'
 import { C, F } from '@/theme'
 
-const MIN_WORDS = 10
+const MIN_WORDS = 5
 const STAR_WORDS = ['', 'ضعيف', 'مقبول', 'جيد', 'جيد جدا', 'ممتاز']
 const words = (t: string) => t.trim().split(/\s+/).filter(Boolean).length
 const starLine = (n: number) => '★'.repeat(n) + '☆'.repeat(5 - n)
@@ -143,10 +143,10 @@ export default function Rate() {
             />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <View style={st.wordBar}>
-                <View style={{ height: 4, width: `${Math.min(100, count * 10)}%`, backgroundColor: count >= MIN_WORDS ? C.ok : C.muted }} />
+                <View style={{ height: 4, width: `${Math.min(100, (count * 100) / MIN_WORDS)}%`, backgroundColor: count >= MIN_WORDS ? C.ok : C.bad }} />
               </View>
-              <Text style={[st.wordText, { color: count >= MIN_WORDS ? C.ok : C.muted }]} accessibilityLiveRegion="polite">
-                {count >= MIN_WORDS ? `✓ ${count} كلمة` : `${count} من ${MIN_WORDS} كلمات على الأقل`}
+              <Text style={[st.wordText, { color: count >= MIN_WORDS ? C.ok : C.bad }]} accessibilityLiveRegion="polite">
+                {count >= MIN_WORDS ? `✓ ${count} كلمة` : `أقل حد ${MIN_WORDS} كلمات (كتبت ${count})`}
               </Text>
             </View>
           </View>

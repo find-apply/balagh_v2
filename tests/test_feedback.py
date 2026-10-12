@@ -1,4 +1,4 @@
-"""A finished video can be rated with stars, the rater's standing and name, and a remark of ten words or more; the admin sees each template's average."""
+"""A finished video can be rated with stars, the rater's standing and name, and a remark of five words or more; the admin sees each template's average."""
 from datetime import datetime, timezone
 
 from app import store
@@ -26,7 +26,7 @@ def test_a_rating_needs_valid_stars_role_and_name(client):
     _video("v1")
     for bad in ({"stars": 0, "role": "student", "name": "علي", "comment": NOTE}, {"stars": 6, "role": "student", "name": "علي", "comment": NOTE},
                 {"stars": 3, "role": "mufti", "name": "علي", "comment": NOTE}, {"stars": 3, "role": "student", "name": "", "comment": NOTE},
-                {"stars": 3, "role": "student", "name": "علي"}, {"stars": 3, "role": "student", "name": "علي", "comment": "جيد جدا بارك الله فيكم"}):
+                {"stars": 3, "role": "student", "name": "علي"}, {"stars": 3, "role": "student", "name": "علي", "comment": "جيد جدا بارك الله"}):
         assert client.post("/videos/v1/feedback", json=bad).status_code == 422
 
 
