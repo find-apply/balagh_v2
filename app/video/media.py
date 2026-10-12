@@ -21,8 +21,11 @@ MEDIA = ROOT / "media"
 AUDIO_CACHE = MEDIA / "cache" / "audio"
 IMAGE_CACHE = MEDIA / "cache" / "images"
 
-TTS_MODEL = os.getenv("VIDEO_TTS_MODEL", "gemini-2.5-flash-preview-tts")
+TTS_MODEL = os.getenv("VIDEO_TTS_MODEL", "gemini-3.8-flash-tts")
 READ_ALOUD = os.getenv("VIDEO_TTS_INSTRUCTION", "Read the following text aloud exactly as written, warmly and clearly. Do not add, answer or translate anything:")
+# The 2.5 models need the instruction above, or they sometimes answer a question instead of reading it. From 3.x the
+# text is read as a verbatim transcript, so an instruction in it would be spoken too: those get the text alone.
+VERBATIM = not TTS_MODEL.startswith("gemini-2.")
 # Prebuilt Gemini voices for the story cast, and one narrator for the caption templates.
 VOICES = {"narr": "Sulafat", "salim": "Puck", "maryam": "Leda", "nour": "Kore"}
 
@@ -72,7 +75,7 @@ async def speak(text: str, who: str = "narr") -> Clip:
     """One spoken line as an mp3. `who` picks the voice."""
     voice = VOICES[who]
     AUDIO_CACHE.mkdir(parents=True, exist_ok=True)
-    out = AUDIO_CACHE / f"{_hash(TTS_MODEL, voice, READ_ALOUD, text)}.mp3"
+    out = AUDIO_CACHE / f"{_hash(TTS_MODEL, voice, '' if VERBATIM else READ_ALOUD, text)}.mp3"
     if out.exists():
         return Clip(out, seconds_of(out), new=False)
     async with _tts_limit:
@@ -97,8 +100,7 @@ async def _tts(text: str, voice: str) -> tuple[bytes, str]:
         try:
             response = await client.aio.models.generate_content(
                 model=TTS_MODEL,
-                # Without the instruction the model sometimes answers a question instead of reading it.
-                contents=f"{READ_ALOUD}\n\n{text}",
+                contents=text if VERBATIM else f"{READ_ALOUD}\n\n{text}",
                 config=types.GenerateContentConfig(
                     response_modalities=["AUDIO"],
                     speech_config=types.SpeechConfig(

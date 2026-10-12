@@ -110,7 +110,7 @@ npm run dev                 # http://localhost:5173
 | `MAGNIFIC_API_KEY` | مفتاح Magnific لتوليد الصور (مطلوب للفيديو) | |
 | `MAGNIFIC_IMAGE_MODEL` | نموذج صور مشاهد قالبي الترجمة: `classic-fast` (الأرخص، 0.005$)، أو `z-image`، أو `flux-2-klein` | `classic-fast` |
 | `MAGNIFIC_STORY_MODEL` | نموذج صور قصة الأطفال. `flux-2-klein` (0.012$) يستقبل رسوم الشخصيات المرجعية فتثبت ملامحها | `flux-2-klein` |
-| `VIDEO_TTS_MODEL` | نموذج توليد الكلام في Gemini (للشرح والحوار فقط) | `gemini-2.5-flash-preview-tts` |
+| `VIDEO_TTS_MODEL` | نموذج توليد الكلام في Gemini (للشرح والحوار فقط) | `gemini-3.8-flash-tts` |
 | `ARCHIVE_ORG_EMAIL` و`ARCHIVE_ORG_PASSWORD` | حساب archive.org (مجاني) يُجلب به تسجيل الحديث من حزم «Sahih Bukhari MP3 Arabic» عند الحاجة؛ بدونهما يُعرض الحديث بصمت إن لم يوجد تسجيل في `data/recitations` | |
 | `VIDEO_QURAN_RECITER` | مجلد القارئ في everyayah.com لتلاوة الآيات | `Alafasy_128kbps` |
 | `VIDEO_RENDER_CONCURRENCY` | عدد مسارات التصيير في Remotion | `2` |
