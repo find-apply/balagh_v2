@@ -106,7 +106,18 @@ export default function VersionScreen() {
     approve: at('approve', changeOpen ? 'edit' : null, script.approved),
   }
   const labels: Record<Part, string> = { script: 'السيناريو', review: 'المراجعة', video: 'الفيديو', approve: specialist ? 'اعتمادك' : 'الاعتماد' }
-  const steps: Step[] = PART_KEYS.map((p) => ({ label: labels[p], state: states[p], onPress: part === p ? undefined : () => setPart(p) }))
+  // A step opens once the one before it is through, as the parts' own "next" buttons allow: the review once one has
+  // run, the video once it passed, the approval once a video was made (or, for a specialist, past blocking notes).
+  // What was already reached stays open: an approved version, or one with signatures or requested changes.
+  const reviewed = !!script.review
+  const settled = script.approved || script.approvals.length > 0 || changeOpen
+  const open: Record<Part, boolean> = {
+    script: true,
+    review: reviewed || reviewing || settled,
+    video: (reviewed && !blocking) || settled || !!videos?.length,
+    approve: settled || (reviewed && (!!videos?.some((v) => v.status === 'done') || (blocking && specialist))),
+  }
+  const steps: Step[] = PART_KEYS.map((p) => ({ label: labels[p], state: states[p], onPress: part === p || !open[p] ? undefined : () => setPart(p) }))
 
   return (
     <Screen>

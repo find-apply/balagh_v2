@@ -70,7 +70,8 @@ export function planFor(sc: Script, hasVideo: boolean, reviewing: boolean): Plan
 
 /** The latest version: its steps, the next one, and the button that opens it. */
 export function ContinueCard({ script, number, plan, onOpen }: { script: Script; number: number; plan: Plan; onOpen: (part: Part) => void }) {
-  const steps: Step[] = plan.steps.map((st) => ({ label: st.label, state: st.state, onPress: () => onOpen(st.part) }))
+  // Only a step reached so far opens: one still to come waits for the step before it.
+  const steps: Step[] = plan.steps.map((st) => ({ label: st.label, state: st.state, onPress: st.state === 'todo' ? undefined : () => onOpen(st.part) }))
   return (
     <View style={st.card}>
       <View style={{ gap: 4 }}>

@@ -54,7 +54,7 @@ export function Stepper({ steps, compact }: { steps: Step[]; compact?: boolean }
           <Pressable
             key={st.label}
             accessibilityRole="tab"
-            accessibilityState={{ selected: st.state === 'current' || st.state === 'error' || st.state === 'edit' }}
+            accessibilityState={{ selected: st.state === 'current' || st.state === 'error' || st.state === 'edit', disabled: !st.onPress && st.state === 'todo' }}
             accessibilityLabel={`${st.label}${st.state === 'done' ? '، مكتمل' : ''}`}
             onPress={st.onPress}
             disabled={!st.onPress}
