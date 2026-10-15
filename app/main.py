@@ -561,6 +561,16 @@ class Me(BaseModel):
     moved: int = 0
 
 
+# The demo accounts whose sign-in is published on the site for anyone to try: whoever uses one may work in it, but
+# not delete it or rewrite its details for the next visitor.
+DEMO_EMAILS = {e.strip().lower() for e in os.getenv("DEMO_EMAILS", "demo.specialist@balagh.space,demo.creator@balagh.space").split(",") if e.strip()}
+
+
+def _not_demo(user: User) -> None:
+    if (user.email or "").lower() in DEMO_EMAILS:
+        raise HTTPException(status_code=403, detail="هذا حساب تجريبي مشترك: لا تُعدَّل بياناته ولا يُحذف.")
+
+
 def _me(user: User, account: dict, moved: int = 0) -> Me:
     return Me(**user.model_dump(), full_name=account["full_name"], specialization=account["specialization"],
               phone=account["phone"], status=account["status"], role=account["role"],
@@ -573,6 +583,7 @@ async def edit_profile(body: Profile, user: Optional[User] = Depends(current_use
     role; the account stays open meanwhile. The role itself is never the person's to change."""
     if user is None:
         raise HTTPException(status_code=401, detail="سجّل الدخول أولا.")
+    _not_demo(user)
     account = store.update_profile(user.uid, body.full_name.strip(), body.phone.strip(), body.specialization.strip())
     if account is None:
         raise HTTPException(status_code=404, detail="الحساب غير موجود.")
@@ -585,6 +596,7 @@ async def delete_me(user: Optional[User] = Depends(auth.signed_in_user)) -> Resp
     platform published stay, signed «صانع محتوى» without a name. Its Firebase sign-in goes too."""
     if user is None:
         raise HTTPException(status_code=401, detail="سجّل الدخول أولا.")
+    _not_demo(user)
     store.delete_user(user.uid)
     firebase.delete_user(user.uid)
     return Response(status_code=204)

@@ -15,7 +15,8 @@ ROOT = {"Authorization": "Bearer root"}
 USERS = {"tok-a": auth.User(uid="uid-a", email="a@example.com", name="أ", provider="google.com"),
          "tok-b": auth.User(uid="uid-b", email="b@example.com", name="ب", provider="password"),
          "tok-c": auth.User(uid="uid-c", email="c@example.com", name="ج", provider="password"),
-         "tok-new": auth.User(uid="uid-new", email="new@example.com", name="جديد", provider="google.com")}
+         "tok-new": auth.User(uid="uid-new", email="new@example.com", name="جديد", provider="google.com"),
+         "tok-demo": auth.User(uid="uid-demo", email="demo.creator@balagh.space", name="تجريبي", provider="password")}
 
 
 def _approve(uid: str) -> None:
@@ -210,3 +211,13 @@ def test_a_signed_in_person_signs_with_the_name_given_at_sign_up(client, signed)
     r = client.post("/projects/p1/scripts/s1/approve", headers=signed("tok-b"), json={"role": "creator", "name": "اسم آخر"})
     assert r.status_code == 200
     assert [a["name"] for a in r.json()["approvals"] if a["role"] == "creator"] == ["بلال الشريف"]
+
+
+def test_a_published_demo_account_can_be_used_but_not_deleted_or_rewritten(client, signed, monkeypatch):
+    _approve("uid-demo")
+    removed = []
+    monkeypatch.setattr(firebase, "delete_user", lambda uid: removed.append(uid) or True)
+    assert client.post("/me", headers=signed("tok-demo")).json()["status"] == "approved"
+    assert client.put("/me/profile", headers=signed("tok-demo"), json=PROFILE).status_code == 403
+    assert client.delete("/me", headers=signed("tok-demo")).status_code == 403
+    assert removed == [] and store.get_user("uid-demo") is not None
