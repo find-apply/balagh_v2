@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type React from 'react'
 import { BASE } from '../api'
 import { PublicPicks } from './PublicPicks'
@@ -20,6 +21,58 @@ const GUARANTEES = [
   { title: 'لا فتوى شخصية', text: 'كل طلب يُصنَّف على أربعة مستويات، والفتوى الشخصية تُحال إلى مختص.' },
   { title: 'مصطلحات مضبوطة', text: 'قاموس ملزم من الحزمة العلمية، وفحص آلي في كل نسخة موطّنة.' },
 ]
+
+export const PLAY_URL = 'https://play.google.com/store/apps/details?id=space.balagh.app'
+
+/** The Android app's store link, as a button with the store's triangle. */
+function PlayButton({ light = false }: { light?: boolean }) {
+  return (
+    <a className={light ? 'play-btn light' : 'play-btn'} href={PLAY_URL} target="_blank" rel="noreferrer">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 2.8v18.4c0 .5.5.8.9.6L20.6 12.6a.7.7 0 0 0 0-1.2L4.9 2.2c-.4-.2-.9.1-.9.6z" fill="currentColor" />
+      </svg>
+      <span>
+        <small>حمّله من</small>
+        Google Play
+      </span>
+    </a>
+  )
+}
+
+/** Shared accounts anyone may sign in with to try the app; the server keeps them from being deleted or edited. */
+const DEMO = [
+  {
+    role: 'مختص شرعي',
+    email: 'demo.specialist@balagh.space',
+    password: 'Blg-tXb8SRxhco',
+    text: 'يراجع ملاحظات المراجعين الآليين ويعتمد النسخة باسمه، فتُفتح للتصدير مباشرة.',
+  },
+  {
+    role: 'صانع محتوى',
+    email: 'demo.creator@balagh.space',
+    password: 'Blg-KeoUpsZDDV',
+    text: 'يكتب الموضوع ويختار الجمهور والقالب. نسخه تنتظر توقيع مختص قبل التصدير.',
+  },
+]
+
+function Copy({ value, label }: { value: string; label: string }) {
+  const [done, setDone] = useState(false)
+  return (
+    <button
+      type="button"
+      className="demo-copy"
+      aria-label={`انسخ ${label}`}
+      onClick={() =>
+        void navigator.clipboard?.writeText(value).then(() => {
+          setDone(true)
+          setTimeout(() => setDone(false), 1500)
+        })
+      }
+    >
+      {done ? 'نُسخ ✓' : 'انسخ'}
+    </button>
+  )
+}
 
 const RESULTS = [
   { value: '10/10', label: 'اقتباسات بلاغ المطابقة حرفيا للمصدر' },
@@ -95,6 +148,7 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
         <div className="topbar-inner">
           <Logo />
           <nav className="links">
+            <a href="#try">جرّب التطبيق</a>
             <a href="#how">كيف يعمل</a>
             <a href="#trust">الضمانات</a>
             <a href="#results">النتائج</a>
@@ -130,6 +184,10 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
                 أمثلة حقيقية
               </a>
             </div>
+            <div className="hero-app">
+              <PlayButton />
+              <span className="muted small">بلاغ على هاتفك: التطبيق متاح على Android</span>
+            </div>
             <a className="muted small" href="#how" style={{ display: 'inline-block', marginTop: 10 }}>
               كيف يعمل ↓
             </a>
@@ -140,6 +198,43 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
             </ul>
           </div>
           <HeroMock />
+        </div>
+      </section>
+
+      <section id="try" className="section try">
+        <div className="section-inner">
+          <Reveal>
+            <span className="eyebrow">جرّب التطبيق</span>
+            <h2>حمّل بلاغ وادخل بحساب تجريبي</h2>
+            <p className="muted">
+              حسابان جاهزان ومقبولان، فلا تنتظر موافقة الإدارة. جرّب كل واحد لترى الفرق: المختص يعتمد بنفسه، وصانع المحتوى
+              يحتاج توقيع مختص.
+            </p>
+          </Reveal>
+          <Reveal className="demo-grid" stagger>
+            {DEMO.map((d, i) => (
+              <div className="demo" key={d.email} style={{ '--i': i } as React.CSSProperties}>
+                <h3>{d.role}</h3>
+                <p className="muted small">{d.text}</p>
+                <dl>
+                  <div>
+                    <dt>البريد</dt>
+                    <dd dir="ltr">{d.email}</dd>
+                    <Copy value={d.email} label={`بريد حساب ${d.role}`} />
+                  </div>
+                  <div>
+                    <dt>كلمة المرور</dt>
+                    <dd dir="ltr">{d.password}</dd>
+                    <Copy value={d.password} label={`كلمة مرور حساب ${d.role}`} />
+                  </div>
+                </dl>
+              </div>
+            ))}
+          </Reveal>
+          <div className="try-foot">
+            <PlayButton />
+            <span className="muted small">في التطبيق: «لدي حساب»، ثم البريد وكلمة المرور. الحسابان مشتركان، فلا تضع فيهما بيانات خاصة.</span>
+          </div>
         </div>
       </section>
 
@@ -228,9 +323,12 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
         <Reveal className="section-inner">
           <h2>جاهز لأول سيناريو موثّق؟</h2>
           <p>اختر جمهورك ومنصتك، واترك الباقي لبلاغ. كل خانة فيها خيار تلقائي.</p>
-          <button className="primary big light" onClick={onStart}>
-            {cta} ←
-          </button>
+          <div className="cta-actions">
+            <button className="primary big light" onClick={onStart}>
+              {cta} ←
+            </button>
+            <PlayButton light />
+          </div>
         </Reveal>
       </section>
 
@@ -242,7 +340,8 @@ export function Landing({ onStart, resume }: { onStart: () => void; resume: bool
             يراجعها الإنسان قبل النشر. لا تصدر الأداة فتاوى.
           </p>
           <p className="small">
-            <a href="#/privacy">سياسة الخصوصية</a> · <a href="#/delete-account">حذف الحساب</a>
+            <a href={PLAY_URL} target="_blank" rel="noreferrer">التطبيق على Google Play</a> · <a href="#/privacy">سياسة الخصوصية</a> ·{' '}
+            <a href="#/delete-account">حذف الحساب</a>
           </p>
         </div>
       </footer>

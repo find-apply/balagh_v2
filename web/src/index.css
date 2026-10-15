@@ -4919,3 +4919,155 @@ button.danger:disabled {
   font-size: 0.85rem;
   color: var(--warn);
 }
+
+/* The Android app's store button: dark on the page, white on the green closing band. */
+.hero-app {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  line-height: 1.15;
+}
+
+.play-btn:hover {
+  background: #000;
+  color: #fff;
+}
+
+.play-btn svg {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+.play-btn span {
+  display: flex;
+  flex-direction: column;
+  font-weight: 700;
+  font-size: 1rem;
+  direction: ltr;
+  text-align: left;
+}
+
+.play-btn small {
+  font-weight: 400;
+  font-size: 0.72rem;
+  opacity: 0.85;
+  direction: rtl;
+  text-align: right;
+}
+
+.play-btn.light {
+  background: #fff;
+  color: var(--brand-2);
+}
+
+.play-btn.light:hover {
+  background: var(--brand-soft);
+  color: var(--brand-2);
+}
+
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
+/* «جرّب التطبيق»: the two shared demo accounts, each with its sign-in to copy, and the store button under them. */
+.try .demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.demo {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo h3 {
+  margin: 0;
+}
+
+.demo p {
+  margin: 0;
+}
+
+.demo dl {
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo dl > div {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.demo dt {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.demo dd {
+  margin: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.demo-copy {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+}
+
+.try-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+@media (max-width: 520px) {
+  .demo dl > div {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .demo dt {
+    grid-column: 1 / -1;
+  }
+
+  .demo dd {
+    font-size: 0.78rem;
+  }
+}
