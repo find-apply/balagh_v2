@@ -27,7 +27,14 @@ function partFor(sc: Script): Part {
   return sc.approved ? 'video' : 'approve'
 }
 
-export default function VersionScreen() {
+/** One screen per version: moving to another version (a new version after a revision, or a link) starts it afresh,
+ * so the step shown is never one carried over from the version before. */
+export default function VersionRoute() {
+  const { sid } = useLocalSearchParams<{ sid: string }>()
+  return <VersionScreen key={sid} />
+}
+
+function VersionScreen() {
   const { id, sid, part: asked, video: focus } = useLocalSearchParams<{ id: string; sid: string; part?: Part; video?: string }>()
   const account = useAccount()
   const accountName = 'me' in account ? (account.me.full_name ?? account.me.name ?? '') : ''

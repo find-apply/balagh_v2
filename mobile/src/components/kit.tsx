@@ -1,7 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useEffect, useState } from 'react'
 import type { ComponentProps, ReactNode } from 'react'
 import { router } from 'expo-router'
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, Keyboard, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { C, F } from '@/theme'
 
@@ -114,18 +115,46 @@ export function SubSteps({ labels, current, onPress, error }: { labels: string[]
   )
 }
 
-/** A sheet that rises from the bottom over a dimmed screen. */
+/** A sheet that rises from the bottom over a dimmed screen. The keyboard lifts it (Android draws edge to edge, so
+ * the window does not shrink for it), and what no longer fits above the keyboard scrolls. */
 export function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
   const insets = useSafeAreaInsets()
+  const { height } = useWindowDimensions()
+  const keyboard = useKeyboardHeight()
+  // The sheet stands on the keyboard while it is open, and never reaches higher than the status bar: what does not
+  // fit in that space scrolls, so a field and the button under it can always be brought into view.
+  const room = height - keyboard - insets.top - 24
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <Pressable style={k.scrim} onPress={onClose} accessibilityLabel="إغلاق" />
-      <View style={[k.sheet, { paddingBottom: 20 + insets.bottom }]}>
-        <View style={k.grip} />
-        {children}
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
+      <View style={{ flex: 1, paddingBottom: keyboard }}>
+        <Pressable style={k.scrim} onPress={onClose} accessibilityLabel="إغلاق" />
+        <View style={[k.sheet, { paddingBottom: keyboard ? 12 : 20 + insets.bottom, maxHeight: room }]}>
+          <View style={k.grip} />
+          <ScrollView keyboardShouldPersistTaps="handled" bounces={false} contentContainerStyle={{ gap: 4 }}>
+            {children}
+          </ScrollView>
+        </View>
       </View>
     </Modal>
   )
+}
+
+/** The open keyboard's height, 0 while it is closed. Measured from the keyboard's own events: Android draws the app
+ * edge to edge, so the window does not shrink for the keyboard and nothing else tells a sheet where it begins. */
+function useKeyboardHeight() {
+  const [h, setH] = useState(0)
+  useEffect(() => {
+    // Android's reported height leaves out the navigation bar under the keyboard; where its top edge sits does not.
+    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', (e) =>
+      setH(Math.max(e.endCoordinates.height, Dimensions.get('window').height - e.endCoordinates.screenY)),
+    )
+    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setH(0))
+    return () => {
+      show.remove()
+      hide.remove()
+    }
+  }, [])
+  return h
 }
 
 export function SheetItem({ icon, label, onPress, danger }: { icon: IconName; label: string; onPress: () => void; danger?: boolean }) {
@@ -191,7 +220,7 @@ const k = StyleSheet.create({
   sub: { flexDirection: 'row', gap: 6 },
   subText: { fontFamily: F.semibold, fontSize: 12 },
   scrim: { flex: 1, backgroundColor: 'rgba(20,32,28,0.42)' },
-  sheet: { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 16, paddingTop: 10, gap: 4 },
+  sheet: { backgroundColor: C.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingHorizontal: 16, paddingTop: 10 },
   grip: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: C.lineStrong, marginBottom: 10 },
   sheetItem: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 8, borderRadius: 12 },
   sheetItemText: { fontFamily: F.semibold, fontSize: 15, color: C.ink },
